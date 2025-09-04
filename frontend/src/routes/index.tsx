@@ -1,14 +1,48 @@
 import { createFileRoute } from '@tanstack/react-router'
-import LandingPage from '@/components/landing/landing'
+import logo from '../logo.svg'
+import { SignedIn, SignedOut, SignInButton, UserButton } from '@clerk/clerk-react'
 
 export const Route = createFileRoute('/')({
-  component: RootPage,
+  component: App,
 })
 
-function RootPage() {
+function App() {
   return (
-    <PageContent>
-      <h1 className="font-bold text-2xl md:text-4xl">Team Planner</h1>
-    </PageContent>
+    <div className="text-center">
+      <header className="min-h-screen flex flex-col items-center justify-center bg-[#282c34] text-white text-[calc(10px+2vmin)]">
+        
+        <SignedOut>
+          <SignInButton />
+        </SignedOut>
+        <SignedIn>
+          <UserButton />
+        </SignedIn>
+        
+        {/* <img
+          src={logo}
+          className="h-[40vmin] pointer-events-none animate-[spin_20s_linear_infinite]"
+          alt="logo"
+        />
+        <p>
+          Edit <code>src/routes/index.tsx</code> and save to reload.
+        </p>
+        <a
+          className="text-[#61dafb] hover:underline"
+          href="https://reactjs.org"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Learn React
+        </a>
+        <a
+          className="text-[#61dafb] hover:underline"
+          href="https://tanstack.com"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Learn TanStack
+        </a> */}
+      </header>
+    </div>
   )
 }

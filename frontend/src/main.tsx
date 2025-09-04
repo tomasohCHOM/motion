@@ -10,6 +10,7 @@ import { routeTree } from './routeTree.gen'
 
 import './styles.css'
 import reportWebVitals from './reportWebVitals.ts'
+import { ClerkProvider } from '@clerk/clerk-react'
 
 // Import Clerk Publishable key
 const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY
@@ -68,11 +69,11 @@ if (rootElement && !rootElement.innerHTML) {
   const root = ReactDOM.createRoot(rootElement)
   root.render(
     <StrictMode>
-      <ClerkWrapper>
+      <ClerkProvider publishableKey={PUBLISHABLE_KEY}>
         <TanStackQueryProvider.Provider {...TanStackQueryProviderContext}>
-          <InnerApp />
+          <RouterProvider router={router} />
         </TanStackQueryProvider.Provider>
-      </ClerkWrapper>
+      </ClerkProvider>
     </StrictMode>,
   )
 }
