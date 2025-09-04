@@ -6,7 +6,7 @@ resource "vercel_project" "motion-frontend" {
   }
 
   root_directory = "frontend"
-  # install_command = "cd frontend && npm install"
-  # build_command = "cd frontend && npm run build"
-  # output_directory = "frontend/dist"
+  install_command = "npm install"
+  build_command = "npm run build"
+  output_directory = "dist"
 }
