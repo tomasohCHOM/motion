@@ -5,6 +5,9 @@ import { TanstackDevtools } from '@tanstack/react-devtools'
 import TanStackQueryDevtools from '../integrations/tanstack-query/devtools'
 
 import type { QueryClient } from '@tanstack/react-query'
+import { SidebarProvider } from '@/components/ui/sidebar'
+import { AppSidebar } from '@/components/layout/sidebar'
+import AppNavigationMenu from '@/components/layout/navbar'
 import type { AuthState } from '@/auth/clerk'
 
 interface MyRouterContext {
@@ -16,6 +19,7 @@ interface MyRouterContext {
 export const Route = createRootRouteWithContext<MyRouterContext>()({
   component: () => (
     <>
+      <Header />
       <Outlet />
       <TanstackDevtools
         config={{
