@@ -48,8 +48,8 @@ const navItems = [
 
 export function AppSidebar() {
   return (
-    <Sidebar className="px-2 py-4">
-      <SidebarContent>
+    <Sidebar>
+      <SidebarContent className="px-2 py-4">
         <SidebarGroup>
           <SidebarGroupLabel>Navigation</SidebarGroupLabel>
           <SidebarGroupContent>

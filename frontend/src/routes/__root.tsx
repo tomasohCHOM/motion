@@ -7,6 +7,7 @@ import TanStackQueryDevtools from '../integrations/tanstack-query/devtools'
 import type { QueryClient } from '@tanstack/react-query'
 import { SidebarProvider } from '@/components/ui/sidebar'
 import { AppSidebar } from '@/components/layout/sidebar'
+import AppNavigationMenu from '@/components/layout/navbar'
 
 interface MyRouterContext {
   queryClient: QueryClient
@@ -17,7 +18,10 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
     <>
       <SidebarProvider>
         <AppSidebar />
-        <Outlet />
+        <div className="w-full">
+          <AppNavigationMenu />
+          <Outlet />
+        </div>
       </SidebarProvider>
       <TanstackDevtools
         config={{
