@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import { cn } from '@/lib/utils'
 
 function Skeleton({ className, ...props }: React.ComponentProps<'div'>) {
@@ -5,6 +6,15 @@ function Skeleton({ className, ...props }: React.ComponentProps<'div'>) {
     <div
       data-slot="skeleton"
       className={cn('bg-accent animate-pulse rounded-md', className)}
+=======
+import { cn } from "@/lib/utils"
+
+function Skeleton({ className, ...props }: React.ComponentProps<"div">) {
+  return (
+    <div
+      data-slot="skeleton"
+      className={cn("bg-accent animate-pulse rounded-md", className)}
+>>>>>>> d903053 (Start working on team workspace UI layout (#6))
       {...props}
     />
   )

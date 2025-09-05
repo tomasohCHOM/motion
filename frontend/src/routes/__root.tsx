@@ -9,6 +9,9 @@ import { SidebarProvider } from '@/components/ui/sidebar'
 import { AppSidebar } from '@/components/layout/sidebar'
 import AppNavigationMenu from '@/components/layout/navbar'
 import type { AuthState } from '@/auth/clerk'
+import { SidebarProvider } from '@/components/ui/sidebar'
+import { AppSidebar } from '@/components/layout/sidebar'
+import AppNavigationMenu from '@/components/layout/navbar'
 
 interface MyRouterContext {
   queryClient: QueryClient
@@ -19,8 +22,17 @@ interface MyRouterContext {
 export const Route = createRootRouteWithContext<MyRouterContext>()({
   component: () => (
     <>
-      <Header />
+<<<<<<< HEAD
       <Outlet />
+=======
+      <SidebarProvider>
+        <AppSidebar />
+        <div className="w-full">
+          <AppNavigationMenu />
+          <Outlet />
+        </div>
+      </SidebarProvider>
+>>>>>>> d903053 (Start working on team workspace UI layout (#6))
       <TanstackDevtools
         config={{
           position: 'bottom-left',
