@@ -10,43 +10,58 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as NotesIndexRouteImport } from './routes/notes/index'
+import { Route as WorkspaceWorkspaceIdRouteRouteImport } from './routes/workspace/$workspaceId/route'
+import { Route as WorkspaceWorkspaceIdNotesRouteImport } from './routes/workspace/$workspaceId/notes'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const NotesIndexRoute = NotesIndexRouteImport.update({
-  id: '/notes/',
-  path: '/notes/',
-  getParentRoute: () => rootRouteImport,
-} as any)
+const WorkspaceWorkspaceIdRouteRoute =
+  WorkspaceWorkspaceIdRouteRouteImport.update({
+    id: '/workspace/$workspaceId',
+    path: '/workspace/$workspaceId',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const WorkspaceWorkspaceIdNotesRoute =
+  WorkspaceWorkspaceIdNotesRouteImport.update({
+    id: '/notes',
+    path: '/notes',
+    getParentRoute: () => WorkspaceWorkspaceIdRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/notes': typeof NotesIndexRoute
+  '/workspace/$workspaceId': typeof WorkspaceWorkspaceIdRouteRouteWithChildren
+  '/workspace/$workspaceId/notes': typeof WorkspaceWorkspaceIdNotesRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/notes': typeof NotesIndexRoute
+  '/workspace/$workspaceId': typeof WorkspaceWorkspaceIdRouteRouteWithChildren
+  '/workspace/$workspaceId/notes': typeof WorkspaceWorkspaceIdNotesRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/notes/': typeof NotesIndexRoute
+  '/workspace/$workspaceId': typeof WorkspaceWorkspaceIdRouteRouteWithChildren
+  '/workspace/$workspaceId/notes': typeof WorkspaceWorkspaceIdNotesRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/notes'
+  fullPaths: '/' | '/workspace/$workspaceId' | '/workspace/$workspaceId/notes'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/notes'
-  id: '__root__' | '/' | '/notes/'
+  to: '/' | '/workspace/$workspaceId' | '/workspace/$workspaceId/notes'
+  id:
+    | '__root__'
+    | '/'
+    | '/workspace/$workspaceId'
+    | '/workspace/$workspaceId/notes'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  NotesIndexRoute: typeof NotesIndexRoute
+  WorkspaceWorkspaceIdRouteRoute: typeof WorkspaceWorkspaceIdRouteRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
@@ -58,19 +73,40 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/notes/': {
-      id: '/notes/'
-      path: '/notes'
-      fullPath: '/notes'
-      preLoaderRoute: typeof NotesIndexRouteImport
+    '/workspace/$workspaceId': {
+      id: '/workspace/$workspaceId'
+      path: '/workspace/$workspaceId'
+      fullPath: '/workspace/$workspaceId'
+      preLoaderRoute: typeof WorkspaceWorkspaceIdRouteRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/workspace/$workspaceId/notes': {
+      id: '/workspace/$workspaceId/notes'
+      path: '/notes'
+      fullPath: '/workspace/$workspaceId/notes'
+      preLoaderRoute: typeof WorkspaceWorkspaceIdNotesRouteImport
+      parentRoute: typeof WorkspaceWorkspaceIdRouteRoute
     }
   }
 }
 
+interface WorkspaceWorkspaceIdRouteRouteChildren {
+  WorkspaceWorkspaceIdNotesRoute: typeof WorkspaceWorkspaceIdNotesRoute
+}
+
+const WorkspaceWorkspaceIdRouteRouteChildren: WorkspaceWorkspaceIdRouteRouteChildren =
+  {
+    WorkspaceWorkspaceIdNotesRoute: WorkspaceWorkspaceIdNotesRoute,
+  }
+
+const WorkspaceWorkspaceIdRouteRouteWithChildren =
+  WorkspaceWorkspaceIdRouteRoute._addFileChildren(
+    WorkspaceWorkspaceIdRouteRouteChildren,
+  )
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  NotesIndexRoute: NotesIndexRoute,
+  WorkspaceWorkspaceIdRouteRoute: WorkspaceWorkspaceIdRouteRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
