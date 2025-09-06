@@ -1,9 +1,9 @@
 import { User } from 'lucide-react'
 
-export default function AppNavigationMenu() {
+export default function AppNavbar() {
   return (
     <nav className="w-full flex items-center justify-between border-b border-sidebar-border p-5">
-      <span className="font-semibold">Motion's team</span>
+      <span className="font-semibold">CPSC 491's Workspace</span>
       <div>
         <User />
       </div>
