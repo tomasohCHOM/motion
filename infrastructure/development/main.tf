@@ -1,8 +1,6 @@
 module "vercel-frontend" {
   source = "../modules/vercel"
-
   vercel_api_token = var.vercel_api_token
-  api_url          = var.api_url
 }
 
 # ECR repository for all services
