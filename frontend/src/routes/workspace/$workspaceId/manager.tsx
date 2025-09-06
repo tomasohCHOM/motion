@@ -1,14 +1,14 @@
 import { createFileRoute } from '@tanstack/react-router'
 import PageContent from '@/components/workspace/layout/page-content'
 
-export const Route = createFileRoute('/workspace/$workspaceId/notes')({
-  component: WorkspaceNotesPage,
+export const Route = createFileRoute('/workspace/$workspaceId/manager')({
+  component: RouteComponent,
 })
 
-function WorkspaceNotesPage() {
+function RouteComponent() {
   return (
     <PageContent>
-      <h1>Notes</h1>
+      <h1>Planner</h1>
     </PageContent>
   )
 }

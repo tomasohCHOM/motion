@@ -1,7 +1,7 @@
+import { Outlet, createFileRoute } from '@tanstack/react-router'
 import { SidebarProvider } from '@/components/ui/sidebar'
 import AppNavbar from '@/components/workspace/layout/navbar'
 import AppSidebar from '@/components/workspace/layout/sidebar'
-import { createFileRoute, Outlet } from '@tanstack/react-router'
 
 export const Route = createFileRoute('/workspace/$workspaceId')({
   component: WorkspaceLayout,
