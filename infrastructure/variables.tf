@@ -1,5 +1,1 @@
-variable "vercel_api_token" {
-  description = "Vercel API Access Token"
-  type        = string
-  sensitive   = true
-}
+# Variables are now defined in the environment-specific directories (development/ and production/).
