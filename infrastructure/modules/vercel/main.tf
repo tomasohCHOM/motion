@@ -9,4 +9,8 @@ resource "vercel_project" "motion-frontend" {
   install_command = "npm install"
   build_command = "npm run build"
   output_directory = "dist"
+
+  environment = {
+    "API_URL" = var.api_url
+  }
 }

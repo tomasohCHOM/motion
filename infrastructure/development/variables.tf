@@ -9,3 +9,9 @@ variable "db_password" {
   type        = string
   sensitive   = true
 }
+
+variable "api_url" {
+  description = "The URL of the API gateway"
+  type        = string
+  default     = "http://localhost:8080"
+}
