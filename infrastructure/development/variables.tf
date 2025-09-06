@@ -3,3 +3,9 @@ variable "vercel_api_token" {
   type        = string
   sensitive   = true
 }
+
+variable "db_password" {
+  description = "Database Password"
+  type        = string
+  sensitive   = true
+}

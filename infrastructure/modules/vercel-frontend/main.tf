@@ -23,7 +23,8 @@ resource "vercel_project" "motion-frontend" {
   build_command    = "npm run build"
   output_directory = "dist"
 
-  environment = { // example
-    "API_URL" = var.api_url
-  }
+  # example
+  # environment = {
+  #   "API_URL" = var.api_url
+  # }
 }
