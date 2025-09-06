@@ -1,1 +1,0 @@
-# Variables are now defined in the environment-specific directories (development/ and production/).
