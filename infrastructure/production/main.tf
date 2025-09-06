@@ -1,11 +1,34 @@
-# Production ECR repository
-resource "aws_ecr_repository" "api_gateway" {
-  name = "api-gateway-prod"
+# ECR repository for all services
+resource "aws_ecr_repository" "main" {
+  name = "motion-prod"
 }
 
-# Production ECS Cluster
-resource "aws_ecs_cluster" "main" {
-  name = "motion-prod"
+module "mailing_service" {
+  source = "../modules/mailing-service"
+  env    = "prod"
+}
+
+module "file_upload_service" {
+  source = "../modules/file-upload-service"
+  env    = "prod"
+}
+
+module "user_service" {
+  source                = "../modules/user-service"
+  env                   = "prod"
+  allocated_storage     = 100
+  instance_class        = "db.m5.large"
+  db_password           = var.db_password
+  skip_final_snapshot   = false
+  multi_az              = true
+}
+
+module "messaging_service" {
+  source         = "../modules/messaging-service"
+  env            = "prod"
+  billing_mode   = "PROVISIONED"
+  read_capacity  = 5
+  write_capacity = 5
 }
 
 # Production VPC
