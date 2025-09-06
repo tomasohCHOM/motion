@@ -1,3 +1,11 @@
+terraform {
+  required_providers {
+    vercel = {
+      source = "vercel/vercel"
+    }
+  }
+}
+
 resource "vercel_project" "motion-frontend" {
   name      = "motion"
   git_repository = {
