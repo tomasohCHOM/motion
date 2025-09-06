@@ -1,14 +1,6 @@
-import { createFileRoute } from '@tanstack/react-router'
-import PageContent from '@/components/workspace/layout/page-content'
+import { createFileRoute } from '@tanstack/react-router';
+import WorkspaceManager from '@/components/workspace/manager/manager';
 
 export const Route = createFileRoute('/workspace/$workspaceId/manager')({
-  component: RouteComponent,
-})
-
-function RouteComponent() {
-  return (
-    <PageContent>
-      <h1>Planner</h1>
-    </PageContent>
-  )
-}
+  component: WorkspaceManager,
+});
