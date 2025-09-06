@@ -1,5 +1,5 @@
 module "vercel-frontend" {
-  source = "../modules/vercel"
+  source = "../modules/vercel-frontend"
   vercel_api_token = var.vercel_api_token
 }
 
