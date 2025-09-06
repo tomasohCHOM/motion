@@ -18,40 +18,40 @@ import {
   SidebarMenuItem,
 } from '@/components/ui/sidebar'
 
-const navItems = [
-  {
-    title: 'Notes',
-    url: '/notes',
-    icon: NotebookTabs,
-  },
-  {
-    title: 'Chat',
-    url: '/chat',
-    icon: MessageSquareDot,
-  },
-  {
-    title: 'Planner',
-    url: '/planner',
-    icon: Calendar,
-  },
-  {
-    title: 'Manager',
-    url: '/manager',
-    icon: FolderClock,
-  },
-  {
-    title: 'Files',
-    url: '/files',
-    icon: File,
-  },
-]
-
-export function AppSidebar() {
+export default function AppSidebar({ workspaceId }: { workspaceId: string }) {
+  const workspaceDynamicRoute = `/workspace/${workspaceId}`
+  const navItems = [
+    {
+      title: 'Notes',
+      url: `${workspaceDynamicRoute}/notes`,
+      icon: NotebookTabs,
+    },
+    {
+      title: 'Chat',
+      url: `${workspaceDynamicRoute}/chat`,
+      icon: MessageSquareDot,
+    },
+    {
+      title: 'Planner',
+      url: `${workspaceDynamicRoute}/planner`,
+      icon: Calendar,
+    },
+    {
+      title: 'Manager',
+      url: `${workspaceDynamicRoute}/manager`,
+      icon: FolderClock,
+    },
+    {
+      title: 'Files',
+      url: `${workspaceDynamicRoute}/files`,
+      icon: File,
+    },
+  ]
   return (
     <Sidebar>
       <SidebarContent className="px-2 py-4">
         <SidebarGroup>
-          <SidebarGroupLabel>Navigation</SidebarGroupLabel>
+          <SidebarGroupLabel>Workspace</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu className="gap-2">
               {navItems.map((item) => (

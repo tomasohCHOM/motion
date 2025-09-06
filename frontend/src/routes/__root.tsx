@@ -5,9 +5,6 @@ import { TanstackDevtools } from '@tanstack/react-devtools'
 import TanStackQueryDevtools from '../integrations/tanstack-query/devtools'
 
 import type { QueryClient } from '@tanstack/react-query'
-import { SidebarProvider } from '@/components/ui/sidebar'
-import { AppSidebar } from '@/components/layout/sidebar'
-import AppNavigationMenu from '@/components/layout/navbar'
 
 interface MyRouterContext {
   queryClient: QueryClient
@@ -16,13 +13,7 @@ interface MyRouterContext {
 export const Route = createRootRouteWithContext<MyRouterContext>()({
   component: () => (
     <>
-      <SidebarProvider>
-        <AppSidebar />
-        <div className="w-full">
-          <AppNavigationMenu />
-          <Outlet />
-        </div>
-      </SidebarProvider>
+      <Outlet />
       <TanstackDevtools
         config={{
           position: 'bottom-left',
