@@ -21,3 +21,9 @@ variable "aws_profile" {
   type        = string
   default     = "default"
 }
+
+variable "pname" {
+  description = "Project Name"
+  type        = string
+  default     = "motion"
+}
