@@ -1,10 +1,12 @@
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
-import notesStore, { noteActions, type Note } from '@/store/notes-store'
-import { createFileRoute, Link, useLocation } from '@tanstack/react-router'
+import { Link, createFileRoute, useLocation } from '@tanstack/react-router'
 import { useStore } from '@tanstack/react-store'
 import { ChevronLeft } from 'lucide-react'
+import type {Note} from '@/store/notes-store';
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Separator } from '@/components/ui/separator'
+import { Textarea } from '@/components/ui/textarea'
+import notesStore, {  noteActions } from '@/store/notes-store'
 
 export const Route = createFileRoute('/workspace/$workspaceId/notes/$noteId')({
   parseParams: (params: { noteId: string }) => ({
@@ -39,12 +41,10 @@ function NoteEditorPage() {
       <div className="flex flex-col items-center justify-center h-screen">
         <h2 className="text-2xl font-semibold mb-4">Note not found</h2>
         <Button asChild variant="outline">
-          <Link
-            to="/workspace/$workspaceId/notes"
-            params={{ workspaceId }}
-          >
+          <Link to="/workspace/$workspaceId/notes" params={{ workspaceId }}>
             Return to Notes List
-          </Link></Button>
+          </Link>
+        </Button>
       </div>
     )
   }
@@ -54,12 +54,10 @@ function NoteEditorPage() {
       {/* Editor Header */}
       <header className="flex items-center gap-2 p-2 border-b shrink-0">
         <Button asChild variant="ghost" size="icon" className="h-8 w-8">
-          <Link
-            to="/workspace/$workspaceId/notes"
-            params={{ workspaceId }}
-          >
+          <Link to="/workspace/$workspaceId/notes" params={{ workspaceId }}>
             <ChevronLeft className="h-5 w-5" />
-          </Link></Button>
+          </Link>
+        </Button>
         <span className="text-sm text-muted-foreground">Notes</span>
       </header>
 
@@ -73,6 +71,7 @@ function NoteEditorPage() {
             placeholder="Untitled Note"
             className="text-3xl md:text-4xl font-bold border-none shadow-none focus-visible:ring-0 p-0 h-auto mb-4"
           />
+          <Separator className="my-4 md:my-6 border-b-2" />
 
           {/* Content */}
           <Textarea

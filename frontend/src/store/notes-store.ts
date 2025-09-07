@@ -4,16 +4,16 @@ export interface Note {
   id: string
   title: string
   content: string
-  tags: string[]
+  tags: Array<string>
   updatedAt: string
 }
 
-// Define the state structure 
+// Define the state structure
 interface NotesState {
-  notes: Note[]
+  notes: Array<Note>
 }
 
-// Create the store instance 
+// Create the store instance
 const notesStore = new Store<NotesState>({
   notes: [],
 })
@@ -32,7 +32,7 @@ export const noteActions = {
       notes: [newNote, ...state.notes],
     }))
 
-    return newNote 
+    return newNote
   },
 
   updateNote: (noteId: string, updates: Partial<Note>) => {
