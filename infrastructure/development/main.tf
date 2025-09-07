@@ -5,22 +5,22 @@ module "vercel-frontend" {
 
 # ECR repository for all services
 resource "aws_ecr_repository" "main" {
-  name = "motion-dev"
+  name = "${var.pname}-${var.env}"
 }
 
 module "mailing_service" {
   source = "../modules/mailing-service"
-  env    = "dev"
+  env    = var.env
 }
 
 module "file_upload_service" {
   source = "../modules/file-upload-service"
-  env    = "dev"
+  env    = var.env
 }
 
 module "user_service" {
   source                = "../modules/user-service"
-  env                   = "dev"
+  env                   = var.env
   allocated_storage     = 20
   instance_class        = "db.t3.micro"
   db_password           = var.db_password
@@ -30,6 +30,6 @@ module "user_service" {
 
 module "messaging_service" {
   source       = "../modules/messaging-service"
-  env          = "dev"
+  env          = var.env
   billing_mode = "PAY_PER_REQUEST"
 }

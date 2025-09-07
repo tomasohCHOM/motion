@@ -4,7 +4,7 @@ variable "vercel_api_token" {
   sensitive   = true
 }
 
-variable "db_password" {
+variable "db_password" { // example variable
   description = "Database Password"
   type        = string
   sensitive   = true
@@ -26,4 +26,10 @@ variable "pname" {
   description = "Project Name"
   type        = string
   default     = "motion"
+}
+
+variable "env" {
+  description = "Project Name"
+  type        = string
+  default     = "dev"
 }
