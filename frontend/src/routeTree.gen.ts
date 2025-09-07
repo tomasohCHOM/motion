@@ -11,7 +11,8 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as WorkspaceWorkspaceIdRouteRouteImport } from './routes/workspace/$workspaceId/route'
-import { Route as WorkspaceWorkspaceIdNotesRouteImport } from './routes/workspace/$workspaceId/notes'
+import { Route as WorkspaceWorkspaceIdNotesIndexRouteImport } from './routes/workspace/$workspaceId/notes/index'
+import { Route as WorkspaceWorkspaceIdNotesNoteIdRouteImport } from './routes/workspace/$workspaceId/notes/$noteId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -24,39 +25,57 @@ const WorkspaceWorkspaceIdRouteRoute =
     path: '/workspace/$workspaceId',
     getParentRoute: () => rootRouteImport,
   } as any)
-const WorkspaceWorkspaceIdNotesRoute =
-  WorkspaceWorkspaceIdNotesRouteImport.update({
-    id: '/notes',
-    path: '/notes',
+const WorkspaceWorkspaceIdNotesIndexRoute =
+  WorkspaceWorkspaceIdNotesIndexRouteImport.update({
+    id: '/notes/',
+    path: '/notes/',
+    getParentRoute: () => WorkspaceWorkspaceIdRouteRoute,
+  } as any)
+const WorkspaceWorkspaceIdNotesNoteIdRoute =
+  WorkspaceWorkspaceIdNotesNoteIdRouteImport.update({
+    id: '/notes/$noteId',
+    path: '/notes/$noteId',
     getParentRoute: () => WorkspaceWorkspaceIdRouteRoute,
   } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/workspace/$workspaceId': typeof WorkspaceWorkspaceIdRouteRouteWithChildren
-  '/workspace/$workspaceId/notes': typeof WorkspaceWorkspaceIdNotesRoute
+  '/workspace/$workspaceId/notes/$noteId': typeof WorkspaceWorkspaceIdNotesNoteIdRoute
+  '/workspace/$workspaceId/notes': typeof WorkspaceWorkspaceIdNotesIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/workspace/$workspaceId': typeof WorkspaceWorkspaceIdRouteRouteWithChildren
-  '/workspace/$workspaceId/notes': typeof WorkspaceWorkspaceIdNotesRoute
+  '/workspace/$workspaceId/notes/$noteId': typeof WorkspaceWorkspaceIdNotesNoteIdRoute
+  '/workspace/$workspaceId/notes': typeof WorkspaceWorkspaceIdNotesIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/workspace/$workspaceId': typeof WorkspaceWorkspaceIdRouteRouteWithChildren
-  '/workspace/$workspaceId/notes': typeof WorkspaceWorkspaceIdNotesRoute
+  '/workspace/$workspaceId/notes/$noteId': typeof WorkspaceWorkspaceIdNotesNoteIdRoute
+  '/workspace/$workspaceId/notes/': typeof WorkspaceWorkspaceIdNotesIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/workspace/$workspaceId' | '/workspace/$workspaceId/notes'
+  fullPaths:
+    | '/'
+    | '/workspace/$workspaceId'
+    | '/workspace/$workspaceId/notes/$noteId'
+    | '/workspace/$workspaceId/notes'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/workspace/$workspaceId' | '/workspace/$workspaceId/notes'
+  to:
+    | '/'
+    | '/workspace/$workspaceId'
+    | '/workspace/$workspaceId/notes/$noteId'
+    | '/workspace/$workspaceId/notes'
   id:
     | '__root__'
     | '/'
     | '/workspace/$workspaceId'
-    | '/workspace/$workspaceId/notes'
+    | '/workspace/$workspaceId/notes/$noteId'
+    | '/workspace/$workspaceId/notes/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -80,23 +99,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof WorkspaceWorkspaceIdRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/workspace/$workspaceId/notes': {
-      id: '/workspace/$workspaceId/notes'
+    '/workspace/$workspaceId/notes/': {
+      id: '/workspace/$workspaceId/notes/'
       path: '/notes'
       fullPath: '/workspace/$workspaceId/notes'
-      preLoaderRoute: typeof WorkspaceWorkspaceIdNotesRouteImport
+      preLoaderRoute: typeof WorkspaceWorkspaceIdNotesIndexRouteImport
+      parentRoute: typeof WorkspaceWorkspaceIdRouteRoute
+    }
+    '/workspace/$workspaceId/notes/$noteId': {
+      id: '/workspace/$workspaceId/notes/$noteId'
+      path: '/notes/$noteId'
+      fullPath: '/workspace/$workspaceId/notes/$noteId'
+      preLoaderRoute: typeof WorkspaceWorkspaceIdNotesNoteIdRouteImport
       parentRoute: typeof WorkspaceWorkspaceIdRouteRoute
     }
   }
 }
 
 interface WorkspaceWorkspaceIdRouteRouteChildren {
-  WorkspaceWorkspaceIdNotesRoute: typeof WorkspaceWorkspaceIdNotesRoute
+  WorkspaceWorkspaceIdNotesNoteIdRoute: typeof WorkspaceWorkspaceIdNotesNoteIdRoute
+  WorkspaceWorkspaceIdNotesIndexRoute: typeof WorkspaceWorkspaceIdNotesIndexRoute
 }
 
 const WorkspaceWorkspaceIdRouteRouteChildren: WorkspaceWorkspaceIdRouteRouteChildren =
   {
-    WorkspaceWorkspaceIdNotesRoute: WorkspaceWorkspaceIdNotesRoute,
+    WorkspaceWorkspaceIdNotesNoteIdRoute: WorkspaceWorkspaceIdNotesNoteIdRoute,
+    WorkspaceWorkspaceIdNotesIndexRoute: WorkspaceWorkspaceIdNotesIndexRoute,
   }
 
 const WorkspaceWorkspaceIdRouteRouteWithChildren =
