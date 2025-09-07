@@ -12,7 +12,14 @@ terraform {
 }
 
 provider "aws" {
-  region = "us-west-1"
+  region = "us-east-1"
+
+  default_tags {
+    tags = {
+      Project     = var.pname
+      Environment = var.env
+    }
+  }
 }
 
 provider "vercel" {

@@ -10,7 +10,14 @@ variable "vercel_api_token" {
   sensitive   = true
 }
 
-variable "api_url" {
-  description = "The URL of the API gateway"
+variable "pname" {
+  description = "Project Name"
   type        = string
+  default     = "motion"
+}
+
+variable "env" {
+  description = "Project Name"
+  type        = string
+  default     = "prod"
 }

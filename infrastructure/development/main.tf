@@ -1,3 +1,9 @@
+module "networking" {
+  source = "../modules/networking"
+  pname  = var.pname
+  env    = var.env
+}
+
 module "vercel-frontend" {
   source = "../modules/vercel-frontend"
   vercel_api_token = var.vercel_api_token
@@ -26,6 +32,10 @@ module "user_service" {
   db_password           = var.db_password
   skip_final_snapshot   = true
   multi_az              = false
+  vpc_id                      = module.networking.vpc_id
+  private_subnet_ids          = module.networking.private_subnet_ids
+  default_security_group_id = module.networking.default_security_group_id
+  pname                       = var.pname
 }
 
 module "messaging_service" {

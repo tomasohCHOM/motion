@@ -1,69 +1,48 @@
 module "vercel-frontend" {
-  source = "../modules/vercel"
+  source = "../modules/vercel-frontend"
 
   vercel_api_token = var.vercel_api_token
-  api_url          = var.api_url
 }
 
 # ECR repository for all services
 resource "aws_ecr_repository" "main" {
-  name = "motion-prod"
+  name = "${var.pname}-${var.env}"
 }
 
 module "mailing_service" {
   source = "../modules/mailing-service"
-  env    = "prod"
+  env    = var.env
 }
 
 module "file_upload_service" {
   source = "../modules/file-upload-service"
-  env    = "prod"
+  env    = var.env
 }
 
 module "user_service" {
-  source                = "../modules/user-service"
-  env                   = "prod"
-  allocated_storage     = 100
-  instance_class        = "db.m5.large"
-  db_password           = var.db_password
-  skip_final_snapshot   = false
-  multi_az              = true
+  source                      = "../modules/user-service"
+  env                         = var.env
+  allocated_storage           = 100
+  instance_class              = "db.m5.large"
+  db_password                 = var.db_password
+  skip_final_snapshot         = false
+  multi_az                    = true
+  vpc_id                      = module.networking.vpc_id
+  private_subnet_ids          = module.networking.private_subnet_ids
+  default_security_group_id = module.networking.default_security_group_id
+  pname                       = var.pname
 }
 
 module "messaging_service" {
   source         = "../modules/messaging-service"
-  env            = "prod"
+  env            = var.env
   billing_mode   = "PROVISIONED"
   read_capacity  = 5
   write_capacity = 5
 }
 
-# Production VPC
-resource "aws_vpc" "main" {
-  cidr_block = "10.0.0.0/16"
-
-  tags = {
-    Name = "motion-prod"
-  }
-}
-
-# Production Subnets (HA)
-resource "aws_subnet" "private_a" {
-  vpc_id            = aws_vpc.main.id
-  cidr_block        = "10.0.1.0/24"
-  availability_zone = "us-east-1a"
-
-  tags = {
-    Name = "motion-prod-private-a"
-  }
-}
-
-resource "aws_subnet" "private_b" {
-  vpc_id            = aws_vpc.main.id
-  cidr_block        = "10.0.2.0/24"
-  availability_zone = "us-east-1b"
-
-  tags = {
-    Name = "motion-prod-private-b"
-  }
+module "networking" {
+  source = "../modules/networking"
+  pname  = var.pname
+  env    = var.env
 }

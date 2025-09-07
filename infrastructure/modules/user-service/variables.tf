@@ -28,3 +28,23 @@ variable "multi_az" {
   description = "Whether to create a multi-AZ database"
   type        = bool
 }
+
+variable "vpc_id" {
+  description = "The ID of the VPC"
+  type        = string
+}
+
+variable "private_subnet_ids" {
+  description = "The IDs of the private subnets"
+  type        = list(string)
+}
+
+variable "default_security_group_id" {
+  description = "The ID of the default security group"
+  type        = string
+}
+
+variable "pname" {
+  description = "Project Name"
+  type        = string
+}
