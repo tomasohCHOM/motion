@@ -12,8 +12,8 @@ terraform {
 }
 
 provider "aws" {
-  region  = "us-west-1"
-  profile = "developer"
+  region  = var.aws_region
+  profile = var.aws_profile
 }
 
 provider "vercel" {
