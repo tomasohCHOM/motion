@@ -4,13 +4,13 @@ export interface Note {
   id: string
   title: string
   content: string
-  tags: Array<string>
+  tags: string[]
   updatedAt: string
 }
 
-// Define the state structure
+// Define the state structure 
 interface NotesState {
-  notes: Array<Note>
+  notes: Note[]
 }
 
 // Create the store instance
@@ -31,8 +31,7 @@ export const noteActions = {
     notesStore.setState((state) => ({
       notes: [newNote, ...state.notes],
     }))
-
-    return newNote
+    return newNote 
   },
 
   updateNote: (noteId: string, updates: Partial<Note>) => {
@@ -45,6 +44,7 @@ export const noteActions = {
     }))
   },
 
+  // Delete a note by its ID
   deleteNote: (noteId: string) => {
     notesStore.setState((state) => ({
       notes: state.notes.filter((note) => note.id !== noteId),

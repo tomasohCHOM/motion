@@ -1,12 +1,18 @@
-import { Link, createFileRoute, useRouter } from '@tanstack/react-router'
-import { useStore } from '@tanstack/react-store'
-import { PlusIcon, SearchIcon } from 'lucide-react'
-import * as React from 'react'
-import type { Note } from '@/store/notes-store'
 import { Button } from '@/components/ui/button'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 import { Input } from '@/components/ui/input'
 import PageContent from '@/components/workspace/layout/page-content'
+import type { Note } from '@/store/notes-store'
 import notesStore, { noteActions } from '@/store/notes-store'
+import { createFileRoute, Link, useRouter } from '@tanstack/react-router'
+import { useStore } from '@tanstack/react-store'
+import { MoreVertical, PencilIcon, PlusIcon, SearchIcon, TrashIcon } from 'lucide-react'
+import * as React from 'react'
 
 interface NoteCardProps {
   note: Note
@@ -14,24 +20,64 @@ interface NoteCardProps {
 }
 
 function NoteCard({ note, workspaceId }: NoteCardProps) {
-  const contentPreview = note.content || 'No additional content.'
+  const router = useRouter()
+
+  const navigateToEditor = () => {
+    router.navigate({
+      to: '/workspace/$workspaceId/notes/$noteId',
+      params: { workspaceId, noteId: note.id },
+    })
+  }
+
+  // Deletion confirmation
+  const handleDelete = () => {
+    if (window.confirm('Are you sure you want to delete this note permanently?')) {
+      noteActions.deleteNote(note.id)
+    }
+  }
+
+  // Prevents card click navigation when interacting with dropdown menu
+  const handleDropdownInteraction = (e: React.MouseEvent) => {
+    e.stopPropagation()
+  }
 
   return (
-    <Link
-      to="/workspace/$workspaceId/notes/$noteId"
-      params={{ workspaceId, noteId: note.id }}
-      className="flex flex-col h-full rounded-lg border bg-card text-card-foreground shadow-sm hover:shadow-md transition-shadow overflow-hidden"
+    <div
+      onClick={navigateToEditor}
+      className="flex flex-col h-full rounded-lg border bg-card text-card-foreground shadow-sm transition-shadow hover:shadow-md cursor-pointer group"
     >
-      <div className="flex-grow p-4 space-y-2">
+      {/* Clickable content area */}
+      <div className="flex-grow space-y-2 p-4">
         <h3 className="font-semibold text-lg break-words">{note.title}</h3>
         <p className="text-sm text-muted-foreground line-clamp-4 min-h-[80px] break-words">
-          {contentPreview}
+          {note.content || 'No additional content.'}
         </p>
       </div>
-      <footer className="border-t p-4 text-xs text-muted-foreground">
-        Updated: {note.updatedAt}
+
+      {/* Footer with actions */}
+      <footer className="flex items-center justify-between border-t px-2 py-1 text-xs text-muted-foreground">
+        <span className="pl-2">Updated: {note.updatedAt}</span>
+
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild onClick={handleDropdownInteraction}>
+            <Button variant="ghost" size="icon" className="h-7 w-7">
+              <span className="sr-only">Note options</span>
+              <MoreVertical className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" onClick={handleDropdownInteraction}>
+            <DropdownMenuItem onClick={navigateToEditor}>
+              <PencilIcon className="mr-2 h-4 w-4" />
+              <span>Edit</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={handleDelete} className="text-red-500 focus:text-red-500">
+              <TrashIcon className="mr-2 h-4 w-4" />
+              <span>Delete</span>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </footer>
-    </Link>
+    </div>
   )
 }
 
@@ -55,7 +101,6 @@ function NotesListPage() {
     })
   }
 
-  // Filter notes based on search term
   const filteredNotes = notes.filter((note) =>
     note.title.toLowerCase().includes(searchTerm.toLowerCase()),
   )
@@ -66,9 +111,7 @@ function NotesListPage() {
       <div className="flex justify-between items-center mb-4 gap-4">
         <div>
           <h1 className="font-bold text-2xl md:text-4xl">All Notes</h1>
-          <p className="text-muted-foreground">
-            Browse and manage your documents.
-          </p>
+          <p className="text-muted-foreground">Browse and manage your documents.</p>
         </div>
         <Button onClick={handleCreateNewNote}>
           <PlusIcon className="mr-2 h-4 w-4" />
@@ -90,7 +133,7 @@ function NotesListPage() {
       {/* Notes List */}
       {filteredNotes.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {filteredNotes.map((note) => (
+          {notes.map((note) => (
             <NoteCard key={note.id} note={note} workspaceId={workspaceId} />
           ))}
         </div>
