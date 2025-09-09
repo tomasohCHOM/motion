@@ -9,7 +9,7 @@ export const mockManagerTestData = [
         description:
           'Understand design doc to develop microservices architecture',
         assignee: { name: 'Josh Holman' },
-        priority: 'high',
+        priority: 'low',
         tags: ['Backend', 'API'],
       },
       {

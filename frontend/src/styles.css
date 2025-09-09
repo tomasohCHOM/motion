@@ -136,3 +136,20 @@ code {
     @apply bg-background text-foreground;
   }
 }
+
+@layer utilities {
+  /* Chrome, Safari, Edge, Opera */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  /* IE and Edge */
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    /* Firefox */
+    scrollbar-width: none;
+  }
+}
+
+body::-webkit-scrollbar {
+  display: none;
+}
