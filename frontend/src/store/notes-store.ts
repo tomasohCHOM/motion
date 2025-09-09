@@ -4,13 +4,14 @@ export interface Note {
   id: string
   title: string
   content: string
-  tags: string[]
-  updatedAt: string
+  tags: Array<string>
+  createdAt: string
+  updatedAt: string | null;
 }
 
 // Define the state structure 
 interface NotesState {
-  notes: Note[]
+  notes: Array<Note>
 }
 
 // Create the store instance
@@ -26,7 +27,8 @@ export const noteActions = {
       title: partialNote.title || 'Untitled',
       content: partialNote.content || '',
       tags: partialNote.tags || [],
-      updatedAt: new Date().toLocaleDateString(),
+      createdAt: new Date().toLocaleDateString(),
+      updatedAt: null,
     }
     notesStore.setState((state) => ({
       notes: [newNote, ...state.notes],
