@@ -18,10 +18,13 @@ import { Board } from './board'
 import { ManagerHeader } from './header'
 import { TaskCard } from './task'
 import type { Task, Column } from './types'
+import EditTask from './edit'
 
 export default function WorkspaceManager() {
   const [columns, setColumns] = useState<Array<Column>>(mockManagerTestData)
   const [activeTask, setActiveTask] = useState<Task | null>(null)
+
+  const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false)
 
   const findTaskById = (id: string) => {
     for (const column of columns) {
@@ -31,11 +34,21 @@ export default function WorkspaceManager() {
     return null
   }
 
+  /**
+   * Needed so users can see the "floating" task as they drag it to other columns.
+   * They would not be able to see the task leave its original column otherwise.
+   */
   const handleDragStart = (e: DragStartEvent) => {
     const task = findTaskById(e.active.id as string)
     setActiveTask(task)
   }
 
+  /**
+   * Performed when the user stops dragging the task, but does not let off the
+   * cursor. It updates which new column the dragged task would belong to, but
+   * does not care about the actual index inside the `tasks` array of that
+   * column yet.
+   */
   const handleDragOver = (event: DragOverEvent) => {
     const { active, over } = event
     if (!over) return
@@ -76,6 +89,10 @@ export default function WorkspaceManager() {
     })
   }
 
+  /**
+   * User lets go off the task, dragging ends. Organizes `tasks` array of the
+   * targeted column with correct index of elements.
+   */
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event
     setActiveTask(null)
@@ -121,8 +138,13 @@ export default function WorkspaceManager() {
       sensors={sensors}
     >
       <PageContent>
-        <ManagerHeader />
-        <Board columns={columns} />
+        <EditTask
+          isAdding={true}
+          isDialogOpen={isDialogOpen}
+          setIsDialogOpen={setIsDialogOpen}
+        />
+        <ManagerHeader setIsDialogOpen={setIsDialogOpen} />
+        <Board columns={columns} setIsDialogOpen={setIsDialogOpen} />
         <DragOverlay>
           {activeTask ? <TaskCard task={activeTask} /> : null}
         </DragOverlay>

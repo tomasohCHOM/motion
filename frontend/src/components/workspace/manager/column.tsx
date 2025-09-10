@@ -7,7 +7,15 @@ import { useDroppable } from '@dnd-kit/core'
 import type { Column } from './types'
 import { TaskCard } from './task'
 
-export const DroppableColumn: React.FC<{ column: Column }> = ({ column }) => {
+type Props = {
+  column: Column
+  setIsDialogOpen: React.Dispatch<React.SetStateAction<boolean>>
+}
+
+export const DroppableColumn: React.FC<Props> = ({
+  column,
+  setIsDialogOpen,
+}) => {
   const { setNodeRef } = useDroppable({ id: column.id })
 
   return (
@@ -19,7 +27,12 @@ export const DroppableColumn: React.FC<{ column: Column }> = ({ column }) => {
             {column.tasks.length}
           </Badge>
         </div>
-        <Button variant="ghost" size="icon" className="h-6 w-6">
+        <Button
+          onClick={() => setIsDialogOpen(true)}
+          variant="ghost"
+          size="icon"
+          className="h-6 w-6"
+        >
           <Plus className="h-4 w-4" />
         </Button>
       </div>
@@ -38,8 +51,9 @@ export const DroppableColumn: React.FC<{ column: Column }> = ({ column }) => {
         </SortableContext>
 
         <Button
+          onClick={() => setIsDialogOpen(true)}
+          className="w-full border-2 cursor-pointer border-dashed border-muted-foreground/25 h-20 text-muted-foreground hover:border-muted-foreground/50 hover:bg-muted/50"
           variant="ghost"
-          className="w-full border-2 border-dashed border-muted-foreground/25 h-20 text-muted-foreground hover:border-muted-foreground/50 hover:bg-muted/50"
         >
           <Plus className="h-4 w-4 mr-2" />
           Add a task

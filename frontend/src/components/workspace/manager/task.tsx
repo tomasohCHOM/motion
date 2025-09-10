@@ -8,6 +8,12 @@ import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import type { Task } from './types'
 import { getPriorityColor, getAssigneeInitials } from './utils'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 
 export const TaskCard: React.FC<{ task: Task }> = ({ task }) => {
   const {
@@ -38,9 +44,23 @@ export const TaskCard: React.FC<{ task: Task }> = ({ task }) => {
             <CardTitle className="text-sm font-medium leading-tight">
               {task.title}
             </CardTitle>
-            <Button variant="ghost" size="icon" className="h-6 w-6 -mr-2 -mt-1">
-              <MoreHorizontal className="h-4 w-4" />
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-6 w-6 -mr-2 -mt-1"
+                >
+                  <MoreHorizontal className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" alignOffset={-10}>
+                <DropdownMenuItem>Edit task</DropdownMenuItem>
+                <DropdownMenuItem variant="destructive">
+                  Delete task
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </CardHeader>
         <CardContent className="pt-0">
