@@ -27,13 +27,13 @@ locals {
 }
 
 module "networking" {
-  source = "../modules/networking"
+  source = "./modules/networking"
   pname  = var.pname
   env    = local.env
 }
 
 module "vercel-frontend" {
-  source = "../modules/vercel-frontend"
+  source = "./modules/vercel-frontend"
   vercel_api_token = var.vercel_api_token
 }
 
@@ -43,17 +43,17 @@ resource "aws_ecr_repository" "main" {
 }
 
 module "mailing_service" {
-  source = "../modules/mailing-service"
+  source = "./modules/mailing-service"
   env    = local.env
 }
 
 module "file_upload_service" {
-  source = "../modules/file-upload-service"
+  source = "./modules/file-upload-service"
   env    = local.env
 }
 
 module "user_service" {
-  source                = "../modules/user-service"
+  source                = "./modules/user-service"
   env                   = local.env
   allocated_storage     = local.vars.user_service_allocated_storage
   instance_class        = local.vars.user_service_instance_class
@@ -67,7 +67,7 @@ module "user_service" {
 }
 
 module "messaging_service" {
-  source       = "../modules/messaging-service"
+  source       = "./modules/messaging-service"
   env          = local.env
   billing_mode = local.vars.messaging_service_billing_mode
   read_capacity = local.vars.messaging_service_read_capacity
