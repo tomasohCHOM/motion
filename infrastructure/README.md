@@ -9,6 +9,39 @@ The platform is built using a **Microservices Architecture Pattern**. This desig
 
 ---
 
+## Workspaces
+
+This project uses Terraform workspaces to manage multiple environments. The available workspaces are `default` (for development) and `production`.
+
+To switch between workspaces, use the following command:
+
+```bash
+terraform workspace select <workspace_name>
+```
+
+For example, to switch to the production workspace, run:
+
+```bash
+terraform workspace select production
+```
+
+### Backend
+
+This project uses the S3 backend to store the Terraform state. Before you can use this project, you need to create the following resources:
+
+*   An S3 bucket named `motion-terraform-state`
+*   A DynamoDB table named `motion-terraform-locks` with a primary key named `LockID` of type `String`.
+
+### Variables
+
+Environment-specific variables are defined in `.tfvars` files. For example, the `production.tfvars` file contains the variables for the production environment.
+
+To apply the Terraform configuration for a specific environment, use the `-var-file` flag. For example, to apply the production configuration, run:
+
+```bash
+terraform apply -var-file="production.tfvars"
+```
+
 ## **Service Breakdown**
 
 ### **1. Mailing Service**

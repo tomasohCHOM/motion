@@ -1,3 +1,0 @@
-# This file is an example. Create a terraform.tfvars file in each environment directory.
-# For example, in development/terraform.tfvars:
-# vercel_api_token = "your-vercel-api-token"
