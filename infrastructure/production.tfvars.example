@@ -1,3 +1,4 @@
-# db_password = "your-production-db-password"
-# vercel_api_token = "your-production-vercel-api-token"
+# This file is an example.
+vercel_api_token = "your-production-vercel-api-token"
+aws_profile      = "your-aws-profile"
 

@@ -32,15 +32,31 @@ This project uses the S3 backend to store the Terraform state. Before you can us
 *   An S3 bucket named `motion-terraform-state`
 *   A DynamoDB table named `motion-terraform-locks` with a primary key named `LockID` of type `String`.
 
-### Variables
+### Backend Secrets
 
-Environment-specific variables are defined in `.tfvars` files. For example, the `production.tfvars` file contains the variables for the production environment.
+This project uses AWS Secrets Manager to handle sensitive values like database passwords and API keys. Terraform reads these values at runtime, instead of requiring them as input variables. This is a security best practice that prevents secrets from being stored in plaintext in state files or version control.
 
-To apply the Terraform configuration for a specific environment, use the `-var-file` flag. For example, to apply the production configuration, run:
+Before you can apply the configuration, you must create the following secret(s) in AWS Secrets Manager:
+
+*   **User Service Database Password**
+    *   **Secret Name**: `motion-dev/user-service/db-password` (for the `default` workspace) or `motion-production/user-service/db-password` (for the `production` workspace).
+    *   **Secret Value**: The value should be a plaintext string containing the password you want to use.
+
+
+#### Creating the Secret via AWS CLI
+
+You can create the secret for the `dev` environment using the following AWS CLI command. Replace `YOUR_PASSWORD_HERE` with your actual desired password.
 
 ```bash
-terraform apply -var-file="production.tfvars"
+aws secretsmanager create-secret --name motion-dev/user-service/db-password --secret-string YOUR_PASSWORD_HERE --region us-west-1
 ```
+
+For production:
+
+```bash
+aws secretsmanager create-secret --name motion-production/user-service/db-password --secret-string YOUR_SECURE_PASSWORD_HERE --region us-east-1
+```
+
 
 ## **Service Breakdown**
 

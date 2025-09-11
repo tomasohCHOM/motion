@@ -4,12 +4,6 @@ variable "vercel_api_token" {
   sensitive   = true
 }
 
-variable "db_password" { // example variable
-  description = "Database Password"
-  type        = string
-  sensitive   = true
-}
-
 variable "aws_profile" {
   description = "AWS CLI User Profile to Use"
   type        = string

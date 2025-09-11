@@ -24,6 +24,13 @@ locals {
 
   env  = terraform.workspace == "default" ? "dev" : terraform.workspace
   vars = can(local.env_vars[terraform.workspace]) ? local.env_vars[terraform.workspace] : local.env_vars["default"]
+
+  # Name of the secret in AWS Secrets Manager
+  db_secret_name = "${var.pname}-${local.env}/user-service/db-password"
+}
+
+data "aws_secretsmanager_secret_version" "db_password" {
+  secret_id = local.db_secret_name
 }
 
 module "networking" {
@@ -57,7 +64,7 @@ module "user_service" {
   env                       = local.env
   allocated_storage         = local.vars.user_service_allocated_storage
   instance_class            = local.vars.user_service_instance_class
-  db_password               = var.db_password
+  db_password               = data.aws_secretsmanager_secret_version.db_password.secret_string
   skip_final_snapshot       = local.vars.user_service_skip_final_snapshot
   multi_az                  = local.vars.user_service_multi_az
   vpc_id                    = module.networking.vpc_id
