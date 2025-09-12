@@ -117,3 +117,26 @@ This service provides instant message exchange for users within group projects.
 * **AWS Infrastructure**:
     * **Amazon DynamoDB**: A managed NoSQL database used for persistent message storage, partitioned by `project_id`.
     * **AWS ECS (Fargate)**: The containerized application is deployed
+
+### **5. Vercel Frontend**
+
+The frontend of the application is deployed on Vercel. The Terraform configuration for the Vercel provider requires an API token.
+
+#### **Vercel API Token
+
+To securely manage the Vercel API token, it must be stored in AWS Secrets Manager.
+
+*   **Secret Name**: `motion-dev/vercel-api-token` (for the `default` workspace) or `motion-production/vercel-api-token` (for the `production` workspace).
+*   **Secret Value**: Your plaintext Vercel API token.
+
+You can create the secret for the `dev` environment using the following AWS CLI command. Replace `YOUR_VERCEL_TOKEN_HERE` with your actual token.
+
+```bash
+aws secretsmanager create-secret --name motion-dev/vercel-api-token --secret-string YOUR_VERCEL_TOKEN_HERE --region us-west-1
+```
+
+For production:
+
+```bash
+aws secretsmanager create-secret --name motion-production/vercel-api-token --secret-string YOUR_VERCEL_TOKEN_HERE --region us-east-1
+```
