@@ -9,3 +9,9 @@ variable "aws_region" {
   type        = string
   default     = "us-west-1"
 }
+
+variable "vercel_api_token" {
+  description = "Vercel API Token"
+  type        = string
+  sensitive   = true
+}
