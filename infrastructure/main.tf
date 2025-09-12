@@ -41,9 +41,9 @@ module "networking" {
   aws_region = local.vars.aws_region
 }
 
-data "aws_secretsmanager_secret_version" "vercel_api_token" {
-  secret_id = local.vercel_secret_name
-}
+# data "aws_secretsmanager_secret_version" "vercel_api_token" {
+#   secret_id = local.vercel_secret_name
+# }
 
 module "vercel-frontend" {
   source           = "./modules/vercel-frontend"
