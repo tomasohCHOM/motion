@@ -35,9 +35,10 @@ locals {
 # }
 
 module "networking" {
-  source = "./modules/networking"
-  pname  = var.pname
-  env    = local.env
+  source     = "./modules/networking"
+  pname      = var.pname
+  env        = local.env
+  aws_region = local.vars.aws_region
 }
 
 data "aws_secretsmanager_secret_version" "vercel_api_token" {
