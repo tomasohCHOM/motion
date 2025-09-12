@@ -13,7 +13,7 @@ terraform {
 
 provider "aws" {
   region  = local.vars.aws_region
-  profile = "motion-dev"
+  profile = "motion-project"
 
   default_tags {
     tags = {
