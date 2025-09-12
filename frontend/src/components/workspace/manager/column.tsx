@@ -4,18 +4,16 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { useDroppable } from '@dnd-kit/core'
-import type { Column } from './types'
+import type { Column } from '@/store/manager/task-store'
 import { TaskCard } from './task'
+import { dialogActions } from '@/store/manager/ui-store'
+import { SortableItem } from './sortable-item'
 
 type Props = {
   column: Column
-  setIsDialogOpen: React.Dispatch<React.SetStateAction<boolean>>
 }
 
-export const DroppableColumn: React.FC<Props> = ({
-  column,
-  setIsDialogOpen,
-}) => {
+export const DroppableColumn: React.FC<Props> = ({ column }) => {
   const { setNodeRef } = useDroppable({ id: column.id })
 
   return (
@@ -28,7 +26,7 @@ export const DroppableColumn: React.FC<Props> = ({
           </Badge>
         </div>
         <Button
-          onClick={() => setIsDialogOpen(true)}
+          onClick={dialogActions.toggleDialog}
           variant="ghost"
           size="icon"
           className="h-6 w-6"
@@ -45,13 +43,15 @@ export const DroppableColumn: React.FC<Props> = ({
         >
           <div ref={setNodeRef}>
             {column.tasks.map((task) => (
-              <TaskCard key={task.id} task={task} />
+              <SortableItem id={task.id}>
+                <TaskCard key={task.id} task={task} />
+              </SortableItem>
             ))}
           </div>
         </SortableContext>
 
         <Button
-          onClick={() => setIsDialogOpen(true)}
+          onClick={dialogActions.toggleDialog}
           className="w-full border-2 cursor-pointer border-dashed border-muted-foreground/25 h-20 text-muted-foreground hover:border-muted-foreground/50 hover:bg-muted/50"
           variant="ghost"
         >

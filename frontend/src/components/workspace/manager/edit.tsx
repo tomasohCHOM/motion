@@ -18,20 +18,21 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { useStore } from '@tanstack/react-store'
+import { dialogActions, dialogStore } from '@/store/manager/ui-store'
 
 type Props = {
   isAdding: boolean
-  isDialogOpen: boolean
-  setIsDialogOpen: React.Dispatch<React.SetStateAction<boolean>>
 }
 
-const EditTask: React.FC<Props> = ({
-  isAdding,
-  isDialogOpen,
-  setIsDialogOpen,
-}) => {
+const EditTask: React.FC<Props> = ({ isAdding }) => {
+  const dialogState = useStore(dialogStore)
+
   return (
-    <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+    <Dialog
+      open={dialogState.isDialogOpen}
+      onOpenChange={dialogActions.toggleDialog}
+    >
       <form>
         <DialogContent className="sm:max-w-[30rem]">
           <DialogHeader>
@@ -53,7 +54,7 @@ const EditTask: React.FC<Props> = ({
               />
             </div>
             <div className="grid gap-3">
-              <Label htmlFor="task-status">Task Status</Label>
+              <Label htmlFor="column">Column</Label>
               <Select>
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="Indicate task status" />
