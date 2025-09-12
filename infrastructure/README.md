@@ -29,8 +29,10 @@ terraform workspace select production
 
 This project uses the S3 backend to store the Terraform state. Before you can use this project, you need to create the following resources:
 
-*   An S3 bucket named `motion-terraform-state`
-*   A DynamoDB table named `motion-terraform-locks` with a primary key named `LockID` of type `String`.
+*   An S3 bucket named `motion-terraform-state-69`
+```bash
+aws s3api create-bucket --bucket motion-terraform-state-69 --region us-east-1
+```
 
 ### Backend Secrets
 
