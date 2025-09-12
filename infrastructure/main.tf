@@ -26,13 +26,13 @@ locals {
   vars = can(local.env_vars[terraform.workspace]) ? local.env_vars[terraform.workspace] : local.env_vars["default"]
 
   # Name of the secret in AWS Secrets Manager
-  db_secret_name     = "${var.pname}-${local.env}/user-service/db-password"
+  # db_secret_name     = "${var.pname}-${local.env}/user-service/db-password"
   vercel_secret_name = "${var.pname}-${local.env}/vercel-api-token"
 }
 
-data "aws_secretsmanager_secret_version" "db_password" {
-  secret_id = local.db_secret_name
-}
+# data "aws_secretsmanager_secret_version" "db_password" {
+#   secret_id = local.db_secret_name
+# }
 
 module "networking" {
   source = "./modules/networking"
@@ -50,38 +50,38 @@ module "vercel-frontend" {
 }
 
 # ECR repository for all services
-resource "aws_ecr_repository" "main" {
-  name = "${var.pname}-${local.env}"
-}
+# resource "aws_ecr_repository" "main" {
+#   name = "${var.pname}-${local.env}"
+# }
 
-module "mailing_service" {
-  source = "./modules/mailing-service"
-  env    = local.env
-}
+# module "mailing_service" {
+#   source = "./modules/mailing-service"
+#   env    = local.env
+# }
 
-module "file_upload_service" {
-  source = "./modules/file-upload-service"
-  env    = local.env
-}
+# module "file_upload_service" {
+#   source = "./modules/file-upload-service"
+#   env    = local.env
+# }
 
-module "user_service" {
-  source                    = "./modules/user-service"
-  env                       = local.env
-  allocated_storage         = local.vars.user_service_allocated_storage
-  instance_class            = local.vars.user_service_instance_class
-  db_password               = data.aws_secretsmanager_secret_version.db_password.secret_string
-  skip_final_snapshot       = local.vars.user_service_skip_final_snapshot
-  multi_az                  = local.vars.user_service_multi_az
-  vpc_id                    = module.networking.vpc_id
-  private_subnet_ids        = module.networking.private_subnet_ids
-  default_security_group_id = module.networking.default_security_group_id
-  pname                     = var.pname
-}
+# module "user_service" {
+#   source                    = "./modules/user-service"
+#   env                       = local.env
+#   allocated_storage         = local.vars.user_service_allocated_storage
+#   instance_class            = local.vars.user_service_instance_class
+#   db_password               = data.aws_secretsmanager_secret_version.db_password.secret_string
+#   skip_final_snapshot       = local.vars.user_service_skip_final_snapshot
+#   multi_az                  = local.vars.user_service_multi_az
+#   vpc_id                    = module.networking.vpc_id
+#   private_subnet_ids        = module.networking.private_subnet_ids
+#   default_security_group_id = module.networking.default_security_group_id
+#   pname                     = var.pname
+# }
 
-module "messaging_service" {
-  source         = "./modules/messaging-service"
-  env            = local.env
-  billing_mode   = local.vars.messaging_service_billing_mode
-  read_capacity  = local.vars.messaging_service_read_capacity
-  write_capacity = local.vars.messaging_service_write_capacity
-}
+# module "messaging_service" {
+#   source         = "./modules/messaging-service"
+#   env            = local.env
+#   billing_mode   = local.vars.messaging_service_billing_mode
+#   read_capacity  = local.vars.messaging_service_read_capacity
+#   write_capacity = local.vars.messaging_service_write_capacity
+# }
