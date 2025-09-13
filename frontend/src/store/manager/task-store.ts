@@ -25,6 +25,15 @@ type KanbanState = {
   activeTask: Task | null
 }
 
+export const priorityLabels = ['low', 'medium', 'high']
+
+export const teamMembers = [
+  'Donovan Bosson',
+  'Nathan Chen',
+  'Josh Holman',
+  'Tomas Oh',
+]
+
 export const kanbanStore = new Store<KanbanState>({
   columns: mockManagerTestData,
   activeTask: null,

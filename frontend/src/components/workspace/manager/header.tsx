@@ -2,7 +2,7 @@ import React from 'react'
 import { Plus, Columns } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { dialogActions } from '@/store/manager/ui-store'
+import { dialogActions } from '@/store/manager/dialog-store'
 
 export const ManagerHeader: React.FC = () => (
   <div className="flex items-center justify-between border-b p-6 border-sidebar-border w-full">
@@ -16,7 +16,10 @@ export const ManagerHeader: React.FC = () => (
       <Button variant="outline" className="cursor-pointer">
         <Columns /> New Column
       </Button>
-      <Button className="cursor-pointer" onClick={dialogActions.toggleDialog}>
+      <Button
+        className="cursor-pointer"
+        onClick={() => dialogActions.openAdd()}
+      >
         <Plus /> New task
       </Button>
     </div>

@@ -1,7 +1,6 @@
 import React from 'react'
 import { MoreHorizontal, Calendar } from 'lucide-react'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 import {
@@ -11,20 +10,16 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import type { Task } from '@/store/manager/task-store'
-import { kanbanHelpers } from '@/store/manager/task-store'
+import { kanbanActions, kanbanHelpers } from '@/store/manager/task-store'
+import { getAssigneeInitials } from './utils'
+import { dialogActions } from '@/store/manager/dialog-store'
 
 type Props = {
+  columnId: string
   task: Task
 }
 
-const getAssigneeInitials = (name: string): string => {
-  return name
-    .split(' ')
-    .map((n) => n[0])
-    .join('')
-}
-
-export const TaskCard: React.FC<Props> = ({ task }) => {
+export const TaskCard: React.FC<Props> = ({ columnId, task }) => {
   return (
     <Card className="min-h-[180px] mb-3 z-50 flex flex-col justify-between cursor-grab hover:shadow-md transition-shadow bg-card border-border">
       <CardHeader>
@@ -34,18 +29,19 @@ export const TaskCard: React.FC<Props> = ({ task }) => {
               {task.title}
             </CardTitle>
             <DropdownMenu>
-              <DropdownMenuTrigger>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-6 w-6 -mr-2 -mt-1"
-                >
-                  <MoreHorizontal className="h-4 w-4" />
-                </Button>
+              <DropdownMenuTrigger className="p-1 -mr-2 -mt-1">
+                <MoreHorizontal className="h-4 w-4" />
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" alignOffset={-10}>
-                <DropdownMenuItem>Edit task</DropdownMenuItem>
-                <DropdownMenuItem variant="destructive">
+                <DropdownMenuItem
+                  onClick={() => dialogActions.openEdit(columnId, task)}
+                >
+                  Edit task
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  variant="destructive"
+                  onClick={() => kanbanActions.deleteTask(columnId, task.id)}
+                >
                   Delete task
                 </DropdownMenuItem>
               </DropdownMenuContent>

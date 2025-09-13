@@ -6,9 +6,9 @@ import EditTask from './edit'
 export default function WorkspaceManager() {
   return (
     <PageContent>
-      <EditTask isAdding={true} />
       <ManagerHeader />
       <Board />
+      <EditTask />
     </PageContent>
   )
 }

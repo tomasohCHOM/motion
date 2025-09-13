@@ -6,7 +6,7 @@ import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { useDroppable } from '@dnd-kit/core'
 import type { Column } from '@/store/manager/task-store'
 import { TaskCard } from './task'
-import { dialogActions } from '@/store/manager/ui-store'
+import { dialogActions } from '@/store/manager/dialog-store'
 import { SortableItem } from './sortable-item'
 
 type Props = {
@@ -26,7 +26,7 @@ export const DroppableColumn: React.FC<Props> = ({ column }) => {
           </Badge>
         </div>
         <Button
-          onClick={dialogActions.toggleDialog}
+          onClick={() => dialogActions.openAdd(column.id)}
           variant="ghost"
           size="icon"
           className="h-6 w-6"
@@ -43,15 +43,15 @@ export const DroppableColumn: React.FC<Props> = ({ column }) => {
         >
           <div ref={setNodeRef}>
             {column.tasks.map((task) => (
-              <SortableItem id={task.id}>
-                <TaskCard key={task.id} task={task} />
+              <SortableItem key={task.id} id={task.id}>
+                <TaskCard key={task.id} columnId={column.id} task={task} />
               </SortableItem>
             ))}
           </div>
         </SortableContext>
 
         <Button
-          onClick={dialogActions.toggleDialog}
+          onClick={() => dialogActions.openAdd(column.id)}
           className="w-full border-2 cursor-pointer border-dashed border-muted-foreground/25 h-20 text-muted-foreground hover:border-muted-foreground/50 hover:bg-muted/50"
           variant="ghost"
         >
