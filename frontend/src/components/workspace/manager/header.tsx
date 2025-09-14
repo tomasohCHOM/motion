@@ -1,5 +1,5 @@
 import React from 'react'
-import { Plus, Columns } from 'lucide-react'
+import { Plus } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { dialogActions } from '@/store/manager/dialog-store'
