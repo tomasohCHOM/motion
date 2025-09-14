@@ -140,7 +140,7 @@ export const KanbanDndProvider: React.FC<Props> = ({ children }) => {
 
       <DragOverlay>
         {kanbanState.activeTask ? (
-          <TaskCard task={kanbanState.activeTask} />
+          <TaskCard columnId="" task={kanbanState.activeTask} />
         ) : null}
       </DragOverlay>
     </DndContext>

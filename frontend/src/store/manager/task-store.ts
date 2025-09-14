@@ -25,6 +25,13 @@ type KanbanState = {
   activeTask: Task | null
 }
 
+export const columnTypes = [
+  { id: 'to-do', title: 'To Do' },
+  { id: 'in-progress', title: 'In Progress' },
+  { id: 'review', title: 'Review' },
+  { id: 'done', title: 'Done' },
+]
+
 export const priorityLabels = ['low', 'medium', 'high']
 
 export const teamMembers = [
@@ -51,22 +58,6 @@ export const kanbanActions = {
     })
   },
 
-  updateTask: (columnId: string, updatedTask: Partial<Task>) => {
-    kanbanStore.setState((prev) => {
-      const columns = prev.columns.map((column) =>
-        column.id === columnId
-          ? {
-              ...column,
-              tasks: column.tasks.map((task) =>
-                task.id === updatedTask.id ? { ...task, ...updatedTask } : task,
-              ),
-            }
-          : column,
-      )
-      return { ...prev, columns }
-    })
-  },
-
   deleteTask: (columnId: string, taskId: string) => {
     kanbanStore.setState((prev) => {
       const columns = prev.columns.map((column) =>
@@ -78,6 +69,43 @@ export const kanbanActions = {
           : column,
       )
       return { ...prev, columns }
+    })
+  },
+
+  updateTask: (columnId: string, updatedTask: Task) => {
+    kanbanStore.setState((prev) => {
+      const fromColumnIndex = prev.columns.findIndex((col) =>
+        col.tasks.some((t) => t.id === updatedTask.id),
+      )
+      if (fromColumnIndex === -1) return prev
+      const fromColumn = prev.columns[fromColumnIndex]
+
+      // If moving within the same column, update in place
+      if (prev.columns[fromColumnIndex].id === columnId) {
+        const newColumns = [...prev.columns]
+        newColumns[fromColumnIndex] = {
+          ...fromColumn,
+          tasks: fromColumn.tasks.map((t) =>
+            t.id === updatedTask.id ? { ...t, ...updatedTask } : t,
+          ),
+        }
+        return { ...prev, columns: newColumns }
+      }
+
+      const toColumnIndex = prev.columns.findIndex((col) => col.id === columnId)
+      if (toColumnIndex === -1) return prev
+
+      const newColumns = [...prev.columns]
+      newColumns[fromColumnIndex] = {
+        ...fromColumn,
+        tasks: fromColumn.tasks.filter((t) => t.id !== updatedTask.id),
+      }
+      newColumns[toColumnIndex] = {
+        ...newColumns[toColumnIndex],
+        tasks: [...newColumns[toColumnIndex].tasks, updatedTask],
+      }
+
+      return { ...prev, columns: newColumns }
     })
   },
 

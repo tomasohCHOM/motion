@@ -1,6 +1,6 @@
 export const mockManagerTestData = [
   {
-    id: 'todo',
+    id: 'to-do',
     title: 'To Do',
     tasks: [
       {

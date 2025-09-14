@@ -12,10 +12,7 @@ export const ManagerHeader: React.FC = () => (
         6 tasks
       </Badge>
     </div>
-    <div className="flex gap-4 items-center">
-      <Button variant="outline" className="cursor-pointer">
-        <Columns /> New Column
-      </Button>
+    <div className="flex items-center">
       <Button
         className="cursor-pointer"
         onClick={() => dialogActions.openAdd()}

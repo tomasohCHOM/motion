@@ -21,6 +21,7 @@ import {
 import { useStore } from '@tanstack/react-store'
 import { dialogActions, dialogStore } from '@/store/manager/dialog-store'
 import {
+  columnTypes,
   kanbanActions,
   kanbanHelpers,
   priorityLabels,
@@ -28,7 +29,7 @@ import {
   type Task,
 } from '@/store/manager/task-store'
 import { DateInput } from '@/components/ui/date-picker'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 const EditTask: React.FC = () => {
   const {
@@ -46,6 +47,15 @@ const EditTask: React.FC = () => {
   const [dueDate, setDueDate] = useState<Date | undefined>(
     task?.dueDate ? new Date(task.dueDate) : undefined,
   )
+
+  useEffect(() => {
+    setTitle(task?.title ?? '')
+    setDescription(task?.description ?? '')
+    setColumnId(currColumnId ?? '')
+    setAssignee(task?.assignee.name ?? '')
+    setPriority(task?.priority ?? '')
+    setDueDate(task?.dueDate ? new Date(task.dueDate) : undefined)
+  }, [task, currColumnId])
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -108,10 +118,13 @@ const EditTask: React.FC = () => {
                 <SelectContent>
                   <SelectGroup>
                     <SelectLabel>Kanban Column</SelectLabel>
-                    <SelectItem value="to-do">To Do</SelectItem>
-                    <SelectItem value="in-progress">In Progress</SelectItem>
-                    <SelectItem value="review">Review</SelectItem>
-                    <SelectItem value="done">Done</SelectItem>
+                    {columnTypes.map(({ id, title }) => {
+                      return (
+                        <SelectItem key={`item-${id}`} value={id}>
+                          {title}
+                        </SelectItem>
+                      )
+                    })}
                   </SelectGroup>
                 </SelectContent>
               </Select>
