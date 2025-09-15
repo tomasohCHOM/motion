@@ -4,54 +4,77 @@ export interface Note {
   id: string
   title: string
   content: string
-  tags: Array<string>
-  createdAt: string
-  updatedAt: string | null;
+  tags: string[]
+  updatedAt: number
+  createdAt: number
 }
 
-// Define the state structure 
+// Define the state structure
 interface NotesState {
-  notes: Array<Note>
+  notes: Note[]
+  allTags: string[]
 }
 
 // Create the store instance
-const notesStore = new Store<NotesState>({
+export const notesStore = new Store<NotesState>({
   notes: [],
+  allTags: [],
 })
+
+// Helper function to get updated tags
+const getUpdatedTags = (notes: Note[]): string[] => {
+  const allTagsSet = new Set<string>()
+  notes.forEach((note) => {
+    note.tags.forEach((tag) => allTagsSet.add(tag))
+  })
+  return Array.from(allTagsSet).sort()
+}
 
 // Define actions to manipulate the store
 export const noteActions = {
   addNote: (partialNote: Partial<Note> = {}) => {
+    const now = Date.now()
     const newNote: Note = {
       id: crypto.randomUUID(),
       title: partialNote.title || 'Untitled',
       content: partialNote.content || '',
       tags: partialNote.tags || [],
-      createdAt: new Date().toLocaleDateString(),
-      updatedAt: null,
+      createdAt: now,
+      updatedAt: now,
     }
-    notesStore.setState((state) => ({
-      notes: [newNote, ...state.notes],
-    }))
-    return newNote 
+    notesStore.setState((state) => {
+      const newNotes = [newNote, ...state.notes]
+      return {
+        notes: newNotes,
+        allTags: getUpdatedTags(newNotes),
+      }
+    })
+    return newNote
   },
 
+  // Update a note by its ID
   updateNote: (noteId: string, updates: Partial<Note>) => {
-    notesStore.setState((state) => ({
-      notes: state.notes.map((note) =>
+    notesStore.setState((state) => {
+      const newNotes = state.notes.map((note) =>
         note.id === noteId
-          ? { ...note, ...updates, updatedAt: new Date().toLocaleDateString() }
+          ? { ...note, ...updates, updatedAt: Date.now() }
           : note,
-      ),
-    }))
+      )
+      return {
+        notes: newNotes,
+        allTags: getUpdatedTags(newNotes),
+      }
+    })
   },
 
   // Delete a note by its ID
   deleteNote: (noteId: string) => {
-    notesStore.setState((state) => ({
-      notes: state.notes.filter((note) => note.id !== noteId),
-    }))
+    notesStore.setState((state) => {
+      const newNotes = state.notes.filter((note) => note.id !== noteId)
+      return {
+        notes: newNotes,
+        allTags: getUpdatedTags(newNotes),
+      }
+    })
   },
 }
-
-export default notesStore

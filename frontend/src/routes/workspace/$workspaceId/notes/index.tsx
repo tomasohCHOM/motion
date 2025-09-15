@@ -1,17 +1,29 @@
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from '@/components/ui/dialog'
 import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
+    DropdownMenuRadioGroup,
+    DropdownMenuRadioItem,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Input } from '@/components/ui/input'
+import { MultiSelectCombobox } from '@/components/ui/multi-select-combobox'
 import PageContent from '@/components/workspace/layout/page-content'
 import type { Note } from '@/store/notes-store'
-import notesStore, { noteActions } from '@/store/notes-store'
+import { noteActions, notesStore } from '@/store/notes-store'
 import { createFileRoute, useRouter } from '@tanstack/react-router'
 import { useStore } from '@tanstack/react-store'
-import { MoreVertical, PencilIcon, PlusIcon, SearchIcon, TrashIcon } from 'lucide-react'
+import { ArrowDownUp, MoreVertical, PencilIcon, PlusIcon, SearchIcon, TagIcon, TrashIcon } from 'lucide-react'
 import * as React from 'react'
 
 interface NoteCardProps {
@@ -21,6 +33,11 @@ interface NoteCardProps {
 
 function NoteCard({ note, workspaceId }: NoteCardProps) {
     const router = useRouter()
+    const { allTags } = useStore(notesStore)
+    const [isTagDialogOpen, setIsTagDialogOpen] = React.useState(false)
+    const [currentTags, setCurrentTags] = React.useState<string[]>([])
+
+    const handleDropdownInteraction = (e: React.MouseEvent) => e.stopPropagation()
 
     const navigateToEditor = () => {
         router.navigate({
@@ -29,61 +46,114 @@ function NoteCard({ note, workspaceId }: NoteCardProps) {
         })
     }
 
-    // Deletion confirmation
+    // Deletes the note
     const handleDelete = () => {
         if (window.confirm('Are you sure you want to delete this note permanently?')) {
             noteActions.deleteNote(note.id)
         }
     }
 
-    // Prevents card click navigation when interacting with dropdown menu
-    const handleDropdownInteraction = (e: React.MouseEvent) => {
-        e.stopPropagation()
+    // Opens the tag dialog
+    const openTagDialog = () => {
+        setCurrentTags(note.tags)
+        setIsTagDialogOpen(true)
     }
 
-    const hasUpdated = note.updatedAt !== note.createdAt;
+    // Saves the updated tags
+    const handleTagSave = () => {
+        noteActions.updateNote(note.id, { tags: currentTags })
+        setIsTagDialogOpen(false)
+    }
+
+    // Uses formatDate to display the either updated or created date 
+    const formatDate = (timestamp: number) => {
+        return new Date(timestamp).toLocaleString('en-US', {
+            month: 'short',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: true,
+            })
+    }
+    const hasUpdated = note.updatedAt > note.createdAt;
 
     return (
-        <div
-            onClick={navigateToEditor}
-            className="flex flex-col h-full rounded-lg border bg-card text-card-foreground shadow-sm transition-shadow hover:shadow-md cursor-pointer group"
-        >
-            {/* Clickable content area */}
-            <div className="flex-grow space-y-2 p-4">
-                <h3 className="font-semibold text-lg break-words">{note.title}</h3>
-                <p className="text-sm text-muted-foreground line-clamp-4 min-h-[80px] break-words">
-                    {note.content || 'No additional content.'}
-                </p>
+        <>
+            <div
+                onClick={navigateToEditor}
+                className="flex flex-col h-full rounded-lg border bg-card text-card-foreground shadow-sm transition-shadow hover:shadow-md cursor-pointer group"
+            >
+                <div className="flex flex-col flex-grow p-4">
+                    <div className="flex items-start justify-between mb-2">
+                        <h3 className="font-semibold text-lg break-words pr-2">{note.title}</h3>
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild onClick={handleDropdownInteraction}>
+                                <Button variant="ghost" size="icon" className="h-7 w-7 flex-shrink-0">
+                                    <span className="sr-only">Note options</span>
+                                    <MoreVertical className="h-4 w-4" />
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" onClick={handleDropdownInteraction}>
+                                <DropdownMenuItem onClick={navigateToEditor}>
+                                    <PencilIcon className="mr-2 h-4 w-4" />
+                                    <span>Edit</span>
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={openTagDialog}>
+                                    <TagIcon className="mr-2 h-4 w-4" />
+                                    <span>Manage Tags</span>
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={handleDelete} className="text-red-500 focus:text-red-500">
+                                    <TrashIcon className="mr-2 h-4 w-4" />
+                                    <span>Delete</span>
+                                </DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                    </div>
+                    <p className="text-sm text-muted-foreground line-clamp-4 min-h-[80px] break-words">
+                        {note.content || 'No additional content.'}
+                    </p>
+                </div>
+                <footer className="flex items-center justify-between border-t px-4 py-2 text-xs text-muted-foreground">
+                    {/* Displays creation date if the note has not been updated since creation */}
+                    <span>
+                        {hasUpdated
+                            ? `Updated ${formatDate(note.updatedAt)}`
+                            : `Created ${formatDate(note.createdAt)}`}
+                    </span>
+                    <div className="flex flex-wrap gap-1 justify-end">
+                        {note.tags.map((tag) => (
+                            <Badge key={tag} variant="outline">{tag}</Badge>
+                        ))}
+                    </div>
+                </footer>
             </div>
 
-            {/* Footer with actions */}
-            <footer className="flex items-center justify-between border-t px-2 py-1 text-xs text-muted-foreground">
-                <span className="pl-2">{hasUpdated ? 'Created at: ' + note.createdAt : 'Updated at: ' + note.updatedAt}</span>
-
-                <DropdownMenu>
-                    <DropdownMenuTrigger asChild onClick={handleDropdownInteraction}>
-                        <Button variant="ghost" size="icon" className="h-7 w-7">
-                            <span className="sr-only">Note options</span>
-                            <MoreVertical className="h-4 w-4" />
-                        </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" onClick={handleDropdownInteraction}>
-                        <DropdownMenuItem onClick={navigateToEditor}>
-                            <PencilIcon className="mr-2 h-4 w-4" />
-                            <span>Edit</span>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={handleDelete} className="text-red-500 focus:text-red-500">
-                            <TrashIcon className="mr-2 h-4 w-4" />
-                            <span>Delete</span>
-                        </DropdownMenuItem>
-                    </DropdownMenuContent>
-                </DropdownMenu>
-            </footer>
-        </div>
+            <Dialog open={isTagDialogOpen} onOpenChange={setIsTagDialogOpen}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Manage Tags for "{note.title}"</DialogTitle>
+                        <DialogDescription>
+                            Select from existing tags or type to create new ones.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="py-4">
+                        <MultiSelectCombobox
+                            allTags={allTags}
+                            selectedTags={currentTags}
+                            onTagsChange={setCurrentTags}
+                        />
+                    </div>
+                    <DialogFooter>
+                        <Button variant="outline" onClick={() => setIsTagDialogOpen(false)}>Cancel</Button>
+                        <Button onClick={handleTagSave}>Save Tags</Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+        </>
     )
 }
 
-// All Notes Page
+// Main Page Component 
 export const Route = createFileRoute('/workspace/$workspaceId/notes/')({
     component: NotesListPage,
 })
@@ -93,6 +163,7 @@ function NotesListPage() {
     const { workspaceId } = Route.useParams()
     const { notes } = useStore(notesStore)
     const [searchTerm, setSearchTerm] = React.useState('')
+    const [sortBy, setSortBy] = React.useState('updatedAt-desc')
 
     const handleCreateNewNote = () => {
         const newNote = noteActions.addNote()
@@ -102,14 +173,32 @@ function NotesListPage() {
             state: { initialNoteData: newNote } as any,
         })
     }
+    
+    // Use useMemo to filter and sort notes
+    const displayedNotes = React.useMemo(() => {
+        const filtered = notes.filter((note) =>
+            note.title.toLowerCase().includes(searchTerm.toLowerCase()),
+        );
 
-    const filteredNotes = notes.filter((note) =>
-        note.title.toLowerCase().includes(searchTerm.toLowerCase()),
-    )
+        const [property, direction] = sortBy.split('-') as [keyof Note, 'asc' | 'desc'];
+
+        return [...filtered].sort((a, b) => {
+            const valA = a[property];
+            const valB = b[property];
+
+            let comparison = 0;
+            if (typeof valA === 'string' && typeof valB === 'string') {
+                comparison = valA.localeCompare(valB);
+            } else if (typeof valA === 'number' && typeof valB === 'number') {
+                comparison = valA - valB;
+            }
+
+            return direction === 'desc' ? -comparison : comparison;
+        });
+    }, [notes, searchTerm, sortBy]);
 
     return (
         <PageContent>
-            {/* Header */}
             <div className="flex justify-between items-center mb-4 gap-4">
                 <div>
                     <h1 className="font-bold text-2xl md:text-4xl">All Notes</h1>
@@ -121,21 +210,39 @@ function NotesListPage() {
                 </Button>
             </div>
 
-            {/* Search Bar */}
-            <div className="relative mb-4">
-                <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                    placeholder="Search notes by title..."
-                    className="pl-9"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                />
+            {/* Search and Sort Bar */}
+            <div className="flex items-center gap-2 mb-4">
+                <div className="relative flex-1">
+                    <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                        placeholder="Search notes by title..."
+                        className="pl-9"
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                </div>
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <Button variant="outline" className="shrink-0">
+                            <ArrowDownUp className="mr-2 h-4 w-4" />
+                            Sort By
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                        <DropdownMenuRadioGroup value={sortBy} onValueChange={setSortBy}>
+                            <DropdownMenuRadioItem value="updatedAt-desc">Date Updated</DropdownMenuRadioItem>
+                            <DropdownMenuRadioItem value="createdAt-desc">Date Created</DropdownMenuRadioItem>
+                            <DropdownMenuRadioItem value="title-asc">Title (A-Z)</DropdownMenuRadioItem>
+                            <DropdownMenuRadioItem value="title-desc">Title (Z-A)</DropdownMenuRadioItem>
+                        </DropdownMenuRadioGroup>
+                    </DropdownMenuContent>
+                </DropdownMenu>
             </div>
 
             {/* Notes List */}
-            {filteredNotes.length > 0 ? (
+            {displayedNotes.length > 0 ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                    {notes.map((note) => (
+                    {displayedNotes.map((note) => (
                         <NoteCard key={note.id} note={note} workspaceId={workspaceId} />
                     ))}
                 </div>
