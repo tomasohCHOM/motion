@@ -1,3 +1,14 @@
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from '@/components/ui/alert-dialog'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
@@ -48,9 +59,7 @@ function NoteCard({ note, workspaceId }: NoteCardProps) {
 
     // Deletes the note
     const handleDelete = () => {
-        if (window.confirm('Are you sure you want to delete this note permanently?')) {
-            noteActions.deleteNote(note.id)
-        }
+        noteActions.deleteNote(note.id)
     }
 
     // Opens the tag dialog
@@ -65,7 +74,7 @@ function NoteCard({ note, workspaceId }: NoteCardProps) {
         setIsTagDialogOpen(false)
     }
 
-    // Uses formatDate to display the either updated or created date 
+    // Uses formatDate to display the either updated or created date
     const formatDate = (timestamp: number) => {
         return new Date(timestamp).toLocaleString('en-US', {
             month: 'short',
@@ -73,87 +82,108 @@ function NoteCard({ note, workspaceId }: NoteCardProps) {
             hour: '2-digit',
             minute: '2-digit',
             hour12: true,
-            })
+        })
     }
     const hasUpdated = note.updatedAt > note.createdAt;
 
     return (
-        <>
-            <div
-                onClick={navigateToEditor}
-                className="flex flex-col h-full rounded-lg border bg-card text-card-foreground shadow-sm transition-shadow hover:shadow-md cursor-pointer group"
-            >
-                <div className="flex flex-col flex-grow p-4">
-                    <div className="flex items-start justify-between mb-2">
-                        <h3 className="font-semibold text-lg break-words pr-2">{note.title}</h3>
-                        <DropdownMenu>
-                            <DropdownMenuTrigger asChild onClick={handleDropdownInteraction}>
-                                <Button variant="ghost" size="icon" className="h-7 w-7 flex-shrink-0">
-                                    <span className="sr-only">Note options</span>
-                                    <MoreVertical className="h-4 w-4" />
-                                </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end" onClick={handleDropdownInteraction}>
-                                <DropdownMenuItem onClick={navigateToEditor}>
-                                    <PencilIcon className="mr-2 h-4 w-4" />
-                                    <span>Edit</span>
-                                </DropdownMenuItem>
-                                <DropdownMenuItem onClick={openTagDialog}>
-                                    <TagIcon className="mr-2 h-4 w-4" />
-                                    <span>Manage Tags</span>
-                                </DropdownMenuItem>
-                                <DropdownMenuItem onClick={handleDelete} className="text-red-500 focus:text-red-500">
-                                    <TrashIcon className="mr-2 h-4 w-4" />
-                                    <span>Delete</span>
-                                </DropdownMenuItem>
-                            </DropdownMenuContent>
-                        </DropdownMenu>
+        <AlertDialog>
+            <>
+                <div
+                    onClick={navigateToEditor}
+                    className="flex flex-col h-full rounded-lg border bg-card text-card-foreground shadow-sm transition-shadow hover:shadow-md cursor-pointer group"
+                >
+                    <div className="flex flex-col flex-grow p-4">
+                        <div className="flex items-start justify-between mb-2">
+                            <h3 className="font-semibold text-lg break-words pr-2">{note.title}</h3>
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild onClick={handleDropdownInteraction}>
+                                    <Button variant="ghost" size="icon" className="h-7 w-7 flex-shrink-0">
+                                        <span className="sr-only">Note options</span>
+                                        <MoreVertical className="h-4 w-4" />
+                                    </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end" onClick={handleDropdownInteraction}>
+                                    <DropdownMenuItem onClick={navigateToEditor}>
+                                        <PencilIcon className="mr-2 h-4 w-4" />
+                                        <span>Edit</span>
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem onClick={openTagDialog}>
+                                        <TagIcon className="mr-2 h-4 w-4" />
+                                        <span>Manage Tags</span>
+                                    </DropdownMenuItem>
+                                    <AlertDialogTrigger asChild>
+                                        <DropdownMenuItem
+                                            onSelect={(e) => e.preventDefault()}
+                                            className="text-red-500 focus:text-red-500"
+                                        >
+                                            <TrashIcon className="mr-2 h-4 w-4" />
+                                            <span>Delete</span>
+                                        </DropdownMenuItem>
+                                    </AlertDialogTrigger>
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+                        </div>
+                        <p className="text-sm text-muted-foreground line-clamp-4 min-h-[80px] break-words">
+                            {note.content || 'No additional content.'}
+                        </p>
                     </div>
-                    <p className="text-sm text-muted-foreground line-clamp-4 min-h-[80px] break-words">
-                        {note.content || 'No additional content.'}
-                    </p>
+                    <footer className="flex items-center justify-between border-t px-4 py-2 text-xs text-muted-foreground">
+                        {/* Displays creation date if the note has not been updated since creation */}
+                        <span>
+                            {hasUpdated
+                                ? `Updated: ${formatDate(note.updatedAt)}`
+                                : `Created: ${formatDate(note.createdAt)}`}
+                        </span>
+                        <div className="flex flex-wrap gap-1 justify-end">
+                            {note.tags.map((tag) => (
+                                <Badge key={tag} variant="outline">{tag}</Badge>
+                            ))}
+                        </div>
+                    </footer>
                 </div>
-                <footer className="flex items-center justify-between border-t px-4 py-2 text-xs text-muted-foreground">
-                    {/* Displays creation date if the note has not been updated since creation */}
-                    <span>
-                        {hasUpdated
-                            ? `Updated ${formatDate(note.updatedAt)}`
-                            : `Created ${formatDate(note.createdAt)}`}
-                    </span>
-                    <div className="flex flex-wrap gap-1 justify-end">
-                        {note.tags.map((tag) => (
-                            <Badge key={tag} variant="outline">{tag}</Badge>
-                        ))}
-                    </div>
-                </footer>
-            </div>
 
-            <Dialog open={isTagDialogOpen} onOpenChange={setIsTagDialogOpen}>
-                <DialogContent>
-                    <DialogHeader>
-                        <DialogTitle>Manage Tags for "{note.title}"</DialogTitle>
-                        <DialogDescription>
-                            Select from existing tags or type to create new ones.
-                        </DialogDescription>
-                    </DialogHeader>
-                    <div className="py-4">
-                        <MultiSelectCombobox
-                            allTags={allTags}
-                            selectedTags={currentTags}
-                            onTagsChange={setCurrentTags}
-                        />
-                    </div>
-                    <DialogFooter>
-                        <Button variant="outline" onClick={() => setIsTagDialogOpen(false)}>Cancel</Button>
-                        <Button onClick={handleTagSave}>Save Tags</Button>
-                    </DialogFooter>
-                </DialogContent>
-            </Dialog>
-        </>
+                <Dialog open={isTagDialogOpen} onOpenChange={setIsTagDialogOpen}>
+                    <DialogContent>
+                        <DialogHeader>
+                            <DialogTitle>Manage Tags for "{note.title}"</DialogTitle>
+                            <DialogDescription>
+                                Select from existing tags or type to create new ones.
+                            </DialogDescription>
+                        </DialogHeader>
+                        <div className="py-4">
+                            <MultiSelectCombobox
+                                allTags={allTags}
+                                selectedTags={currentTags}
+                                onTagsChange={setCurrentTags}
+                            />
+                        </div>
+                        <DialogFooter>
+                            <Button variant="outline" onClick={() => setIsTagDialogOpen(false)}>Cancel</Button>
+                            <Button onClick={handleTagSave}>Save Tags</Button>
+                        </DialogFooter>
+                    </DialogContent>
+                </Dialog>
+
+                <AlertDialogContent onClick={handleDropdownInteraction}>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Confirm Deletion</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            This action cannot be undone. This will permanently delete the note titled "{note.title}".
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction  className="bg-red-600 hover:bg-red-700 text-white" onClick={handleDelete}>
+                        <TrashIcon className="mr-2 h-4 w-4"/> Continue</AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </>
+        </AlertDialog>
     )
 }
 
-// Main Page Component 
+// Main Page Component
 export const Route = createFileRoute('/workspace/$workspaceId/notes/')({
     component: NotesListPage,
 })
@@ -173,7 +203,7 @@ function NotesListPage() {
             state: { initialNoteData: newNote } as any,
         })
     }
-    
+
     // Use useMemo to filter and sort notes
     const displayedNotes = React.useMemo(() => {
         const filtered = notes.filter((note) =>
@@ -199,6 +229,7 @@ function NotesListPage() {
 
     return (
         <PageContent>
+            {/* Header */}
             <div className="flex justify-between items-center mb-4 gap-4">
                 <div>
                     <h1 className="font-bold text-2xl md:text-4xl">All Notes</h1>
