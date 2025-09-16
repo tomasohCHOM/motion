@@ -73,18 +73,8 @@ func CreateS3Client(cfg S3Config) (*s3.Client, error) {
 	var err error
 
 	if cfg.Endpoint != "" {
-		customResolver := aws.EndpointResolverWithOptionsFunc(
-			func(service, region string, options ...any) (aws.Endpoint, error) {
-				return aws.Endpoint{
-					URL:               cfg.Endpoint,
-					SigningRegion:     cfg.Region,
-					HostnameImmutable: true,
-				}, nil
-			})
-
 		awsConfig, err = config.LoadDefaultConfig(context.TODO(),
 			config.WithRegion(cfg.Region),
-			config.WithEndpointResolverWithOptions(customResolver),
 			config.WithCredentialsProvider(credentials.NewStaticCredentialsProvider(
 				cfg.AccessKey,
 				cfg.SecretKey,
