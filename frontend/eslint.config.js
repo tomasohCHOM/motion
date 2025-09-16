@@ -1,7 +1,7 @@
 // @ts-check
 
-import { tanstackConfig } from '@tanstack/eslint-config';
-import tseslint from 'typescript-eslint';
+import { tanstackConfig } from '@tanstack/eslint-config'
+import tseslint from 'typescript-eslint'
 
 export default [
   ...tanstackConfig,
@@ -11,4 +11,4 @@ export default [
 
     ...tseslint.configs.disableTypeChecked,
   },
-];
+]

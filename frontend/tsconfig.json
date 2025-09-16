@@ -1,11 +1,13 @@
 {
-
-  "include": ["**/*.ts", "**/*.tsx", "eslint.config.js", "prettier.config.js", "vite.config.js"],
-
-  
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+    "eslint.config.js",
+    "prettier.config.js",
+    "vite.config.js"
+  ],
 
   "compilerOptions": {
-
     "target": "ES2022",
 
     "jsx": "react-jsx",
@@ -16,8 +18,6 @@
 
     "types": ["vite/client"],
 
-
-
     /* Bundler mode */
 
     "moduleResolution": "bundler",
@@ -27,8 +27,6 @@
     "verbatimModuleSyntax": true,
 
     "noEmit": true,
-
-
 
     /* Linting */
 
@@ -47,12 +45,7 @@
     "baseUrl": ".",
 
     "paths": {
-
-      "@/*": ["./src/*"],
-
+      "@/*": ["./src/*"]
     }
-
   }
-
 }
-
