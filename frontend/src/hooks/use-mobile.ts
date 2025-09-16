@@ -1,8 +1,12 @@
 <<<<<<< HEAD
+<<<<<<< HEAD
 import * as React from 'react'
 =======
 import * as React from "react"
 >>>>>>> d903053 (Start working on team workspace UI layout (#6))
+=======
+import * as React from 'react'
+>>>>>>> 0fb15f3 (Implement note taking (#9))
 
 const MOBILE_BREAKPOINT = 768
 
@@ -15,6 +19,7 @@ export function useIsMobile() {
       setIsMobile(window.innerWidth < MOBILE_BREAKPOINT)
     }
 <<<<<<< HEAD
+<<<<<<< HEAD
     mql.addEventListener('change', onChange)
     setIsMobile(window.innerWidth < MOBILE_BREAKPOINT)
     return () => mql.removeEventListener('change', onChange)
@@ -23,6 +28,11 @@ export function useIsMobile() {
     setIsMobile(window.innerWidth < MOBILE_BREAKPOINT)
     return () => mql.removeEventListener("change", onChange)
 >>>>>>> d903053 (Start working on team workspace UI layout (#6))
+=======
+    mql.addEventListener('change', onChange)
+    setIsMobile(window.innerWidth < MOBILE_BREAKPOINT)
+    return () => mql.removeEventListener('change', onChange)
+>>>>>>> 0fb15f3 (Implement note taking (#9))
   }, [])
 
   return !!isMobile

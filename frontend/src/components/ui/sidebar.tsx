@@ -3,6 +3,7 @@
 import * as React from 'react'
 import { Slot } from '@radix-ui/react-slot'
 <<<<<<< HEAD
+<<<<<<< HEAD
 import { cva } from 'class-variance-authority'
 import { PanelLeftIcon } from 'lucide-react'
 import type { VariantProps } from 'class-variance-authority'
@@ -10,6 +11,11 @@ import type { VariantProps } from 'class-variance-authority'
 import { cva, type VariantProps } from 'class-variance-authority'
 import { PanelLeftIcon } from 'lucide-react'
 >>>>>>> d903053 (Start working on team workspace UI layout (#6))
+=======
+import { cva } from 'class-variance-authority'
+import { PanelLeftIcon } from 'lucide-react'
+import type { VariantProps } from 'class-variance-authority'
+>>>>>>> 0fb15f3 (Implement note taking (#9))
 
 import { useIsMobile } from '@/hooks/use-mobile'
 import { cn } from '@/lib/utils'
@@ -97,9 +103,13 @@ function SidebarProvider({
   // Helper to toggle the sidebar.
   const toggleSidebar = React.useCallback(() => {
 <<<<<<< HEAD
+<<<<<<< HEAD
     // eslint-disable-next-line no-shadow
 =======
 >>>>>>> d903053 (Start working on team workspace UI layout (#6))
+=======
+    // eslint-disable-next-line no-shadow
+>>>>>>> 0fb15f3 (Implement note taking (#9))
     return isMobile ? setOpenMobile((open) => !open) : setOpen((open) => !open)
   }, [isMobile, setOpen, setOpenMobile])
 
@@ -398,10 +408,14 @@ function SidebarGroup({ className, ...props }: React.ComponentProps<'div'>) {
       data-slot="sidebar-group"
       data-sidebar="group"
 <<<<<<< HEAD
+<<<<<<< HEAD
       className={cn('relative flex w-full min-w-0 flex-col p-2', className)}
 =======
       className={cn('relative flex w-full min-w-0 flex-col', className)}
 >>>>>>> d903053 (Start working on team workspace UI layout (#6))
+=======
+      className={cn('relative flex w-full min-w-0 flex-col p-2', className)}
+>>>>>>> 0fb15f3 (Implement note taking (#9))
       {...props}
     />
   )
