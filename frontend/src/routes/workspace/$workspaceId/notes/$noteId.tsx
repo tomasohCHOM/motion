@@ -21,7 +21,7 @@ function NoteEditorPage() {
     const { noteId, workspaceId } = Route.useParams()
     const location = useLocation()
     
-    // Fix: Add a flag from navigation state to identify a new note.
+    // Add a flag from navigation state to identify a new note.
     const isNewNote = (location.state as { isNew?: boolean })?.isNew;
 
     // Add the new note to the store on the first render of the editor page.

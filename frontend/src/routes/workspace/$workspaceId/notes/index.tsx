@@ -175,7 +175,8 @@ function NoteCard({ note, workspaceId }: NoteCardProps) {
                     </AlertDialogHeader>
                     <AlertDialogFooter>
                         <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction onClick={handleDelete}>Continue</AlertDialogAction>
+                        <AlertDialogAction  className="bg-red-600 hover:bg-red-700 text-white" onClick={handleDelete}>
+                        <TrashIcon className="mr-2 h-4 w-4"/> Continue</AlertDialogAction>
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </>
