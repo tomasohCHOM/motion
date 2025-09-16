@@ -15,6 +15,7 @@ interface NotesState {
   allTags: string[]
 }
 
+
 // Create the store instance
 export const notesStore = new Store<NotesState>({
   notes: [],
@@ -32,13 +33,13 @@ const getUpdatedTags = (notes: Note[]): string[] => {
 
 // Define actions to manipulate the store
 export const noteActions = {
-  addNote: (partialNote: Partial<Note> = {}) => {
+  addNote: (noteToAdd?: Note) => {
     const now = Date.now()
-    const newNote: Note = {
+    const newNote = noteToAdd || {
       id: crypto.randomUUID(),
-      title: partialNote.title || 'Untitled',
-      content: partialNote.content || '',
-      tags: partialNote.tags || [],
+      title: 'Untitled',
+      content: '',
+      tags: [],
       createdAt: now,
       updatedAt: now,
     }

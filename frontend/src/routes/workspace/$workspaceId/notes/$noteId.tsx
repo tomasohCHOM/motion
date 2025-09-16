@@ -20,6 +20,21 @@ export const Route = createFileRoute('/workspace/$workspaceId/notes/$noteId')({
 function NoteEditorPage() {
     const { noteId, workspaceId } = Route.useParams()
     const location = useLocation()
+    
+    // Fix: Add a flag from navigation state to identify a new note.
+    const isNewNote = (location.state as { isNew?: boolean })?.isNew;
+
+    // Add the new note to the store on the first render of the editor page.
+    React.useEffect(() => {
+        if (isNewNote && (location.state as any)?.initialNoteData) {
+            const newNoteData = (location.state as any).initialNoteData;
+            // Check if the note isn't already in the store to prevent duplicates
+            const noteExists = notesStore.state.notes.some(n => n.id === newNoteData.id);
+            if (!noteExists) {
+                noteActions.addNote(newNoteData);
+            }
+        }
+    }, [isNewNote, location.state]);
 
     const initialData = (location.state as { initialNoteData?: Note } | null)
         ?.initialNoteData
@@ -54,7 +69,7 @@ function NoteEditorPage() {
             setSaveStatus('Saved')
         }
     }, [debouncedTitle, debouncedContent, noteId, note])
-
+    
     // Effect to show "Saving..." status immediately on typing
     React.useEffect(() => {
         if (note && (title !== note.title || content !== note.content)) {
@@ -107,6 +122,7 @@ function NoteEditorPage() {
                     />
 
                     <Separator className="my-4 md:my-6" />
+
                     {/* Content */}
                     <Textarea
                         value={content}

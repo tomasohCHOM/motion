@@ -84,6 +84,7 @@ function NoteCard({ note, workspaceId }: NoteCardProps) {
             hour12: true,
         })
     }
+
     const hasUpdated = note.updatedAt > note.createdAt;
 
     return (
@@ -129,7 +130,7 @@ function NoteCard({ note, workspaceId }: NoteCardProps) {
                         </p>
                     </div>
                     <footer className="flex items-center justify-between border-t px-4 py-2 text-xs text-muted-foreground">
-                        {/* Displays creation date if the note has not been updated since creation */}
+                        {/* Displays update date, otherwise defaults to creation date */}
                         <span>
                             {hasUpdated
                                 ? `Updated: ${formatDate(note.updatedAt)}`
@@ -167,15 +168,14 @@ function NoteCard({ note, workspaceId }: NoteCardProps) {
 
                 <AlertDialogContent onClick={handleDropdownInteraction}>
                     <AlertDialogHeader>
-                        <AlertDialogTitle>Confirm Deletion</AlertDialogTitle>
+                        <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
                         <AlertDialogDescription>
                             This action cannot be undone. This will permanently delete the note titled "{note.title}".
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
                         <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction  className="bg-red-600 hover:bg-red-700 text-white" onClick={handleDelete}>
-                        <TrashIcon className="mr-2 h-4 w-4"/> Continue</AlertDialogAction>
+                        <AlertDialogAction onClick={handleDelete}>Continue</AlertDialogAction>
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </>
@@ -183,7 +183,8 @@ function NoteCard({ note, workspaceId }: NoteCardProps) {
     )
 }
 
-// Main Page Component
+
+//  Main Page Component 
 export const Route = createFileRoute('/workspace/$workspaceId/notes/')({
     component: NotesListPage,
 })
@@ -196,15 +197,25 @@ function NotesListPage() {
     const [sortBy, setSortBy] = React.useState('updatedAt-desc')
 
     const handleCreateNewNote = () => {
-        const newNote = noteActions.addNote()
+        const now = Date.now()
+        const newNote: Note = {
+            id: crypto.randomUUID(),
+            title: 'Untitled',
+            content: '',
+            tags: [],
+            createdAt: now,
+            updatedAt: now,
+        }
+        // Immediately navigate, passing the new note data in the state.
+        // This prevents the list page from re-rendering and causing a flicker.
         router.navigate({
             to: '/workspace/$workspaceId/notes/$noteId',
             params: { workspaceId, noteId: newNote.id },
-            state: { initialNoteData: newNote } as any,
+            state: { initialNoteData: newNote, isNew: true } as any,
         })
     }
-
-    // Use useMemo to filter and sort notes
+    
+    // Use useMemo to  filter and sort notes 
     const displayedNotes = React.useMemo(() => {
         const filtered = notes.filter((note) =>
             note.title.toLowerCase().includes(searchTerm.toLowerCase()),
