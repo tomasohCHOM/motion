@@ -1,0 +1,30 @@
+name: Infra CI
+
+on:
+  pull_request:
+    branches: [ "main" ]
+    paths: 'infrastructure/**'
+
+jobs:
+  build:
+    name: Infra CI Checks
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: infrastructure
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform format check
+        run: terraform fmt -check
+
+      - name: Terraform init
+        run: terraform init
+
+      - name: Terraform validate
+        run: terraform validate
+
+      - name: Terraform plan
+        run: terraform plan
