@@ -10,7 +10,7 @@ on:
 
 jobs:
   frontend:
-    name: Lint, Format, and Build Frontend
+    name: Lint, Format, Test, and Build Frontend
     runs-on: ubuntu-latest
 
     defaults:
