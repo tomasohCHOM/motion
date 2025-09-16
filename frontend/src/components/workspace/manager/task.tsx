@@ -1,17 +1,17 @@
 import React from 'react'
-import { MoreHorizontal, Calendar } from 'lucide-react'
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
+import { Calendar, MoreHorizontal } from 'lucide-react'
+import { getAssigneeInitials } from './utils'
+import type { Task } from '@/store/manager/task-store'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import type { Task } from '@/store/manager/task-store'
 import { kanbanActions, kanbanHelpers } from '@/store/manager/task-store'
-import { getAssigneeInitials } from './utils'
 import { dialogActions } from '@/store/manager/dialog-store'
 
 type Props = {

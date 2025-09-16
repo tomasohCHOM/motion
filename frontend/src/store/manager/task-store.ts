@@ -1,6 +1,6 @@
-import { mockManagerTestData } from '@/static/workspace/manager'
 import { arrayMove } from '@dnd-kit/sortable'
 import { Store } from '@tanstack/store'
+import { mockManagerTestData } from '@/static/workspace/manager'
 
 export type Task = {
   id: string
@@ -186,8 +186,8 @@ export const kanbanActions = {
 export const kanbanHelpers = {
   findTaskById: (state: KanbanState, taskId: string): Task | null => {
     for (const column of state.columns) {
-      const task = column.tasks.find((task) => task.id === taskId)
-      if (task) return task
+      const found = column.tasks.find((task) => task.id === taskId)
+      if (found) return found
     }
     return null
   },

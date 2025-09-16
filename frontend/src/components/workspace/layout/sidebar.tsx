@@ -5,7 +5,7 @@ import {
   HelpCircle,
   MessageSquareDot,
   NotebookTabs,
-} from 'lucide-react';
+} from 'lucide-react'
 import {
   Sidebar,
   SidebarContent,
@@ -16,10 +16,10 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-} from '@/components/ui/sidebar';
+} from '@/components/ui/sidebar'
 
 export default function AppSidebar({ workspaceId }: { workspaceId: string }) {
-  const workspaceDynamicRoute = `/workspace/${workspaceId}`;
+  const workspaceDynamicRoute = `/workspace/${workspaceId}`
   const navItems = [
     {
       title: 'Notes',
@@ -46,7 +46,7 @@ export default function AppSidebar({ workspaceId }: { workspaceId: string }) {
       url: `${workspaceDynamicRoute}/files`,
       icon: File,
     },
-  ];
+  ]
   return (
     <Sidebar>
       <SidebarContent className="px-2 py-4">
@@ -75,5 +75,5 @@ export default function AppSidebar({ workspaceId }: { workspaceId: string }) {
         </SidebarContent>
       </SidebarFooter>
     </Sidebar>
-  );
+  )
 }

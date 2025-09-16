@@ -1,19 +1,14 @@
 import {
-  kanbanActions,
-  kanbanHelpers,
-  kanbanStore,
-} from '@/store/manager/task-store'
-import {
-  closestCorners,
   DndContext,
+  
+  
   DragOverlay,
+  
   KeyboardSensor,
   PointerSensor,
+  closestCorners,
   useSensor,
-  useSensors,
-  type DragEndEvent,
-  type DragOverEvent,
-  type DragStartEvent,
+  useSensors
 } from '@dnd-kit/core'
 import {
   SortableContext,
@@ -23,6 +18,12 @@ import {
 import { useStore } from '@tanstack/react-store'
 import React from 'react'
 import { TaskCard } from './task'
+import type {DragEndEvent, DragOverEvent, DragStartEvent} from '@dnd-kit/core';
+import {
+  kanbanActions,
+  kanbanHelpers,
+  kanbanStore,
+} from '@/store/manager/task-store'
 
 type Props = {
   children: React.ReactNode

@@ -1,8 +1,8 @@
 import React from 'react'
-import { DroppableColumn } from './column'
 import { useStore } from '@tanstack/react-store'
-import { kanbanStore } from '@/store/manager/task-store'
+import { DroppableColumn } from './column'
 import { KanbanDndProvider } from './kanban-dnd-provider'
+import { kanbanStore } from '@/store/manager/task-store'
 
 export const Board: React.FC = () => {
   const { columns } = useStore(kanbanStore)

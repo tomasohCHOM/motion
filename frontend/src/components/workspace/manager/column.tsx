@@ -1,13 +1,13 @@
 import React from 'react'
 import { Plus } from 'lucide-react'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { useDroppable } from '@dnd-kit/core'
-import type { Column } from '@/store/manager/task-store'
 import { TaskCard } from './task'
-import { dialogActions } from '@/store/manager/dialog-store'
 import { SortableItem } from './sortable-item'
+import type { Column } from '@/store/manager/task-store'
+import { dialogActions } from '@/store/manager/dialog-store'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
 
 type Props = {
   column: Column

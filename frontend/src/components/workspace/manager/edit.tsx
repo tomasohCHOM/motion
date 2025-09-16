@@ -1,11 +1,14 @@
+import { useStore } from '@tanstack/react-store'
+import { useEffect, useState } from 'react'
+import type { Task } from '@/store/manager/task-store'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
-  DialogTitle,
   DialogContent,
-  DialogHeader,
   DialogFooter,
+  DialogHeader,
+  DialogTitle,
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -18,7 +21,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { useStore } from '@tanstack/react-store'
 import { dialogActions, dialogStore } from '@/store/manager/dialog-store'
 import {
   columnTypes,
@@ -26,10 +28,8 @@ import {
   kanbanHelpers,
   priorityLabels,
   teamMembers,
-  type Task,
 } from '@/store/manager/task-store'
 import { DateInput } from '@/components/ui/date-picker'
-import { useEffect, useState } from 'react'
 
 const EditTask: React.FC = () => {
   const {
@@ -118,10 +118,10 @@ const EditTask: React.FC = () => {
                 <SelectContent>
                   <SelectGroup>
                     <SelectLabel>Kanban Column</SelectLabel>
-                    {columnTypes.map(({ id, title }) => {
+                    {columnTypes.map(({ id, title: columnTitle }) => {
                       return (
                         <SelectItem key={`item-${id}`} value={id}>
-                          {title}
+                          {columnTitle}
                         </SelectItem>
                       )
                     })}
