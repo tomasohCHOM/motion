@@ -9,6 +9,6 @@ mkShell {
     air
     delve
     terraform
-    justbuild
+    just
   ];
 }
