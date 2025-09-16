@@ -2,7 +2,7 @@ with import <nixpkgs> {
   config.allowUnfree = true;
 };
 mkShell {
-  nativeBuildInputs = [
+  packages = [
     nodejs
     eslint
     prettier
