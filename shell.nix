@@ -4,8 +4,6 @@ with import <nixpkgs> {
 mkShell {
   packages = [
     nodejs
-    eslint
-    prettier
     go
     gotools
     air
