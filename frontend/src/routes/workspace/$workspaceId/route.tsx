@@ -1,4 +1,5 @@
 import { Outlet, createFileRoute, redirect } from '@tanstack/react-router'
+
 import { SidebarProvider } from '@/components/ui/sidebar'
 import AppNavbar from '@/components/workspace/layout/navbar'
 import AppSidebar from '@/components/workspace/layout/sidebar'

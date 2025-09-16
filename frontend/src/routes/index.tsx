@@ -1,5 +1,5 @@
-import PageContent from '@/components/layout/page-content'
 import { createFileRoute } from '@tanstack/react-router'
+import LandingPage from '@/components/landing/landing'
 
 export const Route = createFileRoute('/')({
   component: RootPage,

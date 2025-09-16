@@ -1,6 +1,6 @@
 import { ArrowRight, Zap } from 'lucide-react'
-import { Button } from '@/components/ui/button'
 import { useClerkAuth } from '@/auth/clerk'
+import { Button } from '@/components/ui/button'
 
 const LandingNavbar: React.FC = () => {
   const auth = useClerkAuth()
