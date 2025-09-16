@@ -19,6 +19,7 @@ import { Route as WorkspaceWorkspaceIdManagerRouteImport } from './routes/worksp
 import { Route as WorkspaceWorkspaceIdNotesIndexRouteImport } from './routes/workspace/$workspaceId/notes/index'
 import { Route as WorkspaceWorkspaceIdFilesIndexRouteImport } from './routes/workspace/$workspaceId/files/index'
 =======
+import { Route as WorkspaceWorkspaceIdManagerRouteImport } from './routes/workspace/$workspaceId/manager'
 import { Route as WorkspaceWorkspaceIdNotesIndexRouteImport } from './routes/workspace/$workspaceId/notes/index'
 >>>>>>> 0fb15f3 (Implement note taking (#9))
 import { Route as WorkspaceWorkspaceIdNotesNoteIdRouteImport } from './routes/workspace/$workspaceId/notes/$noteId'
@@ -43,6 +44,12 @@ const WorkspaceWorkspaceIdManagerRoute =
   } as any)
 =======
 >>>>>>> 0fb15f3 (Implement note taking (#9))
+const WorkspaceWorkspaceIdManagerRoute =
+  WorkspaceWorkspaceIdManagerRouteImport.update({
+    id: '/manager',
+    path: '/manager',
+    getParentRoute: () => WorkspaceWorkspaceIdRouteRoute,
+  } as any)
 const WorkspaceWorkspaceIdNotesIndexRoute =
   WorkspaceWorkspaceIdNotesIndexRouteImport.update({
     id: '/notes/',
@@ -75,6 +82,7 @@ export interface FileRoutesByFullPath {
   '/workspace/$workspaceId/notes/$noteId': typeof WorkspaceWorkspaceIdNotesNoteIdRoute
   '/workspace/$workspaceId/files': typeof WorkspaceWorkspaceIdFilesIndexRoute
 =======
+  '/workspace/$workspaceId/manager': typeof WorkspaceWorkspaceIdManagerRoute
   '/workspace/$workspaceId/notes/$noteId': typeof WorkspaceWorkspaceIdNotesNoteIdRoute
 >>>>>>> 0fb15f3 (Implement note taking (#9))
   '/workspace/$workspaceId/notes': typeof WorkspaceWorkspaceIdNotesIndexRoute
@@ -89,6 +97,7 @@ export interface FileRoutesByTo {
   '/workspace/$workspaceId/notes/$noteId': typeof WorkspaceWorkspaceIdNotesNoteIdRoute
   '/workspace/$workspaceId/files': typeof WorkspaceWorkspaceIdFilesIndexRoute
 =======
+  '/workspace/$workspaceId/manager': typeof WorkspaceWorkspaceIdManagerRoute
   '/workspace/$workspaceId/notes/$noteId': typeof WorkspaceWorkspaceIdNotesNoteIdRoute
 >>>>>>> 0fb15f3 (Implement note taking (#9))
   '/workspace/$workspaceId/notes': typeof WorkspaceWorkspaceIdNotesIndexRoute
@@ -105,6 +114,7 @@ export interface FileRoutesById {
   '/workspace/$workspaceId/notes/$noteId': typeof WorkspaceWorkspaceIdNotesNoteIdRoute
   '/workspace/$workspaceId/files/': typeof WorkspaceWorkspaceIdFilesIndexRoute
 =======
+  '/workspace/$workspaceId/manager': typeof WorkspaceWorkspaceIdManagerRoute
   '/workspace/$workspaceId/notes/$noteId': typeof WorkspaceWorkspaceIdNotesNoteIdRoute
 >>>>>>> 0fb15f3 (Implement note taking (#9))
   '/workspace/$workspaceId/notes/': typeof WorkspaceWorkspaceIdNotesIndexRoute
@@ -119,6 +129,7 @@ export interface FileRouteTypes {
     | '/workspace/$workspaceId/notes/$noteId'
     | '/workspace/$workspaceId/files'
 =======
+    | '/workspace/$workspaceId/manager'
     | '/workspace/$workspaceId/notes/$noteId'
 >>>>>>> 0fb15f3 (Implement note taking (#9))
     | '/workspace/$workspaceId/notes'
@@ -131,6 +142,7 @@ export interface FileRouteTypes {
     | '/workspace/$workspaceId/notes/$noteId'
     | '/workspace/$workspaceId/files'
 =======
+    | '/workspace/$workspaceId/manager'
     | '/workspace/$workspaceId/notes/$noteId'
 >>>>>>> 0fb15f3 (Implement note taking (#9))
     | '/workspace/$workspaceId/notes'
@@ -146,6 +158,7 @@ export interface FileRouteTypes {
     | '/workspace/$workspaceId/notes/$noteId'
     | '/workspace/$workspaceId/files/'
 =======
+    | '/workspace/$workspaceId/manager'
     | '/workspace/$workspaceId/notes/$noteId'
 >>>>>>> 0fb15f3 (Implement note taking (#9))
     | '/workspace/$workspaceId/notes/'
@@ -206,6 +219,13 @@ declare module '@tanstack/react-router' {
     }
 =======
 >>>>>>> 0fb15f3 (Implement note taking (#9))
+    '/workspace/$workspaceId/manager': {
+      id: '/workspace/$workspaceId/manager'
+      path: '/manager'
+      fullPath: '/workspace/$workspaceId/manager'
+      preLoaderRoute: typeof WorkspaceWorkspaceIdManagerRouteImport
+      parentRoute: typeof WorkspaceWorkspaceIdRouteRoute
+    }
     '/workspace/$workspaceId/notes/': {
       id: '/workspace/$workspaceId/notes/'
       path: '/notes'
@@ -247,6 +267,7 @@ interface WorkspaceWorkspaceIdRouteRouteChildren {
   WorkspaceWorkspaceIdNotesNoteIdRoute: typeof WorkspaceWorkspaceIdNotesNoteIdRoute
   WorkspaceWorkspaceIdFilesIndexRoute: typeof WorkspaceWorkspaceIdFilesIndexRoute
 =======
+  WorkspaceWorkspaceIdManagerRoute: typeof WorkspaceWorkspaceIdManagerRoute
   WorkspaceWorkspaceIdNotesNoteIdRoute: typeof WorkspaceWorkspaceIdNotesNoteIdRoute
 >>>>>>> 0fb15f3 (Implement note taking (#9))
   WorkspaceWorkspaceIdNotesIndexRoute: typeof WorkspaceWorkspaceIdNotesIndexRoute
@@ -259,6 +280,7 @@ const WorkspaceWorkspaceIdRouteRouteChildren: WorkspaceWorkspaceIdRouteRouteChil
     WorkspaceWorkspaceIdNotesNoteIdRoute: WorkspaceWorkspaceIdNotesNoteIdRoute,
     WorkspaceWorkspaceIdFilesIndexRoute: WorkspaceWorkspaceIdFilesIndexRoute,
 =======
+    WorkspaceWorkspaceIdManagerRoute: WorkspaceWorkspaceIdManagerRoute,
     WorkspaceWorkspaceIdNotesNoteIdRoute: WorkspaceWorkspaceIdNotesNoteIdRoute,
 >>>>>>> 0fb15f3 (Implement note taking (#9))
     WorkspaceWorkspaceIdNotesIndexRoute: WorkspaceWorkspaceIdNotesIndexRoute,
