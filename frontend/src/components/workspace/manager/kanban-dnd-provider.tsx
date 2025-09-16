@@ -1,14 +1,11 @@
 import {
   DndContext,
-  
-  
   DragOverlay,
-  
   KeyboardSensor,
   PointerSensor,
   closestCorners,
   useSensor,
-  useSensors
+  useSensors,
 } from '@dnd-kit/core'
 import {
   SortableContext,
@@ -18,7 +15,7 @@ import {
 import { useStore } from '@tanstack/react-store'
 import React from 'react'
 import { TaskCard } from './task'
-import type {DragEndEvent, DragOverEvent, DragStartEvent} from '@dnd-kit/core';
+import type { DragEndEvent, DragOverEvent, DragStartEvent } from '@dnd-kit/core'
 import {
   kanbanActions,
   kanbanHelpers,
