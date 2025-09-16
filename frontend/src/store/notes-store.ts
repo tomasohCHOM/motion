@@ -4,17 +4,16 @@ export interface Note {
   id: string
   title: string
   content: string
-  tags: string[]
+  tags: Array<string>
   updatedAt: number
   createdAt: number
 }
 
 // Define the state structure
 interface NotesState {
-  notes: Note[]
-  allTags: string[]
+  notes: Array<Note>
+  allTags: Array<string>
 }
-
 
 // Create the store instance
 export const notesStore = new Store<NotesState>({
@@ -23,7 +22,7 @@ export const notesStore = new Store<NotesState>({
 })
 
 // Helper function to get updated tags
-const getUpdatedTags = (notes: Note[]): string[] => {
+const getUpdatedTags = (notes: Array<Note>): Array<string> => {
   const allTagsSet = new Set<string>()
   notes.forEach((note) => {
     note.tags.forEach((tag) => allTagsSet.add(tag))
