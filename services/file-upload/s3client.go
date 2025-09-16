@@ -7,6 +7,7 @@ package main
 import (
 	"context"
 	"os"
+	"math/rand"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
@@ -44,6 +45,26 @@ func GetS3Config() S3Config {
 		SecretKey:  "minioadmin",
 		UseSSL:     false,
 		BucketName: "test-bucket",
+	}
+}
+
+func generateRandomString(length uint) string {
+	ran_str := make([]byte, length)
+	for i := 0; i < int(length); i++ {
+		ran_str[i] = byte(65 + rand.Intn(25))
+	}
+
+	return string(ran_str)
+}
+
+func GetTestS3Config() S3Config {
+	return S3Config{
+		Endpoint: "http://localhost:9000",
+		Region: "us-east-1",
+		AccessKey: "minioadmin",
+		SecretKey: "minioadmin",
+		UseSSL: false,
+		BucketName: "test-bucket-" + generateRandomString(8),
 	}
 }
 
