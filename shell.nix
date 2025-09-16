@@ -5,7 +5,7 @@ mkShell {
   packages = [
     nodejs
     go
-    gotools
+    go-tools
     air
     delve
     terraform
