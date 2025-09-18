@@ -4,9 +4,9 @@
  */
 terraform {
   backend "s3" {
-    bucket       = "motion-terraform-state-69"
-    key          = "motion.tfstate"
-    region       = "us-east-1"
-    encrypt      = true
+    bucket  = "motion-terraform-state-69"
+    key     = "motion.tfstate"
+    region  = "us-east-1"
+    encrypt = true
   }
 }
