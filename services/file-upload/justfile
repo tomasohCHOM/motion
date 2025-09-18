@@ -1,0 +1,22 @@
+bindir := "bin/"
+pname := "file-upload"
+
+all: build
+
+fmt:
+  go fmt ./...
+
+vet:
+  go vet ./...
+
+build: vet
+  go build -o {{bindir}}{{pname}} .
+
+serve: build
+  ./{{bindir}}{{pname}}
+
+check:
+  staticcheck ./...
+
+clean:
+  rm -rf {{bindir}}
