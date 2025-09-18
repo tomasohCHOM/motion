@@ -6,8 +6,8 @@ package main
 
 import (
 	"context"
-	"os"
 	"math/rand"
+	"os"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
@@ -59,11 +59,11 @@ func generateRandomString(length uint) string {
 
 func GetTestS3Config() S3Config {
 	return S3Config{
-		Endpoint: "http://localhost:9000",
-		Region: "us-east-1",
-		AccessKey: "minioadmin",
-		SecretKey: "minioadmin",
-		UseSSL: false,
+		Endpoint:   "http://localhost:9000",
+		Region:     "us-east-1",
+		AccessKey:  "minioadmin",
+		SecretKey:  "minioadmin",
+		UseSSL:     false,
 		BucketName: "test-bucket-" + generateRandomString(8),
 	}
 }
