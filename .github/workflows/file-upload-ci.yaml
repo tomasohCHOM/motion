@@ -1,0 +1,31 @@
+name: File Upload Microservice CI
+
+on:
+  pull_request:
+    branches: [ "main" ]
+    paths: 'services/file-upload/**'
+
+jobs:
+  build:
+    name: File Upload CI Checks
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: infrastructure
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v6
+
+      - name: Format check
+        run: go fmt ./... && git diff --exit-code
+
+      - name: Static analysis check
+        uses: dominikh/staticcheck-action@v1
+        with:
+          version: "latest"
+
+      - name: Terraform validate
+
+      - name: Build check
+        run: go build ./...
