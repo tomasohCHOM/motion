@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: infrastructure
+        working-directory: services/file-upload
 
     steps:
       - uses: actions/checkout@v4
@@ -26,6 +26,7 @@ jobs:
         uses: dominikh/staticcheck-action@v1
         with:
           version: "latest"
+          working-directory: services/file-upload
 
       - name: Build check
         run: go build ./...
