@@ -34,7 +34,7 @@ func NewS3Service(cfg S3Config) (*S3Service, error) {
 
 	// Create bucket if it doesn't exist (for MinIO)
 	if cfg.Endpoint != "" {
-		err = service.CreateBucketIfNotExists()
+		err = service.createBucketIfNotExists()
 		if err != nil {
 			return nil, err
 		}
@@ -58,7 +58,7 @@ func (s *S3Service) createBucketIfNotExists() error {
 	return nil
 }
 
-func uploadFile(client *s3.Client, bucket, key string, data []byte) error {
+func UploadFile(client *s3.Client, bucket, key string, data []byte) error {
 	_, err := client.PutObject(context.TODO(), &s3.PutObjectInput{
 		Bucket: &bucket,
 		Key:    &key,
@@ -67,7 +67,7 @@ func uploadFile(client *s3.Client, bucket, key string, data []byte) error {
 	return err
 }
 
-func downloadFile(client *s3.Client, bucket, key string) ([]byte, error) {
+func DownloadFile(client *s3.Client, bucket, key string) ([]byte, error) {
 	result, err := client.GetObject(context.TODO(), &s3.GetObjectInput{
 		Bucket: &bucket,
 		Key:    &key,
@@ -79,7 +79,7 @@ func downloadFile(client *s3.Client, bucket, key string) ([]byte, error) {
 	return io.ReadAll(result.Body)
 }
 
-func listObjects(client *s3.Client, bucket string) error {
+func ListObjects(client *s3.Client, bucket string) error {
 	result, err := client.GetObject(context.TODO(), &s3.ListObjectsV2Input{
 		Bucket: &bucket,
 	})
@@ -94,7 +94,7 @@ func listObjects(client *s3.Client, bucket string) error {
 	return nil
 }
 
-func deleteObject(client *s3.Client, bucket, key string) error {
+func DeleteObject(client *s3.Client, bucket, key string) error {
 	_, err := client.DeleteObject(context.TODO(), &s3.DeleteObjectInput{
 		Bucket: &bucket,
 		Key:    &key,
