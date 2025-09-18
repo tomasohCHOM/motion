@@ -1,6 +1,8 @@
 bindir := "bin/"
 pname := "file-upload"
 
+all: build
+
 fmt:
   go fmt ./...
 
