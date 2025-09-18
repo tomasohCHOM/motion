@@ -16,6 +16,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as WorkspaceWorkspaceIdRouteRouteImport } from './routes/workspace/$workspaceId/route'
 import { Route as WorkspaceWorkspaceIdManagerRouteImport } from './routes/workspace/$workspaceId/manager'
 import { Route as WorkspaceWorkspaceIdNotesIndexRouteImport } from './routes/workspace/$workspaceId/notes/index'
+import { Route as WorkspaceWorkspaceIdFilesIndexRouteImport } from './routes/workspace/$workspaceId/files/index'
 import { Route as WorkspaceWorkspaceIdNotesNoteIdRouteImport } from './routes/workspace/$workspaceId/notes/$noteId'
 
 const IndexRoute = IndexRouteImport.update({
@@ -41,6 +42,12 @@ const WorkspaceWorkspaceIdNotesIndexRoute =
     path: '/notes/',
     getParentRoute: () => WorkspaceWorkspaceIdRouteRoute,
   } as any)
+const WorkspaceWorkspaceIdFilesIndexRoute =
+  WorkspaceWorkspaceIdFilesIndexRouteImport.update({
+    id: '/files/',
+    path: '/files/',
+    getParentRoute: () => WorkspaceWorkspaceIdRouteRoute,
+  } as any)
 const WorkspaceWorkspaceIdNotesNoteIdRoute =
   WorkspaceWorkspaceIdNotesNoteIdRouteImport.update({
     id: '/notes/$noteId',
@@ -55,6 +62,7 @@ export interface FileRoutesByFullPath {
   '/workspace/$workspaceId': typeof WorkspaceWorkspaceIdRouteRouteWithChildren
   '/workspace/$workspaceId/manager': typeof WorkspaceWorkspaceIdManagerRoute
   '/workspace/$workspaceId/notes/$noteId': typeof WorkspaceWorkspaceIdNotesNoteIdRoute
+  '/workspace/$workspaceId/files': typeof WorkspaceWorkspaceIdFilesIndexRoute
   '/workspace/$workspaceId/notes': typeof WorkspaceWorkspaceIdNotesIndexRoute
 }
 export interface FileRoutesByTo {
@@ -64,6 +72,7 @@ export interface FileRoutesByTo {
   '/workspace/$workspaceId': typeof WorkspaceWorkspaceIdRouteRouteWithChildren
   '/workspace/$workspaceId/manager': typeof WorkspaceWorkspaceIdManagerRoute
   '/workspace/$workspaceId/notes/$noteId': typeof WorkspaceWorkspaceIdNotesNoteIdRoute
+  '/workspace/$workspaceId/files': typeof WorkspaceWorkspaceIdFilesIndexRoute
   '/workspace/$workspaceId/notes': typeof WorkspaceWorkspaceIdNotesIndexRoute
 }
 export interface FileRoutesById {
@@ -75,6 +84,7 @@ export interface FileRoutesById {
   '/workspace/$workspaceId': typeof WorkspaceWorkspaceIdRouteRouteWithChildren
   '/workspace/$workspaceId/manager': typeof WorkspaceWorkspaceIdManagerRoute
   '/workspace/$workspaceId/notes/$noteId': typeof WorkspaceWorkspaceIdNotesNoteIdRoute
+  '/workspace/$workspaceId/files/': typeof WorkspaceWorkspaceIdFilesIndexRoute
   '/workspace/$workspaceId/notes/': typeof WorkspaceWorkspaceIdNotesIndexRoute
 }
 export interface FileRouteTypes {
@@ -84,6 +94,7 @@ export interface FileRouteTypes {
     | '/workspace/$workspaceId'
     | '/workspace/$workspaceId/manager'
     | '/workspace/$workspaceId/notes/$noteId'
+    | '/workspace/$workspaceId/files'
     | '/workspace/$workspaceId/notes'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -91,6 +102,7 @@ export interface FileRouteTypes {
     | '/workspace/$workspaceId'
     | '/workspace/$workspaceId/manager'
     | '/workspace/$workspaceId/notes/$noteId'
+    | '/workspace/$workspaceId/files'
     | '/workspace/$workspaceId/notes'
   id:
     | '__root__'
@@ -101,6 +113,7 @@ export interface FileRouteTypes {
     | '/workspace/$workspaceId'
     | '/workspace/$workspaceId/manager'
     | '/workspace/$workspaceId/notes/$noteId'
+    | '/workspace/$workspaceId/files/'
     | '/workspace/$workspaceId/notes/'
   fileRoutesById: FileRoutesById
 }
@@ -163,6 +176,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof WorkspaceWorkspaceIdNotesIndexRouteImport
       parentRoute: typeof WorkspaceWorkspaceIdRouteRoute
     }
+    '/workspace/$workspaceId/files/': {
+      id: '/workspace/$workspaceId/files/'
+      path: '/files'
+      fullPath: '/workspace/$workspaceId/files'
+      preLoaderRoute: typeof WorkspaceWorkspaceIdFilesIndexRouteImport
+      parentRoute: typeof WorkspaceWorkspaceIdRouteRoute
+    }
     '/workspace/$workspaceId/notes/$noteId': {
       id: '/workspace/$workspaceId/notes/$noteId'
       path: '/notes/$noteId'
@@ -184,6 +204,7 @@ declare module '@tanstack/react-router' {
 interface WorkspaceWorkspaceIdRouteRouteChildren {
   WorkspaceWorkspaceIdManagerRoute: typeof WorkspaceWorkspaceIdManagerRoute
   WorkspaceWorkspaceIdNotesNoteIdRoute: typeof WorkspaceWorkspaceIdNotesNoteIdRoute
+  WorkspaceWorkspaceIdFilesIndexRoute: typeof WorkspaceWorkspaceIdFilesIndexRoute
   WorkspaceWorkspaceIdNotesIndexRoute: typeof WorkspaceWorkspaceIdNotesIndexRoute
 }
 
@@ -191,6 +212,7 @@ const WorkspaceWorkspaceIdRouteRouteChildren: WorkspaceWorkspaceIdRouteRouteChil
   {
     WorkspaceWorkspaceIdManagerRoute: WorkspaceWorkspaceIdManagerRoute,
     WorkspaceWorkspaceIdNotesNoteIdRoute: WorkspaceWorkspaceIdNotesNoteIdRoute,
+    WorkspaceWorkspaceIdFilesIndexRoute: WorkspaceWorkspaceIdFilesIndexRoute,
     WorkspaceWorkspaceIdNotesIndexRoute: WorkspaceWorkspaceIdNotesIndexRoute,
   }
 
