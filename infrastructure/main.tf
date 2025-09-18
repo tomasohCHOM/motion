@@ -46,7 +46,7 @@ module "networking" {
 # }
 
 module "vercel-frontend" {
-  source           = "./modules/vercel-frontend"
+  source = "./modules/vercel-frontend"
   # vercel_api_token = data.aws_secretsmanager_secret_version.vercel_api_token.secret_string
   vercel_api_token = var.vercel_api_token
 }
