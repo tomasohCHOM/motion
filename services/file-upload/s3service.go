@@ -67,36 +67,18 @@ func (s *S3Service) createBucketIfNotExists() error {
 
 // UploadFile uploads a file to the S3 bucket using the service's configured client and bucket
 func (s *S3Service) UploadFile(key string, data []byte) error {
-	return UploadFile(s.client, s.bucketName, key, data)
-}
-
-// DownloadFile downloads a file from the S3 bucket using the service's configured client and bucket
-func (s *S3Service) DownloadFile(key string) ([]byte, error) {
-	return DownloadFile(s.client, s.bucketName, key)
-}
-
-// DeleteObject deletes an object from the S3 bucket using the service's configured client and bucket
-func (s *S3Service) DeleteObject(key string) error {
-	return DeleteObject(s.client, s.bucketName, key)
-}
-
-// ListObjects lists all objects in the S3 bucket using the service's configured client and bucket
-func (s *S3Service) ListObjects() error {
-	return ListObjects(s.client, s.bucketName)
-}
-
-func UploadFile(client S3ClientInterface, bucket, key string, data []byte) error {
-	_, err := client.PutObject(context.TODO(), &s3.PutObjectInput{
-		Bucket: &bucket,
+	_, err := s.client.PutObject(context.TODO(), &s3.PutObjectInput{
+		Bucket: &s.bucketName,
 		Key:    &key,
 		Body:   bytes.NewReader(data),
 	})
 	return err
 }
 
-func DownloadFile(client S3ClientInterface, bucket, key string) ([]byte, error) {
-	result, err := client.GetObject(context.TODO(), &s3.GetObjectInput{
-		Bucket: &bucket,
+// DownloadFile downloads a file from the S3 bucket using the service's configured client and bucket
+func (s *S3Service) DownloadFile(key string) ([]byte, error) {
+	result, err := s.client.GetObject(context.TODO(), &s3.GetObjectInput{
+		Bucket: &s.bucketName,
 		Key:    &key,
 	})
 	if err != nil {
@@ -106,9 +88,19 @@ func DownloadFile(client S3ClientInterface, bucket, key string) ([]byte, error) 
 	return io.ReadAll(result.Body)
 }
 
-func ListObjects(client S3ClientInterface, bucket string) error {
-	result, err := client.ListObjectsV2(context.TODO(), &s3.ListObjectsV2Input{
-		Bucket: &bucket,
+// DeleteObject deletes an object from the S3 bucket using the service's configured client and bucket
+func (s *S3Service) DeleteObject(key string) error {
+	_, err := s.client.DeleteObject(context.TODO(), &s3.DeleteObjectInput{
+		Bucket: &s.bucketName,
+		Key:    &key,
+	})
+	return err
+}
+
+// ListObjects lists all objects in the S3 bucket using the service's configured client and bucket
+func (s *S3Service) ListObjects() error {
+	result, err := s.client.ListObjectsV2(context.TODO(), &s3.ListObjectsV2Input{
+		Bucket: &s.bucketName,
 	})
 	if err != nil {
 		return err
@@ -118,12 +110,4 @@ func ListObjects(client S3ClientInterface, bucket string) error {
 		fmt.Printf("Key %s, Size: %d\n", *obj.Key, obj.Size)
 	}
 	return nil
-}
-
-func DeleteObject(client S3ClientInterface, bucket, key string) error {
-	_, err := client.DeleteObject(context.TODO(), &s3.DeleteObjectInput{
-		Bucket: &bucket,
-		Key:    &key,
-	})
-	return err
 }
