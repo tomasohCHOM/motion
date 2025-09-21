@@ -10,9 +10,6 @@ import (
 	"fmt"
 	"io"
 
-	// "github.com/aws/aws-sdk-go-v2/aws"
-	// "github.com/aws/aws-sdk-go-v2/config"
-	// "github.com/aws/aws-sdk-go-v2/credentials"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 )
 
@@ -58,18 +55,18 @@ func (s *S3Service) createBucketIfNotExists() error {
 	return nil
 }
 
-func UploadFile(client *s3.Client, bucket, key string, data []byte) error {
-	_, err := client.PutObject(context.TODO(), &s3.PutObjectInput{
-		Bucket: &bucket,
+func (s *S3Service) PutObject(key string, data []byte) error {
+	_, err := s.client.PutObject(context.TODO(), &s3.PutObjectInput{
+		Bucket: &s.bucketName,
 		Key:    &key,
 		Body:   bytes.NewReader(data),
 	})
 	return err
 }
 
-func DownloadFile(client *s3.Client, bucket, key string) ([]byte, error) {
-	result, err := client.GetObject(context.TODO(), &s3.GetObjectInput{
-		Bucket: &bucket,
+func (s *S3Service) GetObject(key string) ([]byte, error) {
+	result, err := s.client.GetObject(context.TODO(), &s3.GetObjectInput{
+		Bucket: &s.bucketName,
 		Key:    &key,
 	})
 	if err != nil {
@@ -79,9 +76,9 @@ func DownloadFile(client *s3.Client, bucket, key string) ([]byte, error) {
 	return io.ReadAll(result.Body)
 }
 
-func ListObjects(client *s3.Client, bucket string) error {
-	result, err := client.GetObject(context.TODO(), &s3.GetObjectInput{
-		Bucket: &bucket,
+func (s *S3Service) ListObjects() error {
+	result, err := s.client.GetObject(context.TODO(), &s3.GetObjectInput{
+		Bucket: &s.bucketName,
 	})
 	if err != nil {
 		return err
@@ -93,9 +90,9 @@ func ListObjects(client *s3.Client, bucket string) error {
 	return nil
 }
 
-func DeleteObject(client *s3.Client, bucket, key string) error {
-	_, err := client.DeleteObject(context.TODO(), &s3.DeleteObjectInput{
-		Bucket: &bucket,
+func (s *S3Service) DeleteObject(key string) error {
+	_, err := s.client.DeleteObject(context.TODO(), &s3.DeleteObjectInput{
+		Bucket: &s.bucketName,
 		Key:    &key,
 	})
 	return err
