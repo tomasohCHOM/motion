@@ -77,15 +77,15 @@ func (s *S3Service) GetObject(key string) ([]byte, error) {
 }
 
 func (s *S3Service) ListObjects() error {
-	result, err := s.client.GetObject(context.TODO(), &s3.GetObjectInput{
+	result, err := s.client.ListObjectsV2(context.TODO(), &s3.ListObjectsV2Input{
 		Bucket: &s.bucketName,
 	})
 	if err != nil {
 		return err
 	}
 
-	for key, val := range result.Metadata {
-		fmt.Printf("Key %s, Size: %d", key, len(val))
+	for _, obj := range result.Contents {
+		fmt.Printf("Key %s, Size: %d\n", *obj.Key, obj.Size)
 	}
 	return nil
 }
