@@ -6,9 +6,9 @@ package main
 
 import (
 	"context"
+	"log"
 	"math/rand"
 	"os"
-	"log"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
@@ -39,16 +39,8 @@ func GetS3Config() S3Config {
 	}
 
 	// minio server ~/minio-data
-	endPoint := "https://localhost:9000";
-	log.Printf("Using Minio server at %s", endPoint)
-	return S3Config{
-		Endpoint:   endPoint,
-		Region:     "us-east-1", // MinIO default
-		AccessKey:  "minioadmin",
-		SecretKey:  "minioadmin",
-		UseSSL:     false,
-		BucketName: "test-bucket",
-	}
+	log.Printf("Using Minio server at https://localhost:9000\n")
+	return getTestS3Config()
 }
 
 func generateRandomString(length uint) string {
@@ -60,7 +52,7 @@ func generateRandomString(length uint) string {
 	return string(ran_str)
 }
 
-func GetTestS3Config() S3Config {
+func getTestS3Config() S3Config {
 	return S3Config{
 		Endpoint:   "http://localhost:9000",
 		Region:     "us-east-1",
