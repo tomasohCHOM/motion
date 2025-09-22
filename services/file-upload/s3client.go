@@ -8,6 +8,7 @@ import (
 	"context"
 	"math/rand"
 	"os"
+	"log"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
@@ -37,9 +38,11 @@ func GetS3Config() S3Config {
 		}
 	}
 
-	// minio server ~/minio-data --console-address ":9000"
+	// minio server ~/minio-data
+	endPoint := "https://localhost:9000";
+	log.Printf("Using Minio server at %s", endPoint)
 	return S3Config{
-		Endpoint:   "http://localhost:9000",
+		Endpoint:   endPoint,
 		Region:     "us-east-1", // MinIO default
 		AccessKey:  "minioadmin",
 		SecretKey:  "minioadmin",
