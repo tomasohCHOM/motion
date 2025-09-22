@@ -7,10 +7,10 @@ package main
 import (
 	"bytes"
 	"context"
-	"fmt"
 	"io"
 
 	"github.com/aws/aws-sdk-go-v2/service/s3"
+	"github.com/aws/aws-sdk-go-v2/service/s3/types"
 )
 
 type S3Service struct {
@@ -76,18 +76,15 @@ func (s *S3Service) GetObject(key string) ([]byte, error) {
 	return io.ReadAll(result.Body)
 }
 
-func (s *S3Service) ListObjects() error {
+func (s *S3Service) ListObjects() ([]types.Object, error) {
 	result, err := s.client.ListObjectsV2(context.TODO(), &s3.ListObjectsV2Input{
 		Bucket: &s.bucketName,
 	})
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	for _, obj := range result.Contents {
-		fmt.Printf("Key %s, Size: %d\n", *obj.Key, obj.Size)
-	}
-	return nil
+	return result.Contents, nil
 }
 
 func (s *S3Service) DeleteObject(key string) error {
