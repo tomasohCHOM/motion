@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"log"
 	"time"
+
+	"github.com/tomasohchom/motion/services/file-upload/internal/clients"
 )
 
 func main() {

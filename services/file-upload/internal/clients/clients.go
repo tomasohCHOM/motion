@@ -2,7 +2,7 @@
  * Stuff for configuting and creating S3 clients
  */
 
-package main
+package clients
 
 import (
 	"context"

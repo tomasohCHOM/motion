@@ -2,7 +2,7 @@
  * S3 Service Wrapper
  */
 
-package main
+package services
 
 import (
 	"bytes"
