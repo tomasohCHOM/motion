@@ -2,7 +2,6 @@ package storage
 
 import (
 	"context"
-	"net/url"
 	"time"
 
 	"github.com/minio/minio-go/v7"
