@@ -10,7 +10,7 @@ vet:
   go vet ./...
 
 build: vet
-  go build -o {{bindir}}{{pname}} cmd/internal
+  go build -o {{bindir}}{{pname}} ./cmd/server
 
 serve: build
   ./{{bindir}}{{pname}}
