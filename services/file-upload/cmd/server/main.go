@@ -15,7 +15,7 @@ func main() {
 	cfg := config.Load()
 	storageClient, err := clients.NewStorageClient(cfg)
 	if err != nil {
-		log.Fatalf("Failed to create storage client:", err)
+		log.Fatalf("Failed to create storage client: %v", err)
 	}
 
 	uploadService := services.NewUploadService(storageClient, cfg)
