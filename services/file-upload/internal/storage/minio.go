@@ -27,8 +27,7 @@ func NewMinIOClient(cfg appconfig.StorageConfig) (*MinIOClient, error) {
 }
 
 func (m *MinIOClient) GeneratePresignedURL(ctx context.Context, bucket, key string, expiry time.Duration) (string, error) {
-	reqParams := make(url.Values)
-	presignedURL, err := m.client.PresignedPutObject(ctx, bucket, key, expiry, reqParams)
+	presignedURL, err := m.client.PresignedPutObject(ctx, bucket, key, expiry)
 	if err != nil {
 		return "", err
 	}
