@@ -8,6 +8,7 @@ import (
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
 	appconfig "github.com/tomasohchom/motion/services/file-upload/internal/config"
+	"github.com/tomasohchom/motion/services/file-upload/internal/interfaces"
 )
 
 type MinIOClient struct {
@@ -53,4 +54,4 @@ func (m *MinIOClient) GetObjectURL(ctx context.Context, bucket, key string) (str
 }
 
 // Compile-time interface compliance check
-var _ StorageClient = (*MinIOClient)(nil)
+var _ interfaces.StorageClient = (*MinIOClient)(nil)

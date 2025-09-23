@@ -7,6 +7,7 @@ import (
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
+	"github.com/tomasohchom/motion/services/file-upload/internal/interfaces"
 )
 
 type S3Client struct {
@@ -106,4 +107,4 @@ func (s *S3Client) ListObjects(ctx context.Context, bucket, prefix string) ([]st
 }
 
 // Compile-time interface compliance check
-var _ StorageClient = (*S3Client)(nil)
+var _ interfaces.StorageClient = (*S3Client)(nil)

@@ -16,9 +16,10 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	appconfig "github.com/tomasohchom/motion/services/file-upload/internal/config"
 	"github.com/tomasohchom/motion/services/file-upload/internal/storage"
+	"github.com/tomasohchom/motion/services/file-upload/internal/interfaces"
 )
 
-func NewStorageClient(cfg *appconfig.Config) (StorageClient, error) {
+func NewStorageClient(cfg *appconfig.Config) (interfaces.StorageClient, error) {
 	if cfg.Storage.Provider == "minio" {
 		return storage.NewMinIOClient(cfg.Storage)
 	}
