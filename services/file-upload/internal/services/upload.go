@@ -8,36 +8,28 @@ import (
 	"bytes"
 	"context"
 	"io"
+	"time"
 
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/aws/aws-sdk-go-v2/service/s3/types"
+	"github.com/tomasohchom/motion/services/file-upload/internal/clients"
+	"github.com/tomasohchom/motion/services/file-upload/internal/config"
 )
 
-type S3Service struct {
-	client     *s3.Client
-	bucketName string
+type UploadService struct {
+	storage clients.StorageClient
+	config *config.Config
 }
 
-func NewS3Service(cfg S3Config) (*S3Service, error) {
-	client, err := CreateS3Client(cfg)
-	if err != nil {
-		return nil, err
+func NewUploadService(storage clients.StorageClient, cfg *config.Config) *UploadService {
+	return &UploadService{
+		storage: storage,
+		config: cfg,
 	}
+}
 
-	service := &S3Service{
-		client:     client,
-		bucketName: cfg.BucketName,
-	}
-
-	// Create bucket if it doesn't exist (for MinIO)
-	if cfg.Endpoint != "" {
-		err = service.createBucketIfNotExists()
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	return service, nil
+func (u *UploadService) GenerateUploadURL(ctx context.Context, filename string) (string, error) {
+	return u.storage.GeneratePresignedURL(ctx, u.config.Storage.Bucket, filename, 15*time.Minute)
 }
 
 func (s *S3Service) createBucketIfNotExists() error {
