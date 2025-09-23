@@ -51,3 +51,6 @@ func (m *MinIOClient) GetObjectURL(ctx context.Context, bucket, key string) (str
 	}
 	return presignedURL.String(), nil
 }
+
+// Compile-time interface compliance check
+var _ StorageClient = (*MinIOClient)(nil)
