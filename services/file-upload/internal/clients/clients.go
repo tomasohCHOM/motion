@@ -6,17 +6,12 @@ package clients
 
 import (
 	"context"
-	// "log"
-	// "math/rand"
-	// "os"
-	//
-	// "github.com/aws/aws-sdk-go-v2/aws"
+
 	"github.com/aws/aws-sdk-go-v2/config"
-	// "github.com/aws/aws-sdk-go-v2/credentials"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	appconfig "github.com/tomasohchom/motion/services/file-upload/internal/config"
-	"github.com/tomasohchom/motion/services/file-upload/internal/storage"
 	"github.com/tomasohchom/motion/services/file-upload/internal/interfaces"
+	"github.com/tomasohchom/motion/services/file-upload/internal/storage"
 )
 
 func NewStorageClient(cfg *appconfig.Config) (interfaces.StorageClient, error) {
