@@ -19,7 +19,7 @@ func main() {
 	}
 
 	uploadService := services.NewUploadService(storageClient, cfg)
-	uploadHandler := services.NewUploadHandler(uploadService, cfg)
+	uploadHandler := handlers.NewUploadHandler(uploadService, cfg)
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /health", uploadHandler.HealthCheck)
 	mux.HandleFunc("POST /health", uploadHandler.GetPresignedURL)

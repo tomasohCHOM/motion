@@ -7,7 +7,7 @@ import (
 
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
-	appconfig "your-project/services/file-upload/internal/config"
+	appconfig "github.com/tomasohchom/motion/services/file-upload/internal/config"
 )
 
 type MinIOClient struct {
@@ -15,7 +15,7 @@ type MinIOClient struct {
 }
 
 func NewMinIOClient(cfg appconfig.StorageConfig) (*MinIOClient, error) {
-	client, err := minio.New(cfg.Endpoint, &minio.Options{
+	client, err := minio.New(cfg.Endpiont, &minio.Options{
 		Creds:  credentials.NewStaticV4(cfg.AccessKey, cfg.SecretKey, ""),
 		Secure: cfg.UseSSL,
 	})
