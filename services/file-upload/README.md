@@ -1,6 +1,6 @@
 # File Upload Microservice
 
-NOTE: This document was AI generated.  
+NOTE: This document was (mostly) AI generated.  
 
 A Go-based microservice for handling file uploads to AWS S3 or MinIO, designed for integration with frontend applications.
 
@@ -144,23 +144,17 @@ The service is configured via environment variables:
 - Docker and Docker Compose
 
 ### Setup
-1. Clone the repository
-2. Navigate to the service directory:
-   ```bash
-   cd services/file-upload
-   ```
-
-3. Start MinIO and the service:
+1. Start MinIO and the service:
    ```bash
    docker compose up -d
    ```
 
-4. The service will be available at `http://localhost:8080`
-5. MinIO console will be available at `http://localhost:9001` (admin/admin)
+2. The service will be available at `http://localhost:8080`
+3. MinIO console will be available at `http://localhost:9001` (admin/admin)
 
 ### Running Tests
 ```bash
-go test ./...
+just test
 ```
 
 ### Testing with xh
