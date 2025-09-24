@@ -14,13 +14,13 @@ import (
 
 type UploadService struct {
 	storage interfaces.StorageClient
-	config *config.Config
+	config  *config.Config
 }
 
 func NewUploadService(storage interfaces.StorageClient, cfg *config.Config) *UploadService {
 	return &UploadService{
 		storage: storage,
-		config: cfg,
+		config:  cfg,
 	}
 }
 
