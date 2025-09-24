@@ -36,8 +36,8 @@ func Load() *Config {
 			Provider:  getEnv("STORAGE_PROVIDER", "s3"),
 			Bucket:    getEnv("STORAGE_BUCKET", "uploads"),
 			Region:    getEnv("MINIO_ENDPOINT", "localhost:9000"),
-			AccessKey: getEnv("MINIO_ACCESSS_KEY", "minioadmin"),
-			SecretKey: getEnv("MINIO_SECRET_KEY", "minioadmin"),
+			AccessKey: getEnv("MINIO_ROOT_USER", "minioadmin"),
+			SecretKey: getEnv("MINIO_ROOT_PASSWORD", "minioadmin"),
 			UseSSL:    getBoolEnv("MINIO_USE_SSL", false),
 		},
 	}

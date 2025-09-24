@@ -133,8 +133,8 @@ The service is configured via environment variables:
 
 ### MinIO Configuration (Local Development)
 - `MINIO_ENDPOINT`: MinIO server endpoint (default: localhost:9000)
-- `MINIO_ACCESS_KEY`: MinIO access key (default: minioadmin)
-- `MINIO_SECRET_KEY`: MinIO secret key (default: minioadmin)
+- `MINIO_ROOT_USER`: MinIO access key (default: minioadmin)
+- `MINIO_ROOT_PASSWORD`: MinIO secret key (default: minioadmin)
 - `MINIO_USE_SSL`: Use SSL for MinIO connections (default: false)
 
 ## Local Development
