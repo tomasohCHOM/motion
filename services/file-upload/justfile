@@ -18,5 +18,8 @@ serve: build
 check:
   staticcheck ./...
 
+test:
+  go test ./...
+
 clean:
   rm -rf {{bindir}}
