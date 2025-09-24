@@ -25,7 +25,7 @@ func main() {
 	uploadHandler := handlers.NewUploadHandler(uploadService, cfg)
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /health", uploadHandler.HealthCheck)
-	mux.HandleFunc("POST /health", uploadHandler.GetPresignedURL)
+	mux.HandleFunc("POST /upload/presigned", uploadHandler.GetPresignedURL)
 	mux.HandleFunc("POST /upload/complete", uploadHandler.CompleteUpload)
 
 	var addr string
