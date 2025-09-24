@@ -1,8 +1,10 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/tomasohchom/motion/services/file-upload/internal/clients"
 	"github.com/tomasohchom/motion/services/file-upload/internal/config"
@@ -25,7 +27,14 @@ func main() {
 	mux.HandleFunc("POST /health", uploadHandler.GetPresignedURL)
 	mux.HandleFunc("POST /upload/complete", uploadHandler.CompleteUpload)
 
-	if err := http.ListenAndServe(":8080", mux); err != nil {
+	var addr string
+	if port := os.Getenv("PORT"); port == "" {
+		addr = ":8080"
+	} else {
+		addr = fmt.Sprintf(":%s", port)
+	}
+
+	if err := http.ListenAndServe(addr, mux); err != nil {
 		log.Fatalf("Server failed to start: %v", err)
 	}
 }
