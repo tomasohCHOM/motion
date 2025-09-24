@@ -10,5 +10,6 @@ mkShell {
     delve
     terraform
     just
+    xh
   ];
 }

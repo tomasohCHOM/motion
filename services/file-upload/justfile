@@ -10,13 +10,16 @@ vet:
   go vet ./...
 
 build: vet
-  go build -o {{bindir}}{{pname}} .
+  go build -o {{bindir}}{{pname}} ./cmd/server
 
 serve: build
   ./{{bindir}}{{pname}}
 
 check:
   staticcheck ./...
+
+test:
+  go test ./...
 
 clean:
   rm -rf {{bindir}}
