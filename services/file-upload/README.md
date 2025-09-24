@@ -169,7 +169,7 @@ You can use [`xh`](https://github.com/ducaale/xh) to interact with the API endpo
 
 **Health Check**
 ```bash
-xh GET :8080/health
+xh :8080/health
 ```
 
 **Generate Presigned URL**
@@ -185,7 +185,7 @@ xh POST :8080/upload/complete key='uploads/user123/1678886400_example.jpg' user_
 ### Building
 ```bash
 # Build binary
-go build -o bin/file-upload ./cmd/server
+just build
 
 # Build Docker image
 docker build -t file-upload:latest .
