@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"os"
 
 	"github.com/tomasohchom/motion/services/file-upload/internal/clients"
 	"github.com/tomasohchom/motion/services/file-upload/internal/config"
@@ -28,12 +27,7 @@ func main() {
 	mux.HandleFunc("POST /upload/presigned", uploadHandler.GetPresignedURL)
 	mux.HandleFunc("POST /upload/complete", uploadHandler.CompleteUpload)
 
-	var addr string
-	if port := os.Getenv("PORT"); port == "" {
-		addr = ":8080"
-	} else {
-		addr = fmt.Sprintf(":%s", port)
-	}
+	addr := fmt.Sprintf(":%s", cfg.Server.Port)
 
 	log.Printf("\033[32mServer started on http://localhost%s\033[0m\n", addr)
 

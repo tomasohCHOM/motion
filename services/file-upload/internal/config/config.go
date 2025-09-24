@@ -29,7 +29,7 @@ type StorageConfig struct {
 func Load() *Config {
 	return &Config{
 		Server: ServerConfig{
-			Port:        getEnv("PORT", "8888"),
+			Port:        getEnv("PORT", "8080"),
 			Environment: getEnv("ENV", "development"),
 		},
 		Storage: StorageConfig{
