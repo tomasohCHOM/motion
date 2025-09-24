@@ -27,8 +27,7 @@ services:
       MINIO_ROOT_USER: minioadmin
       MINIO_ROOT_PASSWORD: minioadmin
     depends_on:
-      minio:
-        condition: service_healthy
+      - minio
 
 volumes:
   minio_data:
