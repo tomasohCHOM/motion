@@ -163,6 +163,25 @@ The service is configured via environment variables:
 go test ./...
 ```
 
+### Testing with xh
+
+You can use [`xh`](https://github.com/ducaale/xh) to interact with the API endpoints during local development.
+
+**Health Check**
+```bash
+xh GET :8080/health
+```
+
+**Generate Presigned URL**
+```bash
+xh POST :8080/upload/presigned filename='example.jpg' content_type='image/jpeg' user_id='user123' fileSize:=1048576
+```
+
+**Notify Upload Completion**
+```bash
+xh POST :8080/upload/complete key='uploads/user123/1678886400_example.jpg' user_id='user123'
+```
+
 ### Building
 ```bash
 # Build binary
