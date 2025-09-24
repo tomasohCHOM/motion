@@ -35,9 +35,9 @@ func main() {
 		addr = fmt.Sprintf(":%s", port)
 	}
 
+	log.Printf("\033[32mServer started on http://localhost%s\033[0m\n", addr)
+
 	if err := http.ListenAndServe(addr, mux); err != nil {
 		log.Fatalf("Server failed to start: %v", err)
 	}
-
-	log.Printf("\033[32m Server started on http://localhost%s \033[0m\n", addr)
 }
