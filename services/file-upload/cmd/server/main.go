@@ -19,6 +19,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to create storage client: %v", err)
 	}
+	log.Println("Successfully created storage client")
 
 	uploadService := services.NewUploadService(storageClient, cfg)
 	uploadHandler := handlers.NewUploadHandler(uploadService, cfg)
@@ -37,4 +38,6 @@ func main() {
 	if err := http.ListenAndServe(addr, mux); err != nil {
 		log.Fatalf("Server failed to start: %v", err)
 	}
+
+	log.Printf("\033[32m Server started on http://localhost%s \033[0m\n", addr)
 }
