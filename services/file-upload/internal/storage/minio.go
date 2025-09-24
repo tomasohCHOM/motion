@@ -16,7 +16,7 @@ type MinIOClient struct {
 }
 
 func NewMinIOClient(cfg appconfig.StorageConfig) (*MinIOClient, error) {
-	client, err := minio.New(cfg.Endpiont, &minio.Options{
+	client, err := minio.New(cfg.Endpoint, &minio.Options{
 		Creds:  credentials.NewStaticV4(cfg.AccessKey, cfg.SecretKey, ""),
 		Secure: cfg.UseSSL,
 	})

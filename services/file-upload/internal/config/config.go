@@ -20,7 +20,7 @@ type StorageConfig struct {
 	Bucket   string
 	Region   string
 	// MinIO specific
-	Endpiont  string
+	Endpoint  string
 	AccessKey string
 	SecretKey string
 	UseSSL    bool
@@ -35,7 +35,8 @@ func Load() *Config {
 		Storage: StorageConfig{
 			Provider:  getEnv("STORAGE_PROVIDER", "s3"),
 			Bucket:    getEnv("STORAGE_BUCKET", "uploads"),
-			Region:    getEnv("MINIO_ENDPOINT", "localhost:9000"),
+			Region:    getEnv("AWS_REGION", "us-east-1"),
+			Endpoint:  getEnv("MINIO_ENDPOINT", "localhost:9000"),
 			AccessKey: getEnv("MINIO_ROOT_USER", "minioadmin"),
 			SecretKey: getEnv("MINIO_ROOT_PASSWORD", "minioadmin"),
 			UseSSL:    getBoolEnv("MINIO_USE_SSL", false),
