@@ -1,5 +1,6 @@
 import { Download } from 'lucide-react'
 import React, { useState } from 'react'
+import { useStore } from '@tanstack/react-store'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -8,8 +9,13 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
+import {
+  filePickerActions,
+  filePickerStore,
+} from '@/store/files/file-picker-store'
 
 export default function FilePicker() {
+  const { isOpen } = useStore(filePickerStore)
   const [_, setFile] = useState<File | null>(null)
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -19,7 +25,7 @@ export default function FilePicker() {
   }
 
   return (
-    <Dialog>
+    <Dialog open={isOpen} onOpenChange={filePickerActions.toggleDialog}>
       <DialogContent className="sm:max-w-[40rem]">
         <DialogHeader>
           <DialogTitle>Upload a new file</DialogTitle>

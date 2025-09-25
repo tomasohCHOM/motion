@@ -1,10 +1,13 @@
 import { FolderOpen, Search, Upload } from 'lucide-react'
+import { useState } from 'react'
 import { FileCard } from './file'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import PageContent from '@/components/workspace/layout/page-content'
 import { mockFilesTestData } from '@/static/workspace/files'
 import FilePicker from '@/components/workspace/files/file-picker'
+import { filePickerActions } from '@/store/files/file-picker-store'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
 const NoFilesFound: React.FC = () => {
   return (
@@ -30,7 +33,10 @@ const FilesPageHeader: React.FC = () => {
         </div>
       </div>
       <div className="flex items-center gap-3">
-        <Button type="button" className="flex items-center">
+        <Button
+          onClick={filePickerActions.toggleDialog}
+          className="cursor-pointer"
+        >
           <Upload className="h-4 w-4 mr-2" />
           Upload
         </Button>
@@ -40,14 +46,36 @@ const FilesPageHeader: React.FC = () => {
 }
 
 const FilesPageContent: React.FC = () => {
+  const [activeTab, setActiveTab] = useState('all')
+
   return (
-    <div className="p-6 grid gap-6">
-      {mockFilesTestData.length === 0 ? (
-        <NoFilesFound />
-      ) : (
-        mockFilesTestData.map((item) => <FileCard key={item.id} item={item} />)
-      )}
-    </div>
+    <Tabs
+      value={activeTab}
+      onValueChange={setActiveTab}
+      className="h-full flex flex-col"
+    >
+      <div className="px-6">
+        <TabsList className="grid w-full max-w-sm grid-cols-3">
+          <TabsTrigger value="all">All Files</TabsTrigger>
+          <TabsTrigger value="recent">Recent</TabsTrigger>
+          <TabsTrigger value="starred">Starred</TabsTrigger>
+        </TabsList>
+      </div>
+
+      <div className="flex-1 overflow-y-auto p-6">
+        <TabsContent value={activeTab} className="mt-0">
+          <div className="grid gap-6">
+            {mockFilesTestData.length === 0 ? (
+              <NoFilesFound />
+            ) : (
+              mockFilesTestData.map((item) => (
+                <FileCard key={item.id} item={item} />
+              ))
+            )}
+          </div>
+        </TabsContent>
+      </div>
+    </Tabs>
   )
 }
 
