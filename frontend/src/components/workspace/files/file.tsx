@@ -1,4 +1,4 @@
-import { Download, MoreHorizontal, Star } from 'lucide-react'
+import { Download, MoreHorizontal, Star, Trash } from 'lucide-react'
 import { formatDate, getFileIcon, getFileTypeColor } from './utils'
 import type { FileItem } from '@/static/workspace/files'
 import { Card, CardContent } from '@/components/ui/card'
@@ -72,6 +72,7 @@ export const FileCard: React.FC<{ item: FileItem }> = ({ item }) => {
                 {item.starred ? 'Unstar' : 'Star'}
               </DropdownMenuItem>
               <DropdownMenuItem className="text-destructive">
+                <Trash className="h-4 w-4 mr-2 text-destructive" />
                 Delete
               </DropdownMenuItem>
             </DropdownMenuContent>
