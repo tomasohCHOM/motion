@@ -1,0 +1,35 @@
+name: File Upload Microservice CI
+
+on:
+  pull_request:
+    branches: [ "main" ]
+    paths: 'services/file-upload/**'
+
+jobs:
+  build:
+    name: File Upload CI Checks
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: services/file-upload
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v6
+        with:
+          go-version: '1.24.6'
+
+      - name: Format check
+        run: go fmt ./... && git diff --exit-code
+
+      - name: Static analysis check
+        uses: dominikh/staticcheck-action@v1
+        with:
+          version: "latest"
+          working-directory: services/file-upload
+
+      - name: Build check
+        run: go build ./...
+
+      - name: Run tests
+        run: go test ./...

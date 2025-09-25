@@ -5,10 +5,11 @@ mkShell {
   packages = [
     nodejs
     go
-    gotools
-    air
+    go-tools
+    minio
     delve
     terraform
-    justbuild
+    just
+    xh
   ];
 }
