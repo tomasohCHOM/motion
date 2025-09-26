@@ -276,6 +276,7 @@ function NotesListPage() {
   return (
     <PageContent>
       {/* Header */}
+      <div className='p-8'>
       <div className="flex justify-between items-center mb-4 gap-4">
         <div>
           <h1 className="font-bold text-2xl md:text-4xl">All Notes</h1>
@@ -339,6 +340,7 @@ function NotesListPage() {
           <p className="mt-2">Click "New Note" to create your first note.</p>
         </div>
       )}
+    </div>
     </PageContent>
   )
 }
