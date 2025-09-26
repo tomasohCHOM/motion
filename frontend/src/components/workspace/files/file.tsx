@@ -1,4 +1,11 @@
-import { Download, MoreHorizontal, Star, Trash } from 'lucide-react'
+import {
+  Download,
+  FolderOpen,
+  MoreHorizontal,
+  Star,
+  Trash,
+  Upload,
+} from 'lucide-react'
 import { formatDate, getFileIcon, getFileTypeColor } from './utils'
 import type { FileItem } from '@/static/workspace/files'
 import { Card, CardContent } from '@/components/ui/card'
@@ -12,6 +19,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Button } from '@/components/ui/button'
+import { filePickerActions } from '@/store/files/file-picker-store'
 
 export const FileCard: React.FC<{ item: FileItem }> = ({ item }) => {
   return (
@@ -80,5 +88,19 @@ export const FileCard: React.FC<{ item: FileItem }> = ({ item }) => {
         </div>
       </CardContent>
     </Card>
+  )
+}
+
+export const NoFilesFound: React.FC = () => {
+  return (
+    <div className="text-center py-12 text-muted-foreground">
+      <FolderOpen className="h-16 w-16 mx-auto mb-4 opacity-50" />
+      <h3 className="text-lg font-medium mb-2">No files found</h3>
+      <p className="text-sm mb-4">Upload some files to get started</p>
+      <Button variant="outline" onClick={filePickerActions.toggleDialog}>
+        <Upload className="h-4 w-4 mr-2" />
+        Upload Files
+      </Button>
+    </div>
   )
 }
