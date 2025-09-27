@@ -13,6 +13,7 @@ import {
   getFileTypeColor,
 } from './utils'
 import type { FileItem } from '@/store/files/files-store'
+import { fileItemsActions } from '@/store/files/files-store'
 import { Card, CardContent } from '@/components/ui/card'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { getMemberInitials } from '@/utils/initals'
@@ -27,6 +28,19 @@ import { Button } from '@/components/ui/button'
 import { filePickerActions } from '@/store/files/file-picker-store'
 
 export const FileCard: React.FC<{ item: FileItem }> = ({ item }) => {
+  const handleDownload = () => {
+    if (!item.file) return
+
+    const url = URL.createObjectURL(item.file)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = item.name
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+  }
+
   return (
     <Card className="hover:shadow-md p-2 transition-shadow cursor-pointer">
       <CardContent className="p-4">
@@ -76,7 +90,7 @@ export const FileCard: React.FC<{ item: FileItem }> = ({ item }) => {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem>
+              <DropdownMenuItem onClick={handleDownload}>
                 <Download className="h-4 w-4 mr-2" />
                 Download
               </DropdownMenuItem>
@@ -84,7 +98,10 @@ export const FileCard: React.FC<{ item: FileItem }> = ({ item }) => {
                 <Star className="h-4 w-4 mr-2" />
                 {item.starred ? 'Unstar' : 'Star'}
               </DropdownMenuItem>
-              <DropdownMenuItem className="text-destructive">
+              <DropdownMenuItem
+                className="text-destructive"
+                onClick={() => fileItemsActions.removeFile(item.id)}
+              >
                 <Trash className="h-4 w-4 mr-2 text-destructive" />
                 Delete
               </DropdownMenuItem>
@@ -108,7 +125,7 @@ export const NoFilesFound: React.FC<{ searchQuery: string }> = ({
           ? 'Upload some files to get started'
           : 'Try adjusting your search terms'}
       </p>
-      <Button variant="outline" onClick={filePickerActions.openDialog}>
+      <Button variant="outline" onClick={filePickerActions.toggleDialog}>
         <Upload className="h-4 w-4 mr-2" />
         Upload Files
       </Button>
