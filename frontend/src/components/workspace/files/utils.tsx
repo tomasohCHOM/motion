@@ -60,7 +60,9 @@ export const getFileTypeColor = (fileType?: string) => {
 }
 
 export const formatDate = (dateString: string) => {
-  const date = new Date(dateString)
+  const [year, month, day] = dateString.split('-').map(Number)
+  const date = new Date(year, month - 1, day)
+  // const date = new Date(dateString)
   return date.toLocaleDateString('en-US', {
     month: 'short',
     day: 'numeric',
