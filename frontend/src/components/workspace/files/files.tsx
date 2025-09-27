@@ -1,16 +1,18 @@
 import { useState } from 'react'
+import { useStore } from '@tanstack/react-store'
 import { FileCard, NoFilesFound } from './file'
 import { FilesPageHeader } from './header'
 import PageContent from '@/components/workspace/layout/page-content'
-import { mockFilesTestData } from '@/static/workspace/files'
 import FilePicker from '@/components/workspace/files/file-picker'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { fileItemsStore } from '@/store/files/files-store'
 
 export default function WorkspaceFiles() {
+  const { fileItems } = useStore(fileItemsStore)
   const [searchQuery, setSearchQuery] = useState('')
   const [activeTab, setActiveTab] = useState('all')
 
-  const filteredFiles = mockFilesTestData.filter((file) => {
+  const filteredFiles = fileItems.filter((file) => {
     const matchesSearch = file.name
       .toLowerCase()
       .includes(searchQuery.toLowerCase())

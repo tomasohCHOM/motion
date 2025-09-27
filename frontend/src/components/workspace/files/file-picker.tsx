@@ -8,6 +8,7 @@ import {
   getFileTypeFromMimeType,
 } from './utils'
 import type { FileItem } from '@/store/files/files-store'
+import { fileItemsActions } from '@/store/files/files-store'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -49,7 +50,7 @@ const PreviewFileCard: React.FC<{ file: FileItem }> = ({ file }) => {
             variant="ghost"
             size="icon"
             className="h-8 w-8 text-muted-foreground hover:text-destructive flex-shrink-0"
-            onClick={filePickerActions.removeFile}
+            onClick={filePickerActions.removeSelectedFile}
           >
             <X className="h-4 w-4" />
           </Button>
@@ -75,8 +76,9 @@ export default function FilePicker() {
           name: 'Tomas Oh',
         },
         starred: false,
+        file,
       }
-      filePickerActions.addFile(fileItem)
+      filePickerActions.addSelectedFile(fileItem)
     },
     [selectedFile],
   )
@@ -104,6 +106,13 @@ export default function FilePicker() {
     if (e.target.files && e.target.files.length > 0) {
       handleSelectedFile(e.target.files[0])
     }
+  }
+
+  // TODO: Change this later to calling file-upload microservice
+  const uploadQueryHandler = () => {
+    if (!selectedFile) return
+    fileItemsActions.addFile(selectedFile)
+    filePickerActions.closeDialog()
   }
 
   return (
@@ -158,7 +167,7 @@ export default function FilePicker() {
           <Button variant="outline" onClick={filePickerActions.closeDialog}>
             Cancel
           </Button>
-          <Button disabled={!selectedFile}>
+          <Button disabled={!selectedFile} onClick={uploadQueryHandler}>
             <Download />
             Upload
           </Button>
