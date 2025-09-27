@@ -28,7 +28,7 @@ export const FilesPageHeader: React.FC<Props> = ({
       </div>
       <div className="flex items-center gap-3">
         <Button
-          onClick={filePickerActions.toggleDialog}
+          onClick={() => filePickerActions.toggleDialog()}
           className="cursor-pointer"
         >
           <Upload className="h-4 w-4 mr-2" />

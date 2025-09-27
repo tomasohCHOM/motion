@@ -48,7 +48,7 @@ export default function WorkspaceFiles() {
           <TabsContent value={activeTab} className="mt-0">
             <div className="grid gap-6">
               {filteredFiles.length === 0 ? (
-                <NoFilesFound />
+                <NoFilesFound searchQuery={searchQuery} />
               ) : (
                 filteredFiles.map((item) => (
                   <FileCard key={item.id} item={item} />
