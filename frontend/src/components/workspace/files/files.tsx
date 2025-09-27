@@ -52,8 +52,8 @@ export default function WorkspaceFiles() {
               {filteredFiles.length === 0 ? (
                 <NoFilesFound searchQuery={searchQuery} />
               ) : (
-                filteredFiles.map((item) => (
-                  <FileCard key={item.id} item={item} />
+                filteredFiles.map((fileItem) => (
+                  <FileCard key={fileItem.id} fileItem={fileItem} />
                 ))
               )}
             </div>
