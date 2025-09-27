@@ -1,6 +1,7 @@
 export type FileItem = {
   id: string
   name: string
+  file?: File
   fileType:
     | 'document'
     | 'pdf'
@@ -8,7 +9,7 @@ export type FileItem = {
     | 'text'
     | 'spreadsheet'
     | 'presentation'
-  size?: string
+  size: number
   modifiedAt: string
   modifiedBy: {
     name: string

@@ -6,8 +6,13 @@ import {
   Trash,
   Upload,
 } from 'lucide-react'
-import { formatDate, getFileIcon, getFileTypeColor } from './utils'
-import type { FileItem } from '@/static/workspace/files'
+import {
+  formatDate,
+  formatFileSize,
+  getFileIcon,
+  getFileTypeColor,
+} from './utils'
+import type { FileItem } from '@/store/files/files-store'
 import { Card, CardContent } from '@/components/ui/card'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { getMemberInitials } from '@/utils/initals'
@@ -37,7 +42,7 @@ export const FileCard: React.FC<{ item: FileItem }> = ({ item }) => {
             </div>
 
             <div className="flex items-center gap-3 text-xs text-muted-foreground">
-              <span>{item.size}</span>
+              <span>{formatFileSize(item.size)}</span>
               <span>•</span>
               <span>Modified {formatDate(item.modifiedAt)}</span>
               <span>•</span>
@@ -91,13 +96,19 @@ export const FileCard: React.FC<{ item: FileItem }> = ({ item }) => {
   )
 }
 
-export const NoFilesFound: React.FC = () => {
+export const NoFilesFound: React.FC<{ searchQuery: string }> = ({
+  searchQuery,
+}) => {
   return (
     <div className="text-center py-12 text-muted-foreground">
       <FolderOpen className="h-16 w-16 mx-auto mb-4 opacity-50" />
       <h3 className="text-lg font-medium mb-2">No files found</h3>
-      <p className="text-sm mb-4">Upload some files to get started</p>
-      <Button variant="outline" onClick={filePickerActions.toggleDialog}>
+      <p className="text-sm mb-4">
+        {searchQuery.length === 0
+          ? 'Upload some files to get started'
+          : 'Try adjusting your search terms'}
+      </p>
+      <Button variant="outline" onClick={filePickerActions.openDialog}>
         <Upload className="h-4 w-4 mr-2" />
         Upload Files
       </Button>
