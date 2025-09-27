@@ -6,6 +6,7 @@ import {
   Trash,
   Upload,
 } from 'lucide-react'
+import { useState } from 'react'
 import {
   formatDate,
   formatFileSize,
@@ -26,15 +27,59 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { Button } from '@/components/ui/button'
 import { filePickerActions } from '@/store/files/file-picker-store'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 
-export const FileCard: React.FC<{ item: FileItem }> = ({ item }) => {
+const DeleteFileDialog: React.FC<{
+  fileItem: FileItem
+  isDeleteActionOpen: boolean
+  setIsDeleteActionOpen: React.Dispatch<React.SetStateAction<boolean>>
+}> = ({ fileItem, isDeleteActionOpen, setIsDeleteActionOpen }) => {
+  return (
+    <AlertDialog
+      open={isDeleteActionOpen}
+      onOpenChange={() => setIsDeleteActionOpen(false)}
+    >
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+          <AlertDialogDescription>
+            This action will permanently delete the file "{fileItem.name}".
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogAction
+            onClick={() => fileItemsActions.removeFile(fileItem.id)}
+            className="bg-red-600 hover:bg-red-700 text-white"
+          >
+            <Trash className="mr-2 h-4 w-4" />
+            Delete
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  )
+}
+
+export const FileCard: React.FC<{ fileItem: FileItem }> = ({ fileItem }) => {
+  const [isDeleteActionOpen, setIsDeleteActionOpen] = useState(false)
+
   const handleDownload = () => {
-    if (!item.file) return
+    if (!fileItem.file) return
 
-    const url = URL.createObjectURL(item.file)
+    const url = URL.createObjectURL(fileItem.file)
     const a = document.createElement('a')
     a.href = url
-    a.download = item.name
+    a.download = fileItem.name
     document.body.appendChild(a)
     a.click()
     document.body.removeChild(a)
@@ -45,39 +90,42 @@ export const FileCard: React.FC<{ item: FileItem }> = ({ item }) => {
     <Card className="hover:shadow-md p-2 transition-shadow cursor-pointer">
       <CardContent className="p-4">
         <div className="flex items-center gap-3">
-          <div className="flex-shrink-0">{getFileIcon(item)}</div>
-
+          <div className="flex-shrink-0">{getFileIcon(fileItem)}</div>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-1">
-              <h4 className="font-medium text-sm truncate">{item.name}</h4>
-              {item.starred && (
+              <h4 className="font-medium text-sm truncate">{fileItem.name}</h4>
+              {fileItem.starred && (
                 <Star className="h-3 w-3 text-yellow-500 fill-yellow-500 flex-shrink-0" />
               )}
             </div>
-
             <div className="flex items-center gap-3 text-xs text-muted-foreground">
-              <span>{formatFileSize(item.size)}</span>
+              <span>{formatFileSize(fileItem.size)}</span>
               <span>•</span>
-              <span>Modified {formatDate(item.modifiedAt)}</span>
+              <span>Modified {formatDate(fileItem.modifiedAt)}</span>
               <span>•</span>
               <div className="flex items-center gap-1">
                 <Avatar className="h-4 w-4">
-                  <AvatarImage src={item.modifiedBy.avatar} />
+                  <AvatarImage src={fileItem.modifiedBy.avatar} />
                   <AvatarFallback className="text-xs">
-                    {getMemberInitials(item.modifiedBy.name)}
+                    {getMemberInitials(fileItem.modifiedBy.name)}
                   </AvatarFallback>
                 </Avatar>
-                <span>{item.modifiedBy.name}</span>
+                <span>{fileItem.modifiedBy.name}</span>
               </div>
             </div>
-
             <Badge
               variant="secondary"
-              className={`text-xs mt-2 ${getFileTypeColor(item.fileType)}`}
+              className={`text-xs mt-2 ${getFileTypeColor(fileItem.fileType)}`}
             >
-              {item.fileType}
+              {fileItem.fileType}
             </Badge>
           </div>
+
+          <DeleteFileDialog
+            fileItem={fileItem}
+            isDeleteActionOpen={isDeleteActionOpen}
+            setIsDeleteActionOpen={setIsDeleteActionOpen}
+          />
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -94,13 +142,15 @@ export const FileCard: React.FC<{ item: FileItem }> = ({ item }) => {
                 <Download className="h-4 w-4 mr-2" />
                 Download
               </DropdownMenuItem>
-              <DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => fileItemsActions.toggleStar(fileItem.id)}
+              >
                 <Star className="h-4 w-4 mr-2" />
-                {item.starred ? 'Unstar' : 'Star'}
+                {fileItem.starred ? 'Unstar' : 'Star'}
               </DropdownMenuItem>
               <DropdownMenuItem
                 className="text-destructive"
-                onClick={() => fileItemsActions.removeFile(item.id)}
+                onClick={() => setIsDeleteActionOpen(true)}
               >
                 <Trash className="h-4 w-4 mr-2 text-destructive" />
                 Delete
