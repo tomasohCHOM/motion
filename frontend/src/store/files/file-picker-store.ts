@@ -14,15 +14,6 @@ export const filePickerStore = new Store<FilePickerState>({
 })
 
 export const filePickerActions = {
-  openDialog: () => {
-    filePickerStore.setState((prev) => ({
-      ...prev,
-      isOpen: true,
-      selectedFile: null,
-      isUploading: false,
-    }))
-  },
-
   closeDialog: () => {
     filePickerStore.setState((prev) => ({
       ...prev,
@@ -32,22 +23,21 @@ export const filePickerActions = {
     }))
   },
 
-  toggleDialog: (isOpen?: boolean) => {
+  toggleDialog: () => {
     filePickerStore.setState((prev) => ({
       ...prev,
-      selectedFile: isOpen === false ? null : prev.selectedFile,
-      isOpen: isOpen !== undefined ? isOpen : !prev.isOpen,
+      isOpen: !prev.isOpen,
     }))
   },
 
-  addFile: (file: FileItem) => {
+  addSelectedFile: (file: FileItem) => {
     filePickerStore.setState((state) => ({
       ...state,
       selectedFile: file,
     }))
   },
 
-  removeFile: () => {
+  removeSelectedFile: () => {
     filePickerStore.setState((state) => ({
       ...state,
       selectedFile: null,
