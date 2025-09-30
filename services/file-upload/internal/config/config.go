@@ -33,7 +33,7 @@ func Load() *Config {
 			Environment: getEnv("ENV", "development"),
 		},
 		Storage: StorageConfig{
-			Provider:  getEnv("STORAGE_PROVIDER", "s3"),
+			Provider:  getEnv("STORAGE_PROVIDER", "minio"),
 			Bucket:    getEnv("STORAGE_BUCKET", "uploads"),
 			Region:    getEnv("AWS_REGION", "us-east-1"),
 			Endpoint:  getEnv("MINIO_ENDPOINT", "localhost:9000"),
