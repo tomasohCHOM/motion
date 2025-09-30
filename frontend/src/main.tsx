@@ -1,6 +1,7 @@
 import { StrictMode } from 'react'
 import ReactDOM from 'react-dom/client'
 import { RouterProvider, createRouter } from '@tanstack/react-router'
+import { ClerkWrapper, useClerkAuth } from './auth/clerk'
 
 import * as TanStackQueryProvider from './integrations/tanstack-query/root-provider.tsx'
 
@@ -40,17 +41,31 @@ declare module '@tanstack/react-router' {
   }
 }
 
+function InnerApp() {
+  const auth = useClerkAuth()
+
+  if (auth.isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        Loading...
+      </div>
+    )
+  }
+
+  return <RouterProvider router={router} context={{ auth }} />
+}
+
 // Render the app
 const rootElement = document.getElementById('app')
 if (rootElement && !rootElement.innerHTML) {
   const root = ReactDOM.createRoot(rootElement)
   root.render(
     <StrictMode>
-      <ClerkProvider publishableKey={PUBLISHABLE_KEY}>
+      <ClerkWrapper>
         <TanStackQueryProvider.Provider {...TanStackQueryProviderContext}>
-          <RouterProvider router={router} />
+          <InnerApp />
         </TanStackQueryProvider.Provider>
-      </ClerkProvider>
+      </ClerkWrapper>
     </StrictMode>,
   )
 }
