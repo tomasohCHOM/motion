@@ -4,27 +4,12 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"time"
 
 	"github.com/tomasohchom/motion/services/file-upload/internal/clients"
 	"github.com/tomasohchom/motion/services/file-upload/internal/config"
 	"github.com/tomasohchom/motion/services/file-upload/internal/handlers"
 	"github.com/tomasohchom/motion/services/file-upload/internal/services"
 )
-
-func checkMinIOConnection(cfg *config.Config) error {
-	client := &http.Client{Timeout: 3 * time.Second}
-	resp, err := client.Get(fmt.Sprintf("http://%s/minio/health/live", cfg.Storage.Endpoint))
-	if err != nil {
-		return err
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("unhealthy status: %d", resp.StatusCode)
-	}
-	return nil
-}
 
 func main() {
 
@@ -36,12 +21,9 @@ func main() {
 	}
 	log.Printf("Successfully created %s storage client\n", cfg.Storage.Provider)
 
-	if cfg.Storage.Provider == "minio" {
-		if err := checkMinIOConnection(cfg); err != nil {
-			log.Printf("MinIO connection failed: %v", err)
-		}
+	if !storageClient.IsOnline() {
+		log.Printf("WARNING: %s storage provider is offline", cfg.Storage.Provider)
 	}
-	log.Println("Successfully connected to MinIO")
 
 	uploadService := services.NewUploadService(storageClient, cfg)
 	uploadHandler := handlers.NewUploadHandler(uploadService, cfg)

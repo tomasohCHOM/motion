@@ -106,5 +106,10 @@ func (s *S3Client) ListObjects(ctx context.Context, bucket, prefix string) ([]st
 	return keys, nil
 }
 
+func (s *S3Client) IsOnline() bool {
+	// return s.client.
+	panic("Not implemented")
+}
+
 // Compile-time interface compliance check
 var _ interfaces.StorageClient = (*S3Client)(nil)

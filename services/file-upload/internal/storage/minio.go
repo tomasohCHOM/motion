@@ -53,5 +53,9 @@ func (m *MinIOClient) GetObjectURL(ctx context.Context, bucket, key string) (str
 	return presignedURL.String(), nil
 }
 
+func (m *MinIOClient) IsOnline() bool {
+	return m.client.IsOnline()
+}
+
 // Compile-time interface compliance check
 var _ interfaces.StorageClient = (*MinIOClient)(nil)
