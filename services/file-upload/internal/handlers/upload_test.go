@@ -6,7 +6,29 @@ import (
 	"net/http/httptest"
 	"reflect"
 	"testing"
+
+	"github.com/tomasohchom/motion/services/file-upload/internal/config"
+	"github.com/tomasohchom/motion/services/file-upload/internal/mocks"
+	"github.com/tomasohchom/motion/services/file-upload/internal/services"
 )
+
+func TestMakeBucket(t *testing.T) {
+	cfg := &config.Config{
+		Storage: config.StorageConfig{
+			Bucket: "test-bucket",
+			Region: "us-east-1",
+		},
+	}
+
+	mockStorage := &mocks.MockStorageClient{}
+	uploadService := services.NewUploadService(mockStorage, cfg)
+	_ = NewUploadHandler(uploadService, cfg)
+
+	// Assert that the MakeBucket function on the mock storage client was called
+	if !mockStorage.MakeBucketCalled {
+		t.Error("expected MakeBucket to be called, but it was not")
+	}
+}
 
 func TestHealthCheck(t *testing.T) {
 	req, err := http.NewRequest("GET", "/health", nil)

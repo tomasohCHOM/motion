@@ -25,6 +25,8 @@ func main() {
 		log.Printf("WARNING: %s storage provider is offline", cfg.Storage.Provider)
 	}
 
+
+
 	uploadService := services.NewUploadService(storageClient, cfg)
 	uploadHandler := handlers.NewUploadHandler(uploadService, cfg)
 	mux := http.NewServeMux()
