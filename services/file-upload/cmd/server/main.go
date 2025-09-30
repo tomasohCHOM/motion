@@ -13,12 +13,17 @@ import (
 
 func main() {
 
+	log.SetPrefix("[SERVER] ")
 	cfg := config.Load()
 	storageClient, err := clients.NewStorageClient(cfg)
 	if err != nil {
-		log.Fatalf("Failed to create storage client: %v", err)
+		log.Fatalf("Failed to create %s storage client: %v", cfg.Storage.Provider, err)
 	}
-	log.Println("Successfully created storage client")
+	log.Printf("Successfully created %s storage client\n", cfg.Storage.Provider)
+
+	if !storageClient.IsOnline() {
+		log.Printf("WARNING: %s storage provider is offline", cfg.Storage.Provider)
+	}
 
 	uploadService := services.NewUploadService(storageClient, cfg)
 	uploadHandler := handlers.NewUploadHandler(uploadService, cfg)

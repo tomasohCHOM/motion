@@ -7,7 +7,7 @@ import (
 
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
-	appconfig "github.com/tomasohchom/motion/services/file-upload/internal/config"
+	"github.com/tomasohchom/motion/services/file-upload/internal/config"
 	"github.com/tomasohchom/motion/services/file-upload/internal/interfaces"
 )
 
@@ -15,7 +15,7 @@ type MinIOClient struct {
 	client *minio.Client
 }
 
-func NewMinIOClient(cfg appconfig.StorageConfig) (*MinIOClient, error) {
+func NewMinIOClient(cfg config.StorageConfig) (*MinIOClient, error) {
 	client, err := minio.New(cfg.Endpoint, &minio.Options{
 		Creds:  credentials.NewStaticV4(cfg.AccessKey, cfg.SecretKey, ""),
 		Secure: cfg.UseSSL,
@@ -51,6 +51,23 @@ func (m *MinIOClient) GetObjectURL(ctx context.Context, bucket, key string) (str
 		return "", err
 	}
 	return presignedURL.String(), nil
+}
+
+func (m *MinIOClient) IsOnline() bool {
+	return m.client.IsOnline()
+}
+
+func (m *MinIOClient) MakeBucket(ctx context.Context, bucketName, region string) error {
+	err := m.client.MakeBucket(ctx, bucketName, minio.MakeBucketOptions{Region: region})
+	if err != nil {
+		exists, errBucketExists := m.client.BucketExists(ctx, bucketName)
+		if errBucketExists == nil && exists {
+			return nil
+		} else {
+			return err
+		}
+	}
+	return err
 }
 
 // Compile-time interface compliance check
