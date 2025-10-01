@@ -14,7 +14,7 @@ type Config struct {
 
 func Load() *Config {
 	return &Config{
-		Port:        getEnv("PORT", "8081"),
+		Port:        getEnv("PORT", "8080"),
 		Environment: getEnv("ENV", "development"),
 		DbEndpoint: getEnv("DB_URL", "localhost:5432"),
 	}

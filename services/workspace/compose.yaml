@@ -2,37 +2,38 @@ services:
   database:
     image: postgres:latest
     ports:
-      - "15432:5432"
-    env_file:
-      - .env
-    networks:
-      - postgres-network
+      - "5432:5432"
+    # environment:
+    #   POSTGRES_USER: dev
+    #   POSTGRES_PASSWORD: password
+    #   POSTGRES_DB: dev_db
     volumes:
-      - ${PWD}/db-data/:/var/lib/postgresql/data/
-      - ${PWD}/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - db-data:/var/lib/postgresql/data
 
-  pgadmin:
-    image: dpage/pgadmin4
-    ports:
-      - "15432:80" # admin page
-    env_file:
-      - .env
-    depends_on:
-      - database
-    networks:
-      - postgres-network
-    volumes:
-      - ${PWD}/pgadmin-data/:/var/lib/pgadmin/
+
+  # pgadmin:
+  #   image: dpage/pgadmin4
+  #   ports:
+  #     - "15433:80" # admin page
+  #   env_file:
+  #     - .env
+  #   depends_on:
+  #     - database
+  #   networks:
+  #     - postgres-network
+    # volumes:
+    #   - ${PWD}/pgadmin-data/:/var/lib/pgadmin/
 
   workspace-service:
     build: .
     ports:
       - "8080:8081"
-    env_file:
-      - .env
+    environment:
+      POSTGRES_USER: dev
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: dev_db
     depends_on:
-      - minio
+      - database
 
-networks:
-  postgres-network:
-    driver: bridge
+volumes:
+  db-data:
