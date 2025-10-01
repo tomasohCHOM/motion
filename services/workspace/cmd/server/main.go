@@ -19,7 +19,7 @@ func main() {
 
 	conn, err := pgx.Connect(context.Background(), os.Getenv("DATABASE_URL"))
 	if err != nil {
-		log.Fatalf("Unable to connect to database: %v\n", err)
+		log.Printf("WARNING: Unable to connect to database: %v\n", err)
 	}
 	defer conn.Close(context.Background())
 	log.Println("Successfully connected to database")
