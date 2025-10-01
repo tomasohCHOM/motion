@@ -13,7 +13,7 @@ type Config struct {
 
 func Load() *Config {
 	return &Config{
-		Port:        getEnv("PORT", "8080"),
+		Port:        getEnv("PORT", "8081"),
 		Environment: getEnv("ENV", "development"),
 		DbEndpoint:  getEnv("DATABASE_URL", "postgres://root@database:5432"),
 	}
