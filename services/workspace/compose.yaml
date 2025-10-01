@@ -21,9 +21,9 @@ services:
       - "8080:8081"
     environment:
       DATABASE_URL: postgres://dev:password@database:5432/dev_db
-    depends_on:
-      database:
-        condition: service_healthy
+    # depends_on:
+    #   database:
+    #     condition: service_healthy
 
 volumes:
   db-data:
