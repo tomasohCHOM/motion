@@ -1,25 +1,30 @@
 package main
 
 import (
+	"context"
 	"fmt"
+	"github.com/jackc/pgx/v5"
 	"log"
 	"net/http"
 	"os"
-	"context"
-	"github.com/jackc/pgx/v5"
+	"time"
 
 	"github.com/tomasohchom/motion/services/workspace/internal/config"
 	"github.com/tomasohchom/motion/services/workspace/internal/handlers"
-
 )
 
 func main() {
 	cfg := config.Load()
 	mux := http.NewServeMux()
 
-	conn, err := pgx.Connect(context.Background(), os.Getenv("DATABASE_URL"))
-	if err != nil {
+	var err error
+	var conn *pgx.Conn
+	conn, err = pgx.Connect(context.Background(), os.Getenv("DATABASE_URL"))
+	for err != nil {
 		log.Printf("WARNING: Unable to connect to database: %v\n", err)
+		log.Printf("Trying again in 5 seconds...")
+		time.Sleep(time.Second * 5)
+		conn, err = pgx.Connect(context.Background(), os.Getenv("DATABASE_URL"))
 	}
 	defer conn.Close(context.Background())
 	log.Println("Successfully connected to database")
