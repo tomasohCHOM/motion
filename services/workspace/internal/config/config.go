@@ -11,12 +11,11 @@ type Config struct {
 	DbEndpoint  string
 }
 
-
 func Load() *Config {
 	return &Config{
 		Port:        getEnv("PORT", "8080"),
 		Environment: getEnv("ENV", "development"),
-		DbEndpoint: getEnv("DB_URL", "localhost:5432"),
+		DbEndpoint:  getEnv("DATABASE_URL", "postgres://dev:password@localhost:5432/dev_db"),
 	}
 }
 
