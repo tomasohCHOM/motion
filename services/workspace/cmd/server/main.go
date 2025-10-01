@@ -24,24 +24,33 @@ func main() {
 		connMu sync.RWMutex
 	)
 
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
 	// Start db in seperate thread
 	go func() {
-		var err error
-		for {
+		// db closer
+		defer func() {
 			connMu.Lock()
-			conn, err = pgx.Connect(context.Background(), os.Getenv("DATABASE_URL"))
+			if conn != nil {
+				conn.Close(context.Background())
+			}
 			connMu.Unlock()
+		}()
 
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			default:
+			}
+
+			c, err := pgx.Connect(ctx, os.Getenv("DATABASE_URL"))
 			if err == nil {
+				connMu.Lock()
+				conn = c
+				connMu.Unlock()
 				log.Println("Successfully connected to database")
-				defer func() {
-					connMu.Lock()
-					if conn != nil {
-						conn.Close(context.Background())
-					}
-					connMu.Unlock()
-				}()
-				break
 			}
 
 			log.Printf("WARNING: Unable to connect to database: %v\n", err)
@@ -50,8 +59,6 @@ func main() {
 		}
 
 	}()
-
-	defer conn.Close(context.Background())
 
 	mux.HandleFunc("GET /health", handlers.HealthCheck)
 
