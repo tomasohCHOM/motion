@@ -60,7 +60,18 @@ func main() {
 
 	}()
 
-	mux.HandleFunc("GET /health", handlers.HealthCheck)
+	mux.HandleFunc("GET /health", func(w http.ResponseWriter, r *http.Request) {
+		connMu.RLock()
+		dbConnected := conn != nil
+		connMu.RUnlock()
+
+		if dbConnected {
+			handlers.HealthCheck(w, r)
+		} else {
+			w.WriteHeader(http.StatusServiceUnavailable)
+			w.Write([]byte("DB not ready"))
+		}
+	})
 
 	addr := fmt.Sprintf(":%s", cfg.Port)
 	log.Printf("\033[32mServer started on http://localhost%s\033[0m\n", addr)
