@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/jackc/pgx/v5"
+	"github.com/rs/cors"
 
 	"github.com/tomasohchom/motion/services/workspace/internal/config"
 	"github.com/tomasohchom/motion/services/workspace/internal/handlers"
@@ -73,9 +74,20 @@ func main() {
 		}
 	})
 
+	c := cors.New(cors.Options{
+		AllowedOrigins:   []string{"*"}, // modify for production
+		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowedHeaders:   []string{"Content-Type", "Authorization"},
+		AllowCredentials: false, // enable in production
+		MaxAge:           300,   // preflight cache duration in seconds
+		Debug:            true,  // disable in production
+	})
+
+	handler := c.Handler(mux)
+
 	addr := fmt.Sprintf(":%s", cfg.Port)
 	log.Printf("\033[32mServer started on http://localhost%s\033[0m\n", addr)
-	if err := http.ListenAndServe(addr, mux); err != nil {
+	if err := http.ListenAndServe(addr, handler); err != nil {
 		log.Fatalf("Server failed to start: %v", err)
 	}
 }
