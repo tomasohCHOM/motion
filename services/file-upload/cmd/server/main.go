@@ -37,8 +37,9 @@ func main() {
 		AllowedOrigins:   []string{"*"}, // modify for production
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowedHeaders:   []string{"Content-Type", "Authorization"},
-		AllowCredentials: false, // change in production
-		MaxAge:           300,   // preflight cache duration in seconds (idk what that is)
+		AllowCredentials: false, // enable in production
+		MaxAge:           300,   // preflight cache duration in seconds
+		Debug:            true,  // disable in production
 	})
 
 	handler := c.Handler(mux)
