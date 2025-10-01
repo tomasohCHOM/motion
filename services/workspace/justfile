@@ -1,0 +1,25 @@
+bindir := "bin/"
+pname := "workspace"
+
+all: build
+
+fmt:
+  go fmt ./...
+
+vet:
+  go vet ./...
+
+build: vet
+  go build -o {{bindir}}{{pname}} ./cmd/server
+
+serve: build
+  ./{{bindir}}{{pname}}
+
+check:
+  staticcheck ./...
+
+test:
+  go test ./...
+
+clean:
+  rm -rf {{bindir}}
