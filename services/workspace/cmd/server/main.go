@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -70,8 +71,9 @@ func main() {
 		if dbConnected {
 			handlers.HealthCheck(w, r)
 		} else {
+			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusServiceUnavailable)
-			w.Write([]byte("DB not ready"))
+			json.NewEncoder(w).Encode(map[string]string{"status": "DB not ready"})
 		}
 	})
 
