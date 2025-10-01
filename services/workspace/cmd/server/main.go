@@ -52,6 +52,7 @@ func main() {
 				conn = c
 				connMu.Unlock()
 				log.Println("Successfully connected to database")
+				return
 			}
 
 			log.Printf("WARNING: Unable to connect to database: %v\n", err)
