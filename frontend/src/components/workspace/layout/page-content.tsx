@@ -5,5 +5,5 @@ export default function PageContent({
 }: {
   children: React.ReactNode
 }) {
-  return <main className="flex flex-col w-full gap-8">{children}</main>
+  return <main className="flex pt-16 flex-col w-full gap-8">{children}</main>
 }
