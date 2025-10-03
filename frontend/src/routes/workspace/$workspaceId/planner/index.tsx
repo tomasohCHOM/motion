@@ -91,11 +91,7 @@ const getTypeBadgeClasses = (type: string) => {
 }
 
 // Sub-components for cleaner rendering
-function ScheduleItemCard({
-  item,
-}: {
-  item: (typeof scheduleItems)[number]
-}) {
+function ScheduleItemCard({ item }: { item: (typeof scheduleItems)[number] }) {
   return (
     <div className="flex items-center gap-5 p-4 rounded-lg border border-border hover:bg-muted/50 transition-colors">
       <div className="text-sm text-muted-foreground font-medium min-w-1 w-16">
@@ -128,11 +124,7 @@ function ScheduleItemCard({
   )
 }
 
-function UpcomingTaskCard({
-  task,
-}: {
-  task: (typeof upcomingTasks)[number]
-}) {
+function UpcomingTaskCard({ task }: { task: (typeof upcomingTasks)[number] }) {
   return (
     <div className="flex items-center justify-between p-3 rounded-lg border border-border">
       <div className="flex-1 min-w-0">
@@ -190,10 +182,12 @@ export default function PlannerPage() {
 
   // Dynamic overview stats
   const totalEvents = scheduleItems.length
-  const meetings = scheduleItems.filter((item) => item.type === 'meeting')
-    .length
-  const deadlines = scheduleItems.filter((item) => item.type === 'deadline')
-    .length
+  const meetings = scheduleItems.filter(
+    (item) => item.type === 'meeting',
+  ).length
+  const deadlines = scheduleItems.filter(
+    (item) => item.type === 'deadline',
+  ).length
 
   return (
     <div className="h-full p-4 sm:p-6 bg-background overflow-y-auto">
