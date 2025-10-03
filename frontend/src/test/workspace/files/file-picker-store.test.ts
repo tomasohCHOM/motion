@@ -3,7 +3,7 @@ import {
   filePickerActions,
   filePickerStore,
 } from '@/store/files/file-picker-store'
-import { mockFilesTestData } from '@/static/workspace/files'
+import { mockFilesTestData } from '@/test/testdata/files'
 
 describe('filePickerStore', () => {
   beforeEach(() => {

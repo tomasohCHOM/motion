@@ -1,10 +1,7 @@
 import { beforeEach, describe, expect, it } from 'vitest'
-import {
-  fileItemsActions,
-  fileItemsStore,
-  type FileItem,
-} from '@/store/files/files-store'
-import { mockFilesTestData } from '@/static/workspace/files'
+import type { FileItem } from '@/store/files/files-store'
+import { fileItemsActions, fileItemsStore } from '@/store/files/files-store'
+import { mockFilesTestData } from '@/test/testdata/files'
 
 describe('fileItemsStore', () => {
   beforeEach(() => {
