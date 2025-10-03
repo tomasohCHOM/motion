@@ -42,7 +42,6 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { Input } from '@/components/ui/input'
 import { MultiSelectCombobox } from '@/components/ui/multi-select-combobox'
-import PageContent from '@/components/workspace/layout/page-content'
 import { noteActions, notesStore } from '@/store/notes-store'
 
 interface NoteCardProps {
@@ -274,7 +273,7 @@ function NotesListPage() {
   }, [notes, searchTerm, sortBy])
 
   return (
-    <PageContent>
+    <>
       {/* Header */}
       <div className="p-8">
         <div className="flex justify-between items-center mb-4 gap-4">
@@ -341,6 +340,6 @@ function NotesListPage() {
           </div>
         )}
       </div>
-    </PageContent>
+    </>
   )
 }
