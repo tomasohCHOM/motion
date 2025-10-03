@@ -2,7 +2,6 @@ import { useState } from 'react'
 import { useStore } from '@tanstack/react-store'
 import { FileCard, NoFilesFound } from './file'
 import { FilesPageHeader } from './header'
-import PageContent from '@/components/workspace/layout/page-content'
 import FilePicker from '@/components/workspace/files/file-picker'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { fileItemsStore } from '@/store/files/files-store'
@@ -27,7 +26,7 @@ export default function WorkspaceFiles() {
   })
 
   return (
-    <PageContent>
+    <>
       <FilePicker />
       <FilesPageHeader
         searchQuery={searchQuery}
@@ -60,6 +59,6 @@ export default function WorkspaceFiles() {
           </TabsContent>
         </div>
       </Tabs>
-    </PageContent>
+    </>
   )
 }
