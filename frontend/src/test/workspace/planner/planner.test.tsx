@@ -1,105 +1,117 @@
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { fireEvent, render, screen } from '@testing-library/react'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
-import type * as DndKitCore from '@dnd-kit/core'
-import type * as DndKitSortable from '@dnd-kit/sortable'
+import PlannerPage from '@/routes/workspace/$workspaceId/planner/index'
 
-import type {Block} from '@/store/planner/planner-store';
-import PlannerPage from '@/components/workspace/planner/planner'
-import {  plannerStore } from '@/store/planner/planner-store'
+// Mock TanStack Router's createFileRoute to isolate the component
+vi.mock('@tanstack/react-router', () => ({
+  createFileRoute: () => ({
+    component: PlannerPage,
+  }),
+}))
 
-// Mock DndContext and SortableContext as drag-and-drop is hard to test with RTL
-vi.mock('@dnd-kit/core', async (importOriginal) => {
-  const original = await importOriginal<typeof DndKitCore>()
-  return {
-    ...original,
-    DndContext: vi.fn(({ children }) => children),
-  }
-})
+describe('PlannerPage', () => {
+  // Use a fixed date to ensure tests are consistent
+  const today = new Date('2025-10-26T10:00:00Z')
 
-vi.mock('@dnd-kit/sortable', async (importOriginal) => {
-  const original = await importOriginal<typeof DndKitSortable>()
-  return {
-    ...original,
-    SortableContext: vi.fn(({ children }) => children),
-    useSortable: vi.fn(() => ({
-      attributes: {},
-      listeners: {},
-      setNodeRef: vi.fn(),
-      transform: null,
-      transition: null,
-      isDragging: false,
-    })),
-  }
-})
-
-describe('PlannerPage Component', () => {
   beforeEach(() => {
-    // Reset store state before each test
-    plannerStore.setState(() => ({
-      blocks: [
-        { id: '1', type: 'heading', content: 'Meeting Notes' },
-        { id: '2', type: 'todo', content: 'Review budget', isCompleted: false },
-      ],
-    }))
-    // Mock the IntersectionObserver
-    const mockIntersectionObserver = vi.fn()
-    mockIntersectionObserver.mockReturnValue({
-      observe: () => null,
-      unobserve: () => null,
-      disconnect: () => null,
-    })
-    window.IntersectionObserver = mockIntersectionObserver
+    vi.useFakeTimers()
+    vi.setSystemTime(today)
   })
 
-  it('should render the main title and initial blocks from the store', () => {
+  afterEach(() => {
+    vi.useRealTimers()
+  })
+
+  const formatDate = (date: Date) => {
+    return date.toLocaleDateString('en-US', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    })
+  }
+
+  it('renders the planner page with the current date and all sections', () => {
     render(<PlannerPage />)
 
-    // Assert header is rendered
+    // Check for main headers
     expect(
-      screen.getByRole('heading', { name: /Planner/i }),
+      screen.getByRole('heading', { name: "Today's Schedule" }),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole('heading', { name: "Today's Overview" }),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole('heading', { name: 'Upcoming Tasks' }),
     ).toBeInTheDocument()
 
-    // Assert initial blocks are rendered
-    expect(screen.getByText('Meeting Notes')).toBeInTheDocument()
-    expect(screen.getByText('Review budget')).toBeInTheDocument()
+    // Check if the current date is displayed
+    expect(
+      screen.getByRole('button', { name: formatDate(today) }),
+    ).toBeInTheDocument()
   })
 
-  it('should toggle a todo item when the checkbox is clicked', () => {
+  it('navigates to the next day when the right chevron is clicked', () => {
     render(<PlannerPage />)
 
-    const checkbox = screen.getByRole('checkbox')
-    expect(checkbox).not.toBeChecked()
+    // Find button by its accessible name (from the icon) or a more robust selector
+    const nextDayButton = screen.getAllByRole('button')[2]
+    fireEvent.click(nextDayButton)
 
-    // Act
-    fireEvent.click(checkbox)
+    const nextDay = new Date(today)
+    nextDay.setDate(today.getDate() + 1)
 
-    // Assert
-    expect(checkbox).toBeChecked()
-    const todoBlock = plannerStore.state.blocks.find((b: Block) => b.id === '2')
-    expect(todoBlock?.isCompleted).toBe(true)
+    expect(
+      screen.getByRole('button', { name: formatDate(nextDay) }),
+    ).toBeInTheDocument()
   })
 
-  it('should delete a block when the delete button is clicked', () => {
+  it('navigates to the previous day when the left chevron is clicked', () => {
+    render(<PlannerPage />)
+    const prevDayButton = screen.getAllByRole('button')[0]
+    fireEvent.click(prevDayButton)
+
+    const prevDay = new Date(today)
+    prevDay.setDate(today.getDate() - 1)
+
+    expect(
+      screen.getByRole('button', { name: formatDate(prevDay) }),
+    ).toBeInTheDocument()
+  })
+
+  it('resets to today when the "Today" button is clicked after navigating', () => {
+    render(<PlannerPage />)
+    const nextDayButton = screen.getAllByRole('button')[2]
+    fireEvent.click(nextDayButton) // Go to tomorrow
+
+    const todayButton = screen.getByRole('button', { name: 'Today' })
+    fireEvent.click(todayButton)
+
+    expect(
+      screen.getByRole('button', { name: formatDate(today) }),
+    ).toBeInTheDocument()
+  })
+
+  it('displays all mock schedule items and upcoming tasks', () => {
     render(<PlannerPage />)
 
-    // Ensure the block is initially present
-    expect(screen.getByText('Meeting Notes')).toBeInTheDocument()
+    // Check for schedule items
+    expect(screen.getByText('Team Standup')).toBeInTheDocument()
+    expect(screen.getByText('Design Review')).toBeInTheDocument()
+    expect(screen.getByText('Project Deadline')).toBeInTheDocument()
 
-    // Find delete button
-    const blockGroup = screen.getByText('Meeting Notes').closest('.group')
-    const deleteButton = blockGroup?.querySelector(
-      'button[aria-label="Delete block"]',
-    )
+    // Check for upcoming tasks
+    expect(screen.getByText('Complete API Documentation')).toBeInTheDocument()
+    expect(screen.getByText('Review Pull Requests')).toBeInTheDocument()
+    expect(screen.getByText('Update Design System')).toBeInTheDocument()
+  })
 
-    expect(deleteButton).not.toBeNull()
+  it('opens the calendar popover when the date button is clicked', () => {
+    render(<PlannerPage />)
+    const dateButton = screen.getByRole('button', { name: formatDate(today) })
+    fireEvent.click(dateButton)
 
-    // Act - click the delete button
-    fireEvent.click(deleteButton!)
-
-    // Assert
-    expect(screen.queryByText('Meeting Notes')).not.toBeInTheDocument()
-    const state = plannerStore.state
-    expect(state.blocks.find((b: Block) => b.id === '1')).toBeUndefined()
-    expect(state.blocks.length).toBe(1)
+    // Check if the calendar popover is visible by looking for a unique element inside it
+    expect(screen.getByText('October')).toBeInTheDocument()
   })
 })
