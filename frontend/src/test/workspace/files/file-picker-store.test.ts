@@ -1,38 +1,48 @@
-import { describe, expect, it } from 'vitest'
-import type { FileItem } from '@/store/files/files-store'
+import { beforeEach, describe, expect, it } from 'vitest'
 import {
   filePickerActions,
   filePickerStore,
 } from '@/store/files/file-picker-store'
+import { mockFilesTestData } from '@/static/workspace/files'
 
 describe('filePickerStore', () => {
-  it('should add a file', () => {
-    const selectedFile = {
-      id: '1',
-      name: 'test',
-      fileType: 'document' as FileItem['fileType'],
-      size: 1000,
-      modifiedAt: '2024-01-15',
-      modifiedBy: { name: 'Test User' },
-      starred: false,
-    }
+  beforeEach(() => {
+    filePickerStore.setState({
+      selectedFile: null,
+      isOpen: false,
+      isUploading: false,
+    })
+  })
 
-    filePickerActions.addSelectedFile(selectedFile)
-    expect(filePickerStore.state.selectedFile).toBe(selectedFile)
+  it('should add a selected file', () => {
+    const file = mockFilesTestData[0]
+    filePickerActions.addSelectedFile(file)
+    expect(filePickerStore.state.selectedFile).toBe(file)
   })
 
   it('should remove a file', () => {
+    const file = mockFilesTestData[0]
+    filePickerActions.addSelectedFile(file)
     filePickerActions.removeSelectedFile()
-    expect(filePickerStore.state.selectedFile).toBe(null)
+    expect(filePickerStore.state.selectedFile).toBeNull()
   })
 
   it('should toggle the dialog', () => {
+    const before = filePickerStore.state.isOpen
     filePickerActions.toggleDialog()
-    expect(filePickerStore.state.isOpen).toBe(true)
+    expect(filePickerStore.state.isOpen).toBe(!before)
+    filePickerActions.toggleDialog()
+    expect(filePickerStore.state.isOpen).toBe(before)
   })
 
   it('should close the dialog', () => {
+    filePickerStore.state.isOpen = true
     filePickerActions.closeDialog()
     expect(filePickerStore.state.isOpen).toBe(false)
+  })
+
+  it('should not break if removing a file when none is selected', () => {
+    filePickerActions.removeSelectedFile()
+    expect(filePickerStore.state.selectedFile).toBeNull()
   })
 })
