@@ -25,6 +25,7 @@ import {
 } from '@/store/files/file-picker-store'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { useFileUpload } from '@/client/files/upload-query'
 
 const PreviewFileCard: React.FC<{ file: FileItem }> = ({ file }) => {
   return (
@@ -61,6 +62,7 @@ const PreviewFileCard: React.FC<{ file: FileItem }> = ({ file }) => {
 }
 
 export default function FilePicker() {
+  const { mutate: uploadFile } = useFileUpload()
   const { isOpen, selectedFile } = useStore(filePickerStore)
   const [isDragOver, setIsDragOver] = useState(false)
 
@@ -108,9 +110,9 @@ export default function FilePicker() {
     }
   }
 
-  // TODO: Change this later to calling file-upload microservice
   const uploadQueryHandler = () => {
     if (!selectedFile) return
+    uploadFile({ file: selectedFile, userId: '23424' })
     fileItemsActions.addFile(selectedFile)
     filePickerActions.closeDialog()
   }
