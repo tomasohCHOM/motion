@@ -71,8 +71,7 @@
     "react-dom": "^19.0.0",
     "tailwind-merge": "^3.0.2",
     "tailwindcss": "^4.0.6",
-    "tw-animate-css": "^1.3.6",
-    "@clerk/clerk-react": "^5.49.1"
+    "tw-animate-css": "^1.3.6"
   },
   "devDependencies": {
     "@tanstack/eslint-config": "^0.3.0",
