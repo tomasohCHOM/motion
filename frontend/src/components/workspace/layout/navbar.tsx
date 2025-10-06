@@ -1,11 +1,44 @@
-import { User } from 'lucide-react'
+import {
+  SignedIn,
+  SignedOut,
+  UserButton,
+} from '@clerk/clerk-react'
+import { useClerkAuth } from '@/auth/clerk'
 
 export default function AppNavbar() {
+  const auth = useClerkAuth()
   return (
     <nav className="w-full flex items-center justify-between border-b border-sidebar-border p-5">
       <span className="font-semibold">CPSC 491's Workspace</span>
       <div>
-        <User />
+        {/* Dev-only auth state indicator to help debug authentication during development */}
+        <span className="mr-4 text-xs text-muted-foreground">
+          Auth: {auth.isLoading ? 'loading' : auth.isAuthenticated ? 'signed-in' : 'signed-out'}
+        </span>
+        <SignedIn>
+          <div className="flex items-center gap-2">
+            <UserButton />
+            <button
+              className="btn"
+              onClick={async () => {
+                await auth.logout()
+              }}
+            >
+              Sign out
+            </button>
+          </div>
+        </SignedIn>
+        <SignedOut>
+          <button
+            className="btn"
+            onClick={() => {
+              const current = typeof window !== 'undefined' ? window.location.href : '/'
+              window.location.href = `/sign-in?redirect=${encodeURIComponent(current)}`
+            }}
+          >
+            Sign in
+          </button>
+        </SignedOut>
       </div>
     </nav>
   )

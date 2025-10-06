@@ -25,6 +25,8 @@ if (!PUBLISHABLE_KEY) {
 const TanStackQueryProviderContext = TanStackQueryProvider.getContext()
 const router = createRouter({
   routeTree,
+  // We don't pass `auth` here because it's only available at runtime after Clerk loads.
+  // The full context (queryClient + auth) will be passed to <RouterProvider />.
   context: {
     ...TanStackQueryProviderContext,
   },
@@ -52,7 +54,13 @@ function InnerApp() {
     )
   }
 
-  return <RouterProvider router={router} context={{ auth }} />
+  // Build full router context expected by the root route
+  const fullContext = {
+    ...TanStackQueryProviderContext,
+    auth,
+  }
+
+  return <RouterProvider router={router} context={fullContext} />
 }
 
 // Render the app

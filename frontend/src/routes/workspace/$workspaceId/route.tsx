@@ -1,9 +1,20 @@
-import { Outlet, createFileRoute } from '@tanstack/react-router'
+import { Outlet, createFileRoute, redirect } from '@tanstack/react-router'
 import { SidebarProvider } from '@/components/ui/sidebar'
 import AppNavbar from '@/components/workspace/layout/navbar'
 import AppSidebar from '@/components/workspace/layout/sidebar'
 
 export const Route = createFileRoute('/workspace/$workspaceId')({
+  beforeLoad: ({ context, location }) => {
+    // If auth is missing or user isn't signed in, redirect to sign-in with the original path
+    if (!context.auth?.isAuthenticated) {
+      throw redirect({
+        to: '/sign-in',
+        search: {
+          redirect: location.pathname,
+        },
+      })
+    }
+  },
   component: WorkspaceLayout,
 })
 

@@ -303,3 +303,26 @@ Files prefixed with `demo` can be safely deleted. They are there to provide a st
 # Learn More
 
 You can learn more about all of the offerings from TanStack in the [TanStack documentation](https://tanstack.com).
+
+
+## Clerk Authentication
+
+This project uses Clerk for authentication. To set it up locally:
+
+1. Create a Clerk account and an application. Copy the Publishable Key.
+2. In `frontend/`, create a `.env` file with:
+
+```env
+VITE_CLERK_PUBLISHABLE_KEY=pk_test_your_clerk_publishable_key
+```
+
+3. Install dependencies and run the dev server:
+
+```bash
+npm install
+npm run dev
+```
+
+4. The navbar shows a "Sign in" button which navigates to `/sign-in?redirect=<current-url>`. After successful sign-in Clerk will redirect back to that URL.
+
+Note: For production use the live publishable key and configure Clerk's dashboard to allow your site's domain.

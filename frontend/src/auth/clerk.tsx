@@ -1,5 +1,13 @@
 import { ClerkProvider, useUser, useAuth } from '@clerk/clerk-react'
 
+export type AuthState = {
+  isAuthenticated: boolean
+  user: { id: string; username: string; email: string } | null
+  isLoading: boolean
+  login: () => void
+  logout: () => void
+}
+
 export function ClerkWrapper({ children }: { children: React.ReactNode }) {
   return (
     <ClerkProvider publishableKey={import.meta.env.VITE_CLERK_PUBLISHABLE_KEY}>
@@ -8,27 +16,45 @@ export function ClerkWrapper({ children }: { children: React.ReactNode }) {
   )
 }
 
-export function useClerkAuth() {
+export function useClerkAuth(): AuthState {
   const { isSignedIn, isLoaded } = useAuth()
   const { user } = useUser()
 
   return {
-    isAuthenticated: isSignedIn,
+    isAuthenticated: Boolean(isSignedIn),
     user: user
       ? {
-          id: user.id,
-          username:
-            user.username || user.primaryEmailAddress?.emailAddress || '',
-          email: user.primaryEmailAddress?.emailAddress || '',
-        }
+        id: user.id,
+        username:
+          user.username || user.primaryEmailAddress?.emailAddress || '',
+        email: user.primaryEmailAddress?.emailAddress || '',
+      }
       : null,
     isLoading: !isLoaded,
     login: () => {
       // Clerk handles login through components
       window.location.href = '/sign-in'
     },
-    logout: () => {
-      // Clerk handles logout through components
+    logout: async () => {
+      // Try to use Clerk's client API if available, otherwise fallback to a redirect.
+      try {
+        // `useClerk` is optional in some setups; try to access global Clerk object
+        // at runtime and call signOut if present.
+        const globalAny = globalThis as any
+        if (globalAny.Clerk && typeof globalAny.Clerk.signOut === 'function') {
+          await globalAny.Clerk.signOut()
+          return
+        }
+        // Some setups expose a `clerk` instance on window
+        if (globalAny.clerk && typeof globalAny.clerk.signOut === 'function') {
+          await globalAny.clerk.signOut()
+          return
+        }
+      } catch (e) {
+        // ignore and fallback to redirect
+      }
+
+      // Fallback: navigate to the sign-out route which may be handled by server or Clerk
       window.location.href = '/sign-out'
     },
   }
