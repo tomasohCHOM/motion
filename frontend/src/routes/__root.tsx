@@ -9,12 +9,11 @@ import { SidebarProvider } from '@/components/ui/sidebar'
 import { AppSidebar } from '@/components/layout/sidebar'
 import AppNavigationMenu from '@/components/layout/navbar'
 import type { AuthState } from '@/auth/clerk'
-import { SidebarProvider } from '@/components/ui/sidebar'
-import { AppSidebar } from '@/components/layout/sidebar'
-import AppNavigationMenu from '@/components/layout/navbar'
 
 interface MyRouterContext {
   queryClient: QueryClient
+  // `auth` is optional at router construction time because Clerk isn't loaded yet.
+  auth?: AuthState
   // `auth` is optional at router construction time because Clerk isn't loaded yet.
   auth?: AuthState
 }

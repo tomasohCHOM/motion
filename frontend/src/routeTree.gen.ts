@@ -24,6 +24,20 @@ import { Route as WorkspaceWorkspaceIdNotesIndexRouteImport } from './routes/wor
 >>>>>>> 0fb15f3 (Implement note taking (#9))
 import { Route as WorkspaceWorkspaceIdNotesNoteIdRouteImport } from './routes/workspace/$workspaceId/notes/$noteId'
 
+const SignUpRoute = SignUpRouteImport.update({
+  id: '/sign-up',
+  path: '/sign-up',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SignInRoute = SignInRouteImport.update({
+  id: '/sign-in',
+  path: '/sign-in',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedRoute = AuthenticatedRouteImport.update({
+  id: '/_authenticated',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -123,6 +137,8 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/sign-in'
+    | '/sign-up'
     | '/workspace/$workspaceId'
 <<<<<<< HEAD
     | '/workspace/$workspaceId/manager'
@@ -136,6 +152,8 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/sign-in'
+    | '/sign-up'
     | '/workspace/$workspaceId'
 <<<<<<< HEAD
     | '/workspace/$workspaceId/manager'

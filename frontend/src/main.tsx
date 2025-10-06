@@ -55,7 +55,13 @@ function InnerApp() {
     )
   }
 
-  return <RouterProvider router={router} context={{ auth }} />
+  // Build full router context expected by the root route
+  const fullContext = {
+    ...TanStackQueryProviderContext,
+    auth,
+  }
+
+  return <RouterProvider router={router} context={fullContext} />
 }
 
 // Render the app

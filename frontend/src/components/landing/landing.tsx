@@ -1,8 +1,14 @@
 import { ArrowRight, Zap } from 'lucide-react'
 import { useClerkAuth } from '@/auth/clerk'
 import { Button } from '@/components/ui/button'
+import { useClerkAuth } from '@/auth/clerk'
 
 const LandingNavbar: React.FC = () => {
+  const auth = useClerkAuth()
+
+  const signInHref = '/sign-in?redirect=/workspace/1'
+  const workspaceHref = '/workspace/1'
+
   const auth = useClerkAuth()
 
   const signInHref = '/sign-in?redirect=/workspace/1'
@@ -48,6 +54,34 @@ const LandingNavbar: React.FC = () => {
                 </a>
               </>
             )}
+            {auth.isLoading ? (
+              <span className="text-sm text-muted-foreground">Checking auth…</span>
+            ) : auth.isAuthenticated ? (
+              <>
+                <a href={workspaceHref}>
+                  <Button variant="ghost">Workspace</Button>
+                </a>
+                <Button
+                  onClick={async () => {
+                    await auth.logout()
+                  }}
+                >
+                  Sign out
+                </Button>
+              </>
+            ) : (
+              <>
+                <a href={signInHref}>
+                  <Button variant="ghost">Sign In</Button>
+                </a>
+                <a href={signInHref}>
+                  <Button>
+                    Get Started
+                    <ArrowRight className="h-4 w-4 ml-2" />
+                  </Button>
+                </a>
+              </>
+            )}
           </div>
         </div>
       </div>
@@ -56,6 +90,9 @@ const LandingNavbar: React.FC = () => {
 }
 
 const Hero: React.FC = () => {
+  const auth = useClerkAuth()
+  const redirect = '/workspace/1'
+
   const auth = useClerkAuth()
   const redirect = '/workspace/1'
 
@@ -77,6 +114,21 @@ const Hero: React.FC = () => {
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+            {auth.isAuthenticated ? (
+              <a href={redirect}>
+                <Button size="lg" className="text-lg px-8 py-6">
+                  Go to workspace
+                  <ArrowRight className="h-5 w-5 ml-2" />
+                </Button>
+              </a>
+            ) : (
+              <a href={`/sign-in?redirect=${encodeURIComponent(redirect)}`}>
+                <Button size="lg" className="text-lg px-8 py-6">
+                  Start for free
+                  <ArrowRight className="h-5 w-5 ml-2" />
+                </Button>
+              </a>
+            )}
             {auth.isAuthenticated ? (
               <a href={redirect}>
                 <Button size="lg" className="text-lg px-8 py-6">
