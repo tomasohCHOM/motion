@@ -75,29 +75,8 @@ func main() {
 		}
 	})
 
-	mux.HandleFunc("POST /upload/presigned", func(w http.ResponseWriter, r *http.Request) {
-		handlerMu.RLock()
-		currentHandler := uploadHandler
-		handlerMu.RUnlock()
-
-		if currentHandler == nil {
-			http.Error(w, "Service not ready", http.StatusServiceUnavailable)
-			return
-		}
-		currentHandler.GetPresignedURL(w, r)
-	})
-
-	mux.HandleFunc("POST /upload/complete", func(w http.ResponseWriter, r *http.Request) {
-		handlerMu.RLock()
-		currentHandler := uploadHandler
-		handlerMu.RUnlock()
-
-		if currentHandler == nil {
-			http.Error(w, "Service not ready", http.StatusServiceUnavailable)
-			return
-		}
-		currentHandler.CompleteUpload(w, r)
-	})
+	mux.HandleFunc("POST /upload/presigned", uploadHandler.GetPresignedURL)
+	mux.HandleFunc("POST /upload/complete", uploadHandler.CompleteUpload)
 
 	c := cors.New(cors.Options{
 		AllowedOrigins:   []string{"*"}, // modify for production
