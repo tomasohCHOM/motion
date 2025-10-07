@@ -171,6 +171,8 @@ xh :8080/health
 **Generate Presigned URL**
 ```bash
 xh POST :8080/upload/presigned filename='example.jpg' content_type='image/jpeg' user_id='user123' fileSize:=1048576
+# OR
+xh POST :8080/upload/presigned < fixtures/presigned_request.json
 ```
 
 **Notify Upload Completion**
@@ -273,19 +275,12 @@ xhr.send(file);
 - Error tracking and alerting integration points
 - Metrics collection ready (add your preferred metrics library)
 
-## Contributing
-
-1. Follow Go conventions and best practices
-2. Add tests for new functionality
-3. Update documentation for API changes
-4. Use conventional commit messages
-
 ## Dependencies
 
 ### Core Dependencies
 - `github.com/aws/aws-sdk-go-v2` - AWS SDK for S3 operations
 - `github.com/minio/minio-go/v7` - MinIO client for local development
-- `github.com/gorilla/mux` - HTTP router and URL matcher
+- `github.com/rs/cors` - CORS middleware
 
 ### Development Dependencies
 - Docker and Docker Compose for local development
