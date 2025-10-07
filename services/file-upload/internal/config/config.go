@@ -3,6 +3,7 @@ package config
 import (
 	"os"
 	"strconv"
+	"strings"
 )
 
 type Config struct {
@@ -11,8 +12,9 @@ type Config struct {
 }
 
 type ServerConfig struct {
-	Port        string
-	Environment string
+	Port           string
+	Environment    string
+	AllowedOrigins []string
 }
 
 type StorageConfig struct {
@@ -29,8 +31,9 @@ type StorageConfig struct {
 func Load() *Config {
 	return &Config{
 		Server: ServerConfig{
-			Port:        getEnv("PORT", "8080"),
-			Environment: getEnv("ENV", "development"),
+			Port:           getEnv("PORT", "8080"),
+			Environment:    getEnv("ENV", "development"),
+			AllowedOrigins: getEnvAsSlice("CORS_ALLOWED_ORIGINS", []string{"*"}),
 		},
 		Storage: StorageConfig{
 			Provider:  getEnv("STORAGE_PROVIDER", "minio"),
@@ -47,6 +50,14 @@ func Load() *Config {
 func getEnv(key, defaultValue string) string {
 	if value := os.Getenv(key); value != "" {
 		return value
+	}
+
+	return defaultValue
+}
+
+func getEnvAsSlice(key string, defaultValue []string) []string {
+	if value := os.Getenv(key); value != "" {
+		return strings.Split(value, ",")
 	}
 
 	return defaultValue

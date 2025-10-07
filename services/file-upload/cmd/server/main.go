@@ -42,12 +42,12 @@ func main() {
 	mux.HandleFunc("POST /upload/complete", uploadHandler.CompleteUpload)
 
 	c := cors.New(cors.Options{
-		AllowedOrigins:   []string{"*"}, // modify for production
+		AllowedOrigins:   cfg.Server.AllowedOrigins, // from CORS_ALLOWED_ORIGINS
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowedHeaders:   []string{"Content-Type", "Authorization"},
 		AllowCredentials: false, // enable in production
 		MaxAge:           300,   // preflight cache duration in seconds
-		Debug:            true,  // disable in production
+		Debug:            cfg.Server.Environment == "development",
 	})
 
 	handler := c.Handler(mux)
