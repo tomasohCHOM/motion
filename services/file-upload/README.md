@@ -40,6 +40,7 @@ services/file-upload/
 │   ├── services/
 │   │   └── upload.go           # Business logic layer
 │   ├── handlers/
+│   │   ├── health.go
 │   │   └── upload.go           # HTTP request handlers
 │   ├── models/
 │   │   └── upload.go           # Request/response models
@@ -114,7 +115,6 @@ Health check endpoint for load balancers.
 ```json
 {
   "status": "healthy",
-  "service": "file-upload"
 }
 ```
 
@@ -148,6 +148,7 @@ The service is configured via environment variables:
    ```bash
    docker compose up -d
    ```
+> Add the `--build` argument to rebuild the server during development.
 
 2. The service will be available at `http://localhost:8080`
 3. MinIO console will be available at `http://localhost:9001` (admin/admin)
