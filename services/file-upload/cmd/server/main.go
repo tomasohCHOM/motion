@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/rs/cors"
 	"log"
@@ -22,14 +23,21 @@ func main() {
 	}
 	log.Printf("Successfully created %s storage client\n", cfg.Storage.Provider)
 
-	if !storageClient.IsOnline() {
-		log.Printf("WARNING: %s storage provider is offline", cfg.Storage.Provider)
-	}
-
 	uploadService := services.NewUploadService(storageClient, cfg)
 	uploadHandler := handlers.NewUploadHandler(uploadService, cfg)
 	mux := http.NewServeMux()
-	mux.HandleFunc("GET /health", uploadHandler.HealthCheck)
+
+	mux.HandleFunc("GET /health", func(w http.ResponseWriter, r *http.Request) {
+		storageOnline := storageClient.IsOnline()
+
+		if storageOnline {
+			handlers.HealthCheck(w, r)
+		} else {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusServiceUnavailable)
+			json.NewEncoder(w).Encode(map[string]string{"status": "storage offline"})
+		}
+	})
 	mux.HandleFunc("POST /upload/presigned", uploadHandler.GetPresignedURL)
 	mux.HandleFunc("POST /upload/complete", uploadHandler.CompleteUpload)
 
@@ -45,9 +53,7 @@ func main() {
 	handler := c.Handler(mux)
 
 	addr := fmt.Sprintf(":%s", cfg.Server.Port)
-
 	log.Printf("\033[32mServer started on http://localhost%s\033[0m\n", addr)
-
 	if err := http.ListenAndServe(addr, handler); err != nil {
 		log.Fatalf("Server failed to start: %v", err)
 	}
