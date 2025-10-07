@@ -125,6 +125,7 @@ The service is configured via environment variables:
 ### Server Configuration
 - `PORT`: Server port (default: 8080)
 - `ENVIRONMENT`: Runtime environment (development/production)
+- ` CORS_ALLOWED_ORIGINS`: Allowed origins (default: *)
 
 ### Storage Configuration
 - `STORAGE_PROVIDER`: Storage backend ("s3" or "minio")
@@ -202,6 +203,7 @@ export STORAGE_BUCKET=your-production-bucket
 export AWS_REGION=us-west-2
 export ENVIRONMENT=production
 export PORT=8080
+export CORS_ALLOWED_ORIGINS=https://your-frontend-domain.com
 ```
 
 ## Frontend Integration
