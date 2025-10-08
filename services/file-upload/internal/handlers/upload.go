@@ -88,6 +88,15 @@ func (h *UploadHandler) CompleteUpload(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(response)
 }
 
+func (h *UploadHandler) ListFiles(w http.ResponseWriter, r *http.Request) {
+	var prefix string
+	prefix = r.URL.Query().Get("prefix")
+	files, _ := h.uploadService.ListFiles(r.Context(), prefix)
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string][]string{"files": files})
+}
+
 // GetUploadStatus checks the status of an upload
 func (h *UploadHandler) GetUploadStatus(w http.ResponseWriter, r *http.Request) {
 	key := r.URL.Query().Get("key")
