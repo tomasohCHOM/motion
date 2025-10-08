@@ -40,6 +40,7 @@ func main() {
 	})
 	mux.HandleFunc("POST /upload/presigned", uploadHandler.GetPresignedURL)
 	mux.HandleFunc("POST /upload/complete", uploadHandler.CompleteUpload)
+	mux.HandleFunc("GET /upload/list", uploadHandler.ListFiles)
 
 	c := cors.New(cors.Options{
 		AllowedOrigins:   cfg.Server.AllowedOrigins, // from CORS_ALLOWED_ORIGINS
