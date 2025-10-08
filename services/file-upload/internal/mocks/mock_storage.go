@@ -65,5 +65,9 @@ func (m *MockStorageClient) MakeBucket(ctx context.Context, bucketName, region s
 	return nil
 }
 
+func (m *MockStorageClient) ListObjects(ctx context.Context, bucketName, prefix string) ([]string, error) {
+	return []string{}, nil
+}
+
 // Compile-time interface compliance check
 var _ interfaces.StorageClient = (*MockStorageClient)(nil)

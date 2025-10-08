@@ -71,5 +71,9 @@ func (m *MinIOClient) MakeBucket(ctx context.Context, bucketName, region string)
 	return err
 }
 
+func (m *MinIOClient) ListObjects(ctx context.Context, bucketName, prefix string) ([]string, error) {
+	return []string{}, nil
+}
+
 // Compile-time interface compliance check
 var _ interfaces.StorageClient = (*MinIOClient)(nil)

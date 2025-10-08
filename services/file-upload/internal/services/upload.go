@@ -33,3 +33,7 @@ func (u *UploadService) MakeBucket(ctx context.Context) error {
 func (u *UploadService) GenerateUploadURL(ctx context.Context, filename string) (string, error) {
 	return u.storage.GeneratePresignedURL(ctx, u.config.Storage.Bucket, filename, 15*time.Minute)
 }
+
+func (u *UploadService) ListFiles(ctx context.Context, prefix string) ([]string, error) {
+	return u.storage.ListObjects(ctx, u.config.Storage.Bucket, prefix)
+}

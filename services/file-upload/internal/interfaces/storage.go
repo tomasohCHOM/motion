@@ -16,6 +16,6 @@ type StorageClient interface {
 
 	// TODO:
 	// GetObject(ctx context.Context, bucket, key string) (io.ReadCloser, error)
-	// ListObjects(ctx context.Context, bucket, prefix string) ([]string, error)
+	ListObjects(ctx context.Context, bucket, prefix string) ([]string, error)
 	// ObjectExists(ctx context.Context, bucket, prefix string) (bool, error)
 }
