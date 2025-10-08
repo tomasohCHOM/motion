@@ -175,6 +175,11 @@ xh POST :8080/upload/presigned filename='example.jpg' content_type='image/jpeg' 
 xh POST :8080/upload/presigned < fixtures/presigned_request.json
 ```
 
+**Upload File to MinIO with Presigned URL**
+```bash
+xh PUT "my-presigned-url" < /path/to/example.jpg
+```
+
 **Notify Upload Completion**
 ```bash
 xh POST :8080/upload/complete key='uploads/user123/1678886400_example.jpg' user_id='user123'
