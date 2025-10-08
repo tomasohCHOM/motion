@@ -1,5 +1,5 @@
-import type { FileItem } from '@/store/files/files-store'
 import { useMutation } from '@tanstack/react-query'
+import type { FileItem } from '@/store/files/files-store'
 
 type PresignedResponse = {
   upload_url: string
