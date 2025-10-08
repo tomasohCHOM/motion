@@ -5,15 +5,10 @@ import { TanstackDevtools } from '@tanstack/react-devtools'
 import TanStackQueryDevtools from '../integrations/tanstack-query/devtools'
 
 import type { QueryClient } from '@tanstack/react-query'
-import { SidebarProvider } from '@/components/ui/sidebar'
-import { AppSidebar } from '@/components/layout/sidebar'
-import AppNavigationMenu from '@/components/layout/navbar'
 import type { AuthState } from '@/auth/clerk'
 
 interface MyRouterContext {
   queryClient: QueryClient
-  // `auth` is optional at router construction time because Clerk isn't loaded yet.
-  auth?: AuthState
   // `auth` is optional at router construction time because Clerk isn't loaded yet.
   auth?: AuthState
 }
@@ -21,17 +16,7 @@ interface MyRouterContext {
 export const Route = createRootRouteWithContext<MyRouterContext>()({
   component: () => (
     <>
-<<<<<<< HEAD
       <Outlet />
-=======
-      <SidebarProvider>
-        <AppSidebar />
-        <div className="w-full">
-          <AppNavigationMenu />
-          <Outlet />
-        </div>
-      </SidebarProvider>
->>>>>>> d903053 (Start working on team workspace UI layout (#6))
       <TanstackDevtools
         config={{
           position: 'bottom-left',

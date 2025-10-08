@@ -1,12 +1,6 @@
-<<<<<<< HEAD
 import * as React from 'react'
 import * as DialogPrimitive from '@radix-ui/react-dialog'
 import { XIcon } from 'lucide-react'
-=======
-import * as React from 'react'
-import * as DialogPrimitive from '@radix-ui/react-dialog'
-import { XIcon } from 'lucide-react'
->>>>>>> 0fb15f3 (Implement note taking (#9))
 
 import { cn } from '@/lib/utils'
 
@@ -114,11 +108,7 @@ function DialogTitle({
   return (
     <DialogPrimitive.Title
       data-slot="dialog-title"
-<<<<<<< HEAD
       className={cn('text-lg leading-none font-semibold', className)}
-=======
-      className={cn('text-lg leading-none font-semibold', className)}
->>>>>>> 0fb15f3 (Implement note taking (#9))
       {...props}
     />
   )

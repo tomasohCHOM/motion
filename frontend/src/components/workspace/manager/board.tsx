@@ -8,7 +8,7 @@ export const Board: React.FC = () => {
   const { columns } = useStore(kanbanStore)
   return (
     <KanbanDndProvider>
-      <div className="flex-1 overflow-x-auto overflow-y-hidden p-6 min-h-0">
+      <div className="flex-1 overflow-x-auto overflow-y-hidden p-6">
         <div className="flex gap-6 h-full min-w-max">
           {columns.map((column) => (
             <DroppableColumn key={column.id} column={column} />

@@ -1,7 +1,7 @@
 import React from 'react'
 import { Calendar, MoreHorizontal } from 'lucide-react'
+import { getAssigneeInitials } from './utils'
 import type { Task } from '@/store/manager/task-store'
-import { getMemberInitials } from '@/utils/initals'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
@@ -58,7 +58,7 @@ export const TaskCard: React.FC<Props> = ({ columnId, task }) => {
             <Avatar className="h-6 w-6">
               <AvatarImage src={task.assignee.avatar} />
               <AvatarFallback className="text-xs">
-                {getMemberInitials(task.assignee.name)}
+                {getAssigneeInitials(task.assignee.name)}
               </AvatarFallback>
             </Avatar>
             <Badge
