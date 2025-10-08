@@ -1,7 +1,6 @@
 import { queryOptions, useQuery } from '@tanstack/react-query'
 
 type HealthResponse = {
-  service: string
   status: string
 }
 
@@ -11,10 +10,8 @@ async function fetchFilesServiceHealth(): Promise<HealthResponse> {
     throw new Error('Files service healthcheck failed (bad response code)')
   }
   const data: HealthResponse = await res.json()
-  if (data.service !== 'file-upload' || data.status !== 'healthy') {
-    throw new Error(
-      `Files service healthcheck failed: service=${data.service}, status=${data.status}`,
-    )
+  if (data.status !== 'healthy') {
+    throw new Error(`Files service healthcheck failed: status=${data.status}`)
   }
   return data
 }
