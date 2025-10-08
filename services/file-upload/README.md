@@ -185,6 +185,13 @@ xh PUT "my-presigned-url" < /path/to/example.jpg
 xh POST :8080/upload/complete key='uploads/user123/1678886400_example.jpg' user_id='user123'
 ```
 
+### Using the Mock Client Script
+This mock client will take some file as input and run the above commands. Once
+its done check the [MinIO dashboard](http://localhost:9001) to see if the file has appeared.
+```bash
+./client.sh README.md
+```
+
 ### Building
 ```bash
 # Build binary
