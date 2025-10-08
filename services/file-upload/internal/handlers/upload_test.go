@@ -37,17 +37,15 @@ func TestHealthCheck(t *testing.T) {
 	}
 
 	rr := httptest.NewRecorder()
-	// The HealthCheck handler doesn't use any dependencies, so we can pass nil.
-	handler := NewUploadHandler(nil, nil)
 
-	handler.HealthCheck(rr, req)
+	HealthCheck(rr, req)
 
 	if status := rr.Code; status != http.StatusOK {
 		t.Errorf("handler returned wrong status code: got %v want %v",
 			status, http.StatusOK)
 	}
 
-	expected := map[string]string{"status": "healthy", "service": "file-upload"}
+	expected := map[string]string{"status": "healthy"}
 	var actual map[string]string
 	if err := json.Unmarshal(rr.Body.Bytes(), &actual); err != nil {
 		t.Fatalf("could not unmarshal response body: %v", err)
