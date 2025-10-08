@@ -73,7 +73,10 @@ func (m *MinIOClient) MakeBucket(ctx context.Context, bucketName, region string)
 
 func (m *MinIOClient) ListObjects(ctx context.Context, bucketName, prefix string) ([]string, error) {
 	var objects []string
-	for object := range m.client.ListObjects(ctx, bucketName, minio.ListObjectsOptions{Prefix: prefix, Recursive: false}) {
+	for object := range m.client.ListObjects(ctx, bucketName, minio.ListObjectsOptions{Prefix: prefix, Recursive: true}) {
+		if object.Err != nil {
+			return nil, object.Err
+		}
 		objects = append(objects, object.Key)
 	}
 	return objects, nil

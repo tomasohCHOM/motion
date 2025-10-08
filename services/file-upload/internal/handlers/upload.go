@@ -3,6 +3,7 @@ package handlers
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"time"
 
@@ -89,12 +90,19 @@ func (h *UploadHandler) CompleteUpload(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *UploadHandler) ListFiles(w http.ResponseWriter, r *http.Request) {
-	var prefix string
-	prefix = r.URL.Query().Get("prefix")
-	files, _ := h.uploadService.ListFiles(r.Context(), prefix)
+	prefix := r.URL.Query().Get("prefix")
+	files, err := h.uploadService.ListFiles(r.Context(), prefix)
+
+	if err != nil {
+		http.Error(w, "Failed to list files", http.StatusInternalServerError)
+		return
+	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string][]string{"files": files})
+	if err := json.NewEncoder(w).Encode(map[string][]string{"files": files}); err != nil {
+		log.Printf("[ERROR] Could not encode files to JSON: %v\n", err)
+		return
+	}
 }
 
 // GetUploadStatus checks the status of an upload
