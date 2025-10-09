@@ -22,7 +22,9 @@ const LandingNavbar: React.FC = () => {
 
           <div className="flex items-center gap-3">
             {auth.isLoading ? (
-              <span className="text-sm text-muted-foreground">Checking auth…</span>
+              <span className="text-sm text-muted-foreground">
+                Checking auth…
+              </span>
             ) : auth.isAuthenticated ? (
               <>
                 <a href={workspaceHref}>

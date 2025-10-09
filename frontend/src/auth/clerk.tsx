@@ -1,4 +1,4 @@
-import { ClerkProvider, useUser, useAuth } from '@clerk/clerk-react'
+import { ClerkProvider, useAuth, useUser } from '@clerk/clerk-react'
 
 export type AuthState = {
   isAuthenticated: boolean
@@ -24,11 +24,11 @@ export function useClerkAuth(): AuthState {
     isAuthenticated: Boolean(isSignedIn),
     user: user
       ? {
-        id: user.id,
-        username:
-          user.username || user.primaryEmailAddress?.emailAddress || '',
-        email: user.primaryEmailAddress?.emailAddress || '',
-      }
+          id: user.id,
+          username:
+            user.username || user.primaryEmailAddress?.emailAddress || '',
+          email: user.primaryEmailAddress?.emailAddress || '',
+        }
       : null,
     isLoading: !isLoaded,
     login: () => {
