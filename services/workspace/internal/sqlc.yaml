@@ -1,0 +1,11 @@
+version: "2"
+sql:
+  - engine: "postgresql"
+    schema: "sql/schemas/"
+    queries: "sql/queries/"
+    gen:
+      go:
+        package: "models"
+        out: "models"
+        json_tags_id_uppercase: true
+        emit_json_tags: true
