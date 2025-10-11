@@ -6,24 +6,26 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"os"
 	"sync"
 	"time"
 
-	"github.com/jackc/pgx/v5"
+	"github.com/clerk/clerk-sdk-go/v2"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/rs/cors"
 
 	"github.com/tomasohchom/motion/services/workspace/internal/config"
 	"github.com/tomasohchom/motion/services/workspace/internal/handlers"
+	"github.com/tomasohchom/motion/services/workspace/internal/store"
 )
 
 func main() {
 	cfg := config.Load()
 	mux := http.NewServeMux()
+	clerk.SetKey(cfg.ClerkKey)
 
 	var (
-		conn   *pgx.Conn
-		connMu sync.RWMutex
+		pool   *pgxpool.Pool
+		poolMu sync.RWMutex
 	)
 
 	ctx, cancel := context.WithCancel(context.Background())
@@ -32,13 +34,13 @@ func main() {
 	// Start db in seperate thread
 	go func() {
 		// db closer
-		defer func() {
-			connMu.Lock()
-			if conn != nil {
-				conn.Close(context.Background())
-			}
-			connMu.Unlock()
-		}()
+		// defer func() {
+		// 	poolMu.Lock()
+		// 	if pool != nil {
+		// 		pool.Close()
+		// 	}
+		// 	poolMu.Unlock()
+		// }()
 
 		for {
 			select {
@@ -46,16 +48,16 @@ func main() {
 				return
 			default:
 			}
-
-			c, err := pgx.Connect(ctx, os.Getenv("DATABASE_URL"))
+			dbpool, err := pgxpool.New(ctx, cfg.DbEndpoint)
 			if err == nil {
-				connMu.Lock()
-				conn = c
-				connMu.Unlock()
-				log.Println("Successfully connected to database")
-				return
+				if err := dbpool.Ping(ctx); err == nil {
+					poolMu.Lock()
+					pool = dbpool
+					poolMu.Unlock()
+					log.Println("Successfully connected to database")
+					return
+				}
 			}
-
 			log.Printf("WARNING: Unable to connect to database: %v\n", err)
 			log.Printf("Trying again in 5 seconds...")
 			time.Sleep(time.Second * 5)
@@ -64,9 +66,9 @@ func main() {
 	}()
 
 	mux.HandleFunc("GET /health", func(w http.ResponseWriter, r *http.Request) {
-		connMu.RLock()
-		dbConnected := conn != nil
-		connMu.RUnlock()
+		poolMu.RLock()
+		dbConnected := pool != nil
+		poolMu.RUnlock()
 
 		if dbConnected {
 			handlers.HealthCheck(w, r)
@@ -76,6 +78,26 @@ func main() {
 			json.NewEncoder(w).Encode(map[string]string{"status": "DB not ready"})
 		}
 	})
+
+	go func() {
+		for {
+			poolMu.RLock()
+			ready := pool != nil
+			poolMu.RUnlock()
+			if ready {
+				break
+			}
+			time.Sleep(time.Second)
+		}
+
+		poolMu.RLock()
+		store := store.NewStore(pool)
+		poolMu.RUnlock()
+
+		userHandler := handlers.NewUserHandler(store)
+		mux.HandleFunc("POST /users/create", userHandler.CreateUserHandler)
+		log.Println("User handler routes registered")
+	}()
 
 	c := cors.New(cors.Options{
 		AllowedOrigins:   []string{"*"}, // modify for production
