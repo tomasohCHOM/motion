@@ -1,3 +1,12 @@
+import { useUser } from '@clerk/clerk-react'
+import {
+  createFileRoute,
+  isRedirect,
+  redirect,
+  useNavigate,
+} from '@tanstack/react-router'
+import { Mail, Sparkles, UserCircle } from 'lucide-react'
+import { useState } from 'react'
 import { useCreateUser } from '@/client/user/create-user-query'
 import { userQueryOptions } from '@/client/user/get-user-query'
 import { Button } from '@/components/ui/button'
@@ -10,15 +19,6 @@ import {
 } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { useUser } from '@clerk/clerk-react'
-import {
-  createFileRoute,
-  isRedirect,
-  redirect,
-  useNavigate,
-} from '@tanstack/react-router'
-import { Mail, Sparkles, UserCircle } from 'lucide-react'
-import { useState } from 'react'
 
 export const Route = createFileRoute('/onboarding')({
   beforeLoad: async ({ context, location }) => {

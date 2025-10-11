@@ -1,5 +1,5 @@
-import { userQueryOptions } from '@/client/user/get-user-query'
 import { createFileRoute, redirect } from '@tanstack/react-router'
+import { userQueryOptions } from '@/client/user/get-user-query'
 
 export const Route = createFileRoute('/dashboard')({
   beforeLoad: async ({ context, location }) => {
