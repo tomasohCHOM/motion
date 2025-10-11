@@ -16,3 +16,18 @@ type User struct {
 	CreatedAt pgtype.Timestamptz `json:"created_at"`
 	UpdatedAt pgtype.Timestamptz `json:"updated_at"`
 }
+
+type Workspace struct {
+	ID          pgtype.UUID      `json:"id"`
+	Name        string           `json:"name"`
+	Description pgtype.Text      `json:"description"`
+	CreatedAt   pgtype.Timestamp `json:"created_at"`
+	UpdatedAt   pgtype.Timestamp `json:"updated_at"`
+}
+
+type WorkspaceUser struct {
+	UserID      string           `json:"user_id"`
+	WorkspaceID pgtype.UUID      `json:"workspace_id"`
+	AccessType  pgtype.Text      `json:"access_type"`
+	JoinedAt    pgtype.Timestamp `json:"joined_at"`
+}
