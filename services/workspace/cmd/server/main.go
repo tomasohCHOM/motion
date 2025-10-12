@@ -20,9 +20,9 @@ import (
 
 func main() {
 	cfg := config.Load()
-	mux := http.NewServeMux()
 	clerk.SetKey(cfg.ClerkKey)
 
+	mux := http.NewServeMux()
 	var (
 		pool   *pgxpool.Pool
 		poolMu sync.RWMutex
@@ -33,15 +33,6 @@ func main() {
 
 	// Start db in seperate thread
 	go func() {
-		// db closer
-		// defer func() {
-		// 	poolMu.Lock()
-		// 	if pool != nil {
-		// 		pool.Close()
-		// 	}
-		// 	poolMu.Unlock()
-		// }()
-
 		for {
 			select {
 			case <-ctx.Done():
@@ -95,7 +86,9 @@ func main() {
 		poolMu.RUnlock()
 
 		userHandler := handlers.NewUserHandler(store)
-		mux.HandleFunc("POST /users/create", userHandler.CreateUserHandler)
+		mux.HandleFunc("POST /users", userHandler.CreateUserHandler)
+		mux.HandleFunc("GET /users/", userHandler.GetUser)
+
 		log.Println("User handler routes registered")
 	}()
 
