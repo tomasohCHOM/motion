@@ -20,9 +20,9 @@ import (
 
 func main() {
 	cfg := config.Load()
-	mux := http.NewServeMux()
 	clerk.SetKey(cfg.ClerkKey)
 
+	mux := http.NewServeMux()
 	var (
 		pool   *pgxpool.Pool
 		poolMu sync.RWMutex
@@ -33,15 +33,6 @@ func main() {
 
 	// Start db in seperate thread
 	go func() {
-		// db closer
-		// defer func() {
-		// 	poolMu.Lock()
-		// 	if pool != nil {
-		// 		pool.Close()
-		// 	}
-		// 	poolMu.Unlock()
-		// }()
-
 		for {
 			select {
 			case <-ctx.Done():

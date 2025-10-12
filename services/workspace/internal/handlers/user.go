@@ -1,9 +1,13 @@
 package handlers
 
 import (
+	"database/sql"
 	"encoding/json"
+	"errors"
 	"fmt"
+	"log"
 	"net/http"
+	"strings"
 
 	"github.com/tomasohchom/motion/services/workspace/internal/models"
 	"github.com/tomasohchom/motion/services/workspace/internal/store"
@@ -22,6 +26,30 @@ type UserRequestData struct {
 	Email     string `json:"email"`
 	FirstName string `json:"first_name"`
 	LastName  string `json:"last_name"`
+}
+
+func (h *UserHandler) GetUser(w http.ResponseWriter, r *http.Request) {
+	path := strings.TrimPrefix(r.URL.Path, "/users/")
+	userId := strings.TrimSpace(path)
+	if userId == "" {
+		userId = r.URL.Query().Get("id")
+	}
+	if userId == "" {
+		http.Error(w, "Missing user ID", http.StatusBadRequest)
+		return
+	}
+	user, err := h.Store.Queries.GetUserByID(r.Context(), userId)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			http.Error(w, "User not found", http.StatusNotFound)
+			return
+		}
+		log.Printf("Failed to fetch user %s: %v", userId, err)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(user)
 }
 
 func (h *UserHandler) CreateUserHandler(w http.ResponseWriter, r *http.Request) {
