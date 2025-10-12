@@ -8,9 +8,11 @@
     "build": "vite build && tsc",
     "serve": "vite preview",
     "test": "vitest run",
-    "lint": "eslint",
-    "format": "prettier --write .",
-    "check": "prettier --write . && eslint --fix"
+    "lint": "eslint .",
+    "lint:fix": "eslint --fix .",
+    "format": "prettier --check .",
+    "format:fix": "prettier --write .",
+    "all": "npm run lint:fix && npm run format:fix && npm run build && npm run test"
   },
   "dependencies": {
     "@clerk/clerk-react": "^5.51.0",
