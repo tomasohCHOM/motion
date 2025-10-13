@@ -1,6 +1,14 @@
 #!/usr/bin/env bash
 set -e
 
+case "$1" in
+-h | --help | help)
+  echo "Usage: $0 [-h|--help|help]"
+  echo "Run with no arguments to spin everything up! All process will be cleaned up automatically."
+  exit 0
+  ;;
+esac
+
 # This script is extensible - if you want to add some service, just spin it up somewhere in this
 # script and append its PID to this PIDS array.
 # If it uses docker compose, just reference in in the root `compose.yaml` file.
