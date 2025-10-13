@@ -1,0 +1,3 @@
+include:
+  - services/file-upload/compose.yaml
+  - services/workspace/compose.yaml
