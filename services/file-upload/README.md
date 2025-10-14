@@ -40,6 +40,7 @@ services/file-upload/
 │   ├── services/
 │   │   └── upload.go           # Business logic layer
 │   ├── handlers/
+│   │   ├── health.go
 │   │   └── upload.go           # HTTP request handlers
 │   ├── models/
 │   │   └── upload.go           # Request/response models
@@ -114,7 +115,6 @@ Health check endpoint for load balancers.
 ```json
 {
   "status": "healthy",
-  "service": "file-upload"
 }
 ```
 
@@ -125,6 +125,7 @@ The service is configured via environment variables:
 ### Server Configuration
 - `PORT`: Server port (default: 8080)
 - `ENVIRONMENT`: Runtime environment (development/production)
+- ` CORS_ALLOWED_ORIGINS`: Allowed origins (default: *)
 
 ### Storage Configuration
 - `STORAGE_PROVIDER`: Storage backend ("s3" or "minio")
@@ -148,6 +149,7 @@ The service is configured via environment variables:
    ```bash
    docker compose up -d
    ```
+> Add the `--build` argument to rebuild the server during development.
 
 2. The service will be available at `http://localhost:8080`
 3. MinIO console will be available at `http://localhost:9001` (admin/admin)
@@ -169,11 +171,25 @@ xh :8080/health
 **Generate Presigned URL**
 ```bash
 xh POST :8080/upload/presigned filename='example.jpg' content_type='image/jpeg' user_id='user123' fileSize:=1048576
+# OR
+xh POST :8080/upload/presigned < fixtures/presigned_request.json
+```
+
+**Upload File to MinIO with Presigned URL**
+```bash
+xh PUT "my-presigned-url" < /path/to/example.jpg
 ```
 
 **Notify Upload Completion**
 ```bash
 xh POST :8080/upload/complete key='uploads/user123/1678886400_example.jpg' user_id='user123'
+```
+
+### Using the Mock Client Script
+This mock client will take some file as input and run the above commands. Once
+its done check the [MinIO dashboard](http://localhost:9001) to see if the file has appeared.
+```bash
+./client.sh README.md
 ```
 
 ### Building
@@ -201,6 +217,7 @@ export STORAGE_BUCKET=your-production-bucket
 export AWS_REGION=us-west-2
 export ENVIRONMENT=production
 export PORT=8080
+export CORS_ALLOWED_ORIGINS=https://your-frontend-domain.com
 ```
 
 ## Frontend Integration
@@ -270,19 +287,12 @@ xhr.send(file);
 - Error tracking and alerting integration points
 - Metrics collection ready (add your preferred metrics library)
 
-## Contributing
-
-1. Follow Go conventions and best practices
-2. Add tests for new functionality
-3. Update documentation for API changes
-4. Use conventional commit messages
-
 ## Dependencies
 
 ### Core Dependencies
 - `github.com/aws/aws-sdk-go-v2` - AWS SDK for S3 operations
 - `github.com/minio/minio-go/v7` - MinIO client for local development
-- `github.com/gorilla/mux` - HTTP router and URL matcher
+- `github.com/rs/cors` - CORS middleware
 
 ### Development Dependencies
 - Docker and Docker Compose for local development

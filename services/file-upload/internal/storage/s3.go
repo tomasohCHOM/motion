@@ -2,11 +2,13 @@ package storage
 
 import (
 	"context"
+	"errors"
 	"io"
 	"time"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
+	"github.com/aws/aws-sdk-go-v2/service/s3/types"
 	"github.com/tomasohchom/motion/services/file-upload/internal/interfaces"
 )
 
@@ -104,6 +106,28 @@ func (s *S3Client) ListObjects(ctx context.Context, bucket, prefix string) ([]st
 	}
 
 	return keys, nil
+}
+
+func (s *S3Client) IsOnline() bool {
+	// return s.client.
+	panic("Not implemented")
+}
+
+func (s *S3Client) MakeBucket(ctx context.Context, bucketName, region string) error {
+	_, err := s.client.CreateBucket(ctx, &s3.CreateBucketInput{
+		Bucket: &bucketName,
+	})
+
+	if err != nil {
+		// Check if the bucket already exists
+		var bne *types.BucketAlreadyOwnedByYou
+		if errors.As(err, &bne) {
+			return nil
+		}
+		return err
+	}
+
+	return nil
 }
 
 // Compile-time interface compliance check

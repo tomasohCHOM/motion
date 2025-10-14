@@ -11,6 +11,8 @@ type StorageClient interface {
 	PutObject(ctx context.Context, bucket, key string, data io.Reader, size int64) error
 	DeleteObject(ctx context.Context, bucket, key string) error
 	GetObjectURL(ctx context.Context, bucket, key string) (string, error)
+	IsOnline() bool
+	MakeBucket(ctx context.Context, bucketName, region string) error
 
 	// TODO:
 	// GetObject(ctx context.Context, bucket, key string) (io.ReadCloser, error)

@@ -18,10 +18,16 @@ type UploadService struct {
 }
 
 func NewUploadService(storage interfaces.StorageClient, cfg *config.Config) *UploadService {
-	return &UploadService{
+	service := &UploadService{
 		storage: storage,
 		config:  cfg,
 	}
+	service.MakeBucket(context.Background())
+	return service
+}
+
+func (u *UploadService) MakeBucket(ctx context.Context) error {
+	return u.storage.MakeBucket(ctx, u.config.Storage.Bucket, u.config.Storage.Region)
 }
 
 func (u *UploadService) GenerateUploadURL(ctx context.Context, filename string) (string, error) {

@@ -1,12 +1,21 @@
 import { ArrowRight, Zap } from 'lucide-react'
 import type React from 'react'
 import { Button } from '@/components/ui/button'
+import { useClerkAuth } from '@/auth/clerk'
+
+const DEFAULT_AUTH_REDIRECT = '/dashboard'
 
 const LandingNavbar: React.FC = () => {
+  const auth = useClerkAuth()
+
+  const signInHref = `/sign-in?redirect=${encodeURIComponent(DEFAULT_AUTH_REDIRECT)}`
+  const workspaceHref = DEFAULT_AUTH_REDIRECT
+
   return (
     <nav className="border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
+          {/* Logo */}
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
               <Zap className="h-5 w-5 text-primary-foreground" />
@@ -14,14 +23,32 @@ const LandingNavbar: React.FC = () => {
             <span className="text-lg font-semibold">Motion</span>
           </div>
 
+          {/* Auth buttons */}
           <div className="flex items-center gap-3">
-            <a href="/workspace/1">
-              <Button variant="ghost">Sign In</Button>
-            </a>
-            <Button>
-              Get Started
-              <ArrowRight className="h-4 w-4 ml-2" />
-            </Button>
+            {auth.isLoading ? (
+              <span className="text-sm text-muted-foreground">
+                Checking auth…
+              </span>
+            ) : auth.isAuthenticated ? (
+              <a href={workspaceHref}>
+                <Button>
+                  Go to workspace
+                  <ArrowRight className="h-4 w-4 ml-2" />
+                </Button>
+              </a>
+            ) : (
+              <>
+                <a href={signInHref}>
+                  <Button variant="ghost">Sign In</Button>
+                </a>
+                <a href={signInHref}>
+                  <Button>
+                    Get Started
+                    <ArrowRight className="h-4 w-4 ml-2" />
+                  </Button>
+                </a>
+              </>
+            )}
           </div>
         </div>
       </div>
@@ -30,6 +57,8 @@ const LandingNavbar: React.FC = () => {
 }
 
 const Hero: React.FC = () => {
+  const auth = useClerkAuth()
+
   return (
     <section className="relative py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-background via-background to-muted/20">
       <div className="max-w-7xl mx-auto">
@@ -48,12 +77,23 @@ const Hero: React.FC = () => {
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <a href="/workspace/1">
-              <Button size="lg" className="text-lg px-8 py-6">
-                Start for free
-                <ArrowRight className="h-5 w-5 ml-2" />
-              </Button>
-            </a>
+            {auth.isAuthenticated ? (
+              <a href={DEFAULT_AUTH_REDIRECT}>
+                <Button size="lg" className="text-lg px-8 py-6">
+                  Go to workspace
+                  <ArrowRight className="h-5 w-5 ml-2" />
+                </Button>
+              </a>
+            ) : (
+              <a
+                href={`/sign-in?redirect=${encodeURIComponent(DEFAULT_AUTH_REDIRECT)}`}
+              >
+                <Button size="lg" className="text-lg px-8 py-6">
+                  Get started for free
+                  <ArrowRight className="h-5 w-5 ml-2" />
+                </Button>
+              </a>
+            )}
           </div>
 
           <p className="text-sm text-muted-foreground">

@@ -1,0 +1,29 @@
+services:
+  database:
+    image: postgres:latest
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: dev
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: dev_db
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U dev -d dev_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - db-data:/var/lib/postgresql/data
+
+  workspace-service:
+    build: .
+    ports:
+      - "8081:8081"
+    environment:
+      DATABASE_URL: postgres://dev:password@database:5432/dev_db
+    # depends_on:
+    #   database:
+    #     condition: service_healthy
+
+volumes:
+  db-data:
