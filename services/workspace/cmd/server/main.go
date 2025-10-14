@@ -88,8 +88,13 @@ func main() {
 		userHandler := handlers.NewUserHandler(store)
 		mux.HandleFunc("POST /users", userHandler.CreateUserHandler)
 		mux.HandleFunc("GET /users/", userHandler.GetUser)
-
 		log.Println("User handler routes registered")
+
+		workspaceHandler := handlers.NewWorkspaceHandler(store)
+		mux.HandleFunc("POST /workspaces", workspaceHandler.CreateWorkspace)
+		mux.HandleFunc("GET /workspaces/{id}", workspaceHandler.GetWorkspaceById)
+		mux.HandleFunc("GET /users/{user_id}/workspaces", workspaceHandler.ListUserWorkspaces)
+		log.Println("Workspace handler routes registered")
 	}()
 
 	c := cors.New(cors.Options{
