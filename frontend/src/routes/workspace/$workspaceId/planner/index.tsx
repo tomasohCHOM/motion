@@ -190,7 +190,7 @@ function PlannerRoute() {
   const gotoToday = () => setSelectedDate(startOfDay(new Date()))
 
   return (
-    <div className="mx-auto max-w-6xl p-4 space-y-6">
+    <div className="mt-8 p-4 space-y-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <div className="w-9">
