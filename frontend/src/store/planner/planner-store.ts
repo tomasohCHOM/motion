@@ -30,7 +30,8 @@ type PlannerState = {
 
 type PlannerActions = {
   addEvent: (event: PlannerEvent) => void
-  addScheduleItem: (event: PlannerEvent) => void // alias for backwards compatibility
+  addScheduleItem: (event: PlannerEvent) => void
+  updateEvent: (updated: PlannerEvent) => void
   setEventTypeColor: (typeLabel: string, color: PlannerTypeColor) => void
   getEventTypeColor: (typeLabel: string) => PlannerTypeColor
   removeEvent: (id: string) => void
@@ -47,20 +48,23 @@ const actions: PlannerActions = {
   addEvent(event) {
     plannerStore.setState((s) => ({
       ...s,
-      events: [
-        ...s.events,
-        { ...event, date: new Date(event.date), time: event.time },
-      ],
+      events: [...s.events, { ...event, date: new Date(event.date) }],
     }))
   },
 
   addScheduleItem(event) {
     plannerStore.setState((s) => ({
       ...s,
-      events: [
-        ...s.events,
-        { ...event, date: new Date(event.date), time: event.time },
-      ],
+      events: [...s.events, { ...event, date: new Date(event.date) }],
+    }))
+  },
+
+  updateEvent(updated) {
+    plannerStore.setState((s) => ({
+      ...s,
+      events: s.events.map((e) =>
+        e.id === updated.id ? { ...updated, date: new Date(updated.date) } : e,
+      ),
     }))
   },
 
