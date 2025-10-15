@@ -50,6 +50,7 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover'
 import { Calendar } from '@/components/ui/calendar'
+import { Checkbox } from '@/components/ui/checkbox'
 
 import { usePlannerStore } from '@/store/planner/planner-store'
 
@@ -184,7 +185,6 @@ function PlannerRoute() {
     day: 'numeric',
     year: 'numeric',
   })
-
   const gotoPrev = () => setSelectedDate((d) => addDays(d, -1))
   const gotoNext = () => setSelectedDate((d) => addDays(d, 1))
   const gotoToday = () => setSelectedDate(startOfDay(new Date()))
@@ -367,6 +367,7 @@ function AddEventForm({
   const [dateTime, setDateTime] = React.useState<Date | undefined>(defaultDate)
   const [duration, setDuration] = React.useState<string>('')
   const [attendees, setAttendees] = React.useState<string>('')
+  const [saveDefault, setSaveDefault] = React.useState(false)
 
   React.useEffect(() => {
     setTypeColor(getEventTypeColor(type))
@@ -381,7 +382,7 @@ function AddEventForm({
     dateOnly.setHours(0, 0, 0, 0)
     const time = `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
 
-    setEventTypeColor(type, typeColor)
+    if (saveDefault) setEventTypeColor(type, typeColor)
 
     const payload: PlannerEvent = {
       id: crypto.randomUUID(),
@@ -393,6 +394,7 @@ function AddEventForm({
         ? Math.max(0, parseInt(duration, 10))
         : undefined,
       attendees: attendees ? Math.max(0, parseInt(attendees, 10)) : undefined,
+      color: typeColor,
     }
 
     addEvent(payload)
@@ -411,7 +413,7 @@ function AddEventForm({
         />
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <div className="space-y-2">
           <Label htmlFor="type">Type</Label>
           <Input
@@ -421,7 +423,18 @@ function AddEventForm({
             onChange={(e) => setType(e.target.value)}
           />
         </div>
-        <TypeColorPicker typeColor={typeColor} setTypeColor={setTypeColor} />
+
+        <div className="space-y-2">
+          <Label>Color</Label>
+          <TypeColorPicker typeColor={typeColor} setTypeColor={setTypeColor} />
+          <label className="mt-1 flex items-center gap-2 text-sm text-muted-foreground">
+            <Checkbox
+              checked={saveDefault}
+              onCheckedChange={(v) => setSaveDefault(Boolean(v))}
+            />
+            <span>Make default for this type</span>
+          </label>
+        </div>
       </div>
 
       <div className="space-y-2">
@@ -429,7 +442,7 @@ function AddEventForm({
         <DateTimePicker date={dateTime} setDate={setDateTime} />
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <div className="space-y-2">
           <Label htmlFor="duration">Duration (minutes)</Label>
           <Input
@@ -452,6 +465,80 @@ function AddEventForm({
             onChange={(e) => setAttendees(e.target.value)}
           />
         </div>
+      </div>
+    </form>
+  )
+}
+
+function AddTaskInlineForm({
+  onClose,
+  defaultDate,
+  onAddTask,
+}: {
+  onClose: () => void
+  defaultDate: Date
+  onAddTask: (payload: {
+    title: string
+    description: string
+    due: Date
+    priority: TaskPriority
+  }) => void
+}) {
+  const [title, setTitle] = React.useState('')
+  const [description, setDescription] = React.useState('')
+  const [due, setDue] = React.useState<Date>(() => startOfDay(defaultDate))
+  const [priority, setPriority] = React.useState<TaskPriority>('medium')
+
+  const submit: React.FormEventHandler = (e) => {
+    e.preventDefault()
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+    if (!title || !due) return
+    onAddTask({ title: title.trim(), description, due, priority })
+    onClose()
+  }
+
+  return (
+    <form id="add-task-form" onSubmit={submit} className="space-y-4">
+      <div className="space-y-2">
+        <Label htmlFor="task-title">Title</Label>
+        <Input
+          id="task-title"
+          placeholder="Complete project documentation"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+        />
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="task-desc">Description</Label>
+        <Textarea
+          id="task-desc"
+          placeholder="Add task details..."
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+        />
+      </div>
+
+      <div className="space-y-2">
+        <Label>Priority</Label>
+        <Select
+          value={priority}
+          onValueChange={(v) => setPriority(v as TaskPriority)}
+        >
+          <SelectTrigger className="w-full">
+            <SelectValue placeholder="Medium" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="low">Low</SelectItem>
+            <SelectItem value="medium">Medium</SelectItem>
+            <SelectItem value="high">High</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div className="space-y-2">
+        <Label>Due date</Label>
+        <DatePicker date={due} setDate={setDue} />
       </div>
     </form>
   )
@@ -536,109 +623,32 @@ function TypeColorPicker({
   }
 
   return (
-    <div className="space-y-2">
-      <Label>Color</Label>
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="outline" className="w-full justify-start">
-            <span className="mr-2">
-              <ColorDot c={typeColor} />
-            </span>
-            <span className="truncate">{COLOR_LABELS[typeColor]}</span>
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent className="w-44">
-          <DropdownMenuLabel>Colors</DropdownMenuLabel>
-          <DropdownMenuSeparator />
-          <DropdownMenuRadioGroup
-            value={typeColor}
-            onValueChange={(v) => setTypeColor(v as PlannerTypeColor)}
-          >
-            {(Object.keys(COLOR_LABELS) as Array<PlannerTypeColor>).map((c) => (
-              <DropdownMenuRadioItem key={c} value={c}>
-                <span className="mr-2">
-                  <ColorDot c={c} />
-                </span>
-                {COLOR_LABELS[c]}
-              </DropdownMenuRadioItem>
-            ))}
-          </DropdownMenuRadioGroup>
-        </DropdownMenuContent>
-      </DropdownMenu>
-    </div>
-  )
-}
-
-function AddTaskInlineForm({
-  onClose,
-  defaultDate,
-  onAddTask,
-}: {
-  onClose: () => void
-  defaultDate: Date
-  onAddTask: (payload: {
-    title: string
-    description: string
-    due: Date
-    priority: TaskPriority
-  }) => void
-}) {
-  const [title, setTitle] = React.useState('')
-  const [description, setDescription] = React.useState('')
-  const [due, setDue] = React.useState<Date>(() => startOfDay(defaultDate))
-  const [priority, setPriority] = React.useState<TaskPriority>('medium')
-
-  const submit: React.FormEventHandler = (e) => {
-    e.preventDefault()
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-    if (!title || !due) return
-    onAddTask({ title: title.trim(), description, due, priority })
-    onClose()
-  }
-
-  return (
-    <form id="add-task-form" onSubmit={submit} className="space-y-4">
-      <div className="space-y-2">
-        <Label htmlFor="task-title">Title</Label>
-        <Input
-          id="task-title"
-          placeholder="Complete project documentation"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-        />
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="task-desc">Description</Label>
-        <Textarea
-          id="task-desc"
-          placeholder="Add task details..."
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-        />
-      </div>
-
-      <div className="space-y-2">
-        <Label>Priority</Label>
-        <Select
-          value={priority}
-          onValueChange={(v) => setPriority(v as TaskPriority)}
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="outline" className="w-full justify-start">
+          <span className="mr-2">
+            <ColorDot c={typeColor} />
+          </span>
+          <span className="truncate">{COLOR_LABELS[typeColor]}</span>
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent className="w-44">
+        <DropdownMenuLabel>Colors</DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        <DropdownMenuRadioGroup
+          value={typeColor}
+          onValueChange={(v) => setTypeColor(v as PlannerTypeColor)}
         >
-          <SelectTrigger className="w-full">
-            <SelectValue placeholder="Medium" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="low">Low</SelectItem>
-            <SelectItem value="medium">Medium</SelectItem>
-            <SelectItem value="high">High</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-
-      <div className="space-y-2">
-        <Label>Due date</Label>
-        <DatePicker date={due} setDate={setDue} />
-      </div>
-    </form>
+          {(Object.keys(COLOR_LABELS) as Array<PlannerTypeColor>).map((c) => (
+            <DropdownMenuRadioItem key={c} value={c}>
+              <span className="mr-2">
+                <ColorDot c={c} />
+              </span>
+              {COLOR_LABELS[c]}
+            </DropdownMenuRadioItem>
+          ))}
+        </DropdownMenuRadioGroup>
+      </DropdownMenuContent>
+    </DropdownMenu>
   )
 }

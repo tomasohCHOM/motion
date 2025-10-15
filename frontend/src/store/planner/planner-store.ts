@@ -21,6 +21,7 @@ export interface PlannerEvent {
   time: string // "HH:MM"
   durationMinutes?: number
   attendees?: number
+  color?: PlannerTypeColor
 }
 
 type PlannerState = {
@@ -43,42 +44,47 @@ const plannerStore: Store<PlannerState> = new Store<PlannerState>({
 })
 
 const norm = (s: string) => s.trim().toLowerCase()
+const resolveDefaultColor = (typeLabel: string): PlannerTypeColor =>
+  plannerStore.state.typeColors[norm(typeLabel)] ?? 'default'
 
 const actions: PlannerActions = {
   addEvent(event) {
+    const color = event.color ?? resolveDefaultColor(event.type)
     plannerStore.setState((s) => ({
       ...s,
-      events: [...s.events, { ...event, date: new Date(event.date) }],
+      events: [...s.events, { ...event, color, date: new Date(event.date) }],
     }))
   },
 
   addScheduleItem(event) {
+    const color = event.color ?? resolveDefaultColor(event.type)
     plannerStore.setState((s) => ({
       ...s,
-      events: [...s.events, { ...event, date: new Date(event.date) }],
+      events: [...s.events, { ...event, color, date: new Date(event.date) }],
     }))
   },
 
   updateEvent(updated) {
+    const color = updated.color ?? resolveDefaultColor(updated.type)
     plannerStore.setState((s) => ({
       ...s,
       events: s.events.map((e) =>
-        e.id === updated.id ? { ...updated, date: new Date(updated.date) } : e,
+        e.id === updated.id
+          ? { ...updated, color, date: new Date(updated.date) }
+          : e,
       ),
     }))
   },
 
   setEventTypeColor(typeLabel, color) {
-    const key = norm(typeLabel)
     plannerStore.setState((s) => ({
       ...s,
-      typeColors: { ...s.typeColors, [key]: color },
+      typeColors: { ...s.typeColors, [norm(typeLabel)]: color },
     }))
   },
 
   getEventTypeColor(typeLabel): PlannerTypeColor {
-    const key = norm(typeLabel)
-    return plannerStore.state.typeColors[key] ?? 'default'
+    return resolveDefaultColor(typeLabel)
   },
 
   removeEvent(id) {
@@ -106,5 +112,4 @@ export function getPlannerStore(): Store<PlannerState> {
 }
 
 export const plannerActions: PlannerActions = actions
-
 export type { PlannerState, PlannerActions }

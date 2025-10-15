@@ -1,12 +1,5 @@
 import * as React from 'react'
-import {
-  Calendar as CalendarIcon,
-  Clock,
-  MoreVertical,
-  Pencil,
-  Trash2,
-  Users,
-} from 'lucide-react'
+import { Clock, MoreVertical, Pencil, Trash2, Users } from 'lucide-react'
 import type {
   PlannerEvent,
   PlannerTypeColor,
@@ -29,15 +22,15 @@ import {
 } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
+import { DateTimePicker } from '@/components/workspace/planner/date-time-picker'
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover'
-import { Calendar } from '@/components/ui/calendar'
-import { DateTimePicker } from '@/components/workspace/planner/date-time-picker'
+import { Checkbox } from '@/components/ui/checkbox'
 
-/* type chip styles */
+/* chip styles */
 const CHIP_STYLES: Record<
   PlannerTypeColor,
   { bg: string; text: string; ring: string }
@@ -116,7 +109,7 @@ function TypeChip({
   )
 }
 
-/* "HH:MM" -> "h:MM AM/PM" */
+/** "HH:MM" -> "h:MM AM/PM" */
 function to12h(hhmm: string) {
   const [hh, mm] = hhmm.split(':')
   let h = Number(hh)
@@ -126,15 +119,13 @@ function to12h(hhmm: string) {
   return `${h}:${mm} ${ampm}`
 }
 
-/* combine event.date + event.time to a JS Date */
 function toDate(date: Date, time: string) {
-  const [hh, mm] = time.split(':').map((n) => Number(n))
+  const [hh, mm] = time.split(':').map(Number)
   const d = new Date(date)
   d.setHours(hh, mm, 0, 0)
   return d
 }
 
-/* color picker used in edit dialog */
 const COLOR_LABELS: Record<PlannerTypeColor, string> = {
   default: 'Default',
   gray: 'Gray',
@@ -168,6 +159,7 @@ function ColorDot({ c }: { c: PlannerTypeColor }) {
     />
   )
 }
+
 function TypeColorPicker({
   value,
   onChange,
@@ -191,25 +183,19 @@ function TypeColorPicker({
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-44 p-2" align="start">
-        <div className="space-y-1">
-          <div className="text-xs text-muted-foreground px-2">Colors</div>
-          <div className="mt-2 grid grid-cols-1">
-            {(Object.keys(COLOR_LABELS) as Array<PlannerTypeColor>).map((c) => (
-              <button
-                key={c}
-                type="button"
-                onClick={() => {
-                  onChange(c)
-                  setOpen(false)
-                }}
-                className="flex items-center gap-2 rounded-md px-2 py-1.5 hover:bg-accent text-sm text-foreground"
-              >
-                <ColorDot c={c} />
-                {COLOR_LABELS[c]}
-              </button>
-            ))}
-          </div>
-        </div>
+        {(Object.keys(COLOR_LABELS) as Array<PlannerTypeColor>).map((c) => (
+          <button
+            key={c}
+            type="button"
+            onClick={() => {
+              onChange(c)
+              setOpen(false)
+            }}
+            className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm hover:bg-accent"
+          >
+            <ColorDot c={c} /> {COLOR_LABELS[c]}
+          </button>
+        ))}
       </PopoverContent>
     </Popover>
   )
@@ -231,7 +217,7 @@ export function TodaysSchedule({
   return (
     <div className="space-y-4">
       <div className="rounded-xl border p-4">
-        <div className="flex items-center gap-2 text-base font-medium mb-2">
+        <div className="mb-2 flex items-center gap-2 text-base font-medium">
           <span>Today&apos;s Schedule</span>
         </div>
 
@@ -242,15 +228,15 @@ export function TodaysSchedule({
             </div>
           ) : (
             events.map((e) => {
-              const color = getTypeColor(e.type)
+              const color = e.color ?? getTypeColor(e.type)
               return (
                 <div key={e.id} className="flex gap-3 rounded-xl border p-4">
-                  <div className="w-24 shrink-0 text-sm text-muted-foreground tabular-nums pt-1">
+                  <div className="w-24 shrink-0 pt-1 text-sm tabular-nums text-muted-foreground">
                     {to12h(e.time)}
                   </div>
 
                   <div className="flex-1">
-                    <div className="text-sm sm:text-base font-semibold">
+                    <div className="text-sm font-semibold sm:text-base">
                       {e.title}
                     </div>
                     <div className="mt-1 flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
@@ -289,7 +275,6 @@ function EventActions({
   onDelete: () => void
 }) {
   const [open, setOpen] = React.useState(false)
-
   return (
     <>
       <DropdownMenu>
@@ -300,16 +285,14 @@ function EventActions({
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuItem onSelect={() => setOpen(true)}>
-            <Pencil className="h-4 w-4 mr-2" />
-            Edit
+            <Pencil className="mr-2 h-4 w-4" /> Edit
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem
             className="text-red-600 focus:text-red-600"
             onSelect={onDelete}
           >
-            <Trash2 className="h-4 w-4 mr-2" />
-            Delete
+            <Trash2 className="mr-2 h-4 w-4" /> Delete
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
@@ -335,35 +318,31 @@ function EditEventDialog({
   const [title, setTitle] = React.useState(original.title)
   const [type, setType] = React.useState(original.type)
   const [color, setColor] = React.useState<PlannerTypeColor>(
-    getEventTypeColor(original.type),
+    original.color ?? getEventTypeColor(original.type),
   )
-
-  // IMPORTANT: allow undefined to satisfy DateTimePicker's prop contract
   const [dateTime, setDateTime] = React.useState<Date | undefined>(
     toDate(original.date, original.time),
   )
-
   const [duration, setDuration] = React.useState<string>(
     original.durationMinutes?.toString() ?? '',
   )
   const [attendees, setAttendees] = React.useState<string>(
     original.attendees?.toString() ?? '',
   )
+  const [saveDefault, setSaveDefault] = React.useState(false)
 
   const save = (e: React.FormEvent) => {
     e.preventDefault()
-    if (!dateTime) return // guard for typing
+    if (!dateTime) return
 
     const d = new Date(dateTime)
     const dateOnly = new Date(d)
     dateOnly.setHours(0, 0, 0, 0)
-    const time = `${String(d.getHours()).padStart(2, '0')}:${String(
-      d.getMinutes(),
-    ).padStart(2, '0')}`
+    const time = `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
 
-    setEventTypeColor(type, color)
+    if (saveDefault) setEventTypeColor(type, color)
 
-    const updated: PlannerEvent = {
+    updateEvent({
       id: original.id,
       title: title.trim(),
       type: type.trim(),
@@ -373,9 +352,9 @@ function EditEventDialog({
         ? Math.max(0, parseInt(duration, 10))
         : undefined,
       attendees: attendees ? Math.max(0, parseInt(attendees, 10)) : undefined,
-    }
+      color,
+    })
 
-    updateEvent(updated)
     onOpenChange(false)
   }
 
@@ -399,7 +378,7 @@ function EditEventDialog({
             />
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="e-type">Type</Label>
               <Input
@@ -411,6 +390,13 @@ function EditEventDialog({
             <div className="space-y-2">
               <Label>Color</Label>
               <TypeColorPicker value={color} onChange={setColor} />
+              <label className="mt-1 flex items-center gap-2 text-sm text-muted-foreground">
+                <Checkbox
+                  checked={saveDefault}
+                  onCheckedChange={(v) => setSaveDefault(Boolean(v))}
+                />
+                <span>Make default for this type</span>
+              </label>
             </div>
           </div>
 
@@ -419,7 +405,7 @@ function EditEventDialog({
             <DateTimePicker date={dateTime} setDate={setDateTime} />
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="e-duration">Duration (minutes)</Label>
               <Input
