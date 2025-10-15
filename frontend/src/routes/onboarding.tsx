@@ -74,7 +74,7 @@ export function OnboardingForm() {
           <h1 className="text-3xl mb-2 font-semibold">Welcome! 🎉</h1>
           <p className="text-slate-600">Let's get your workspace set up</p>
         </div>
-        <Card className="border-slate-200 shadow-xl">
+        <Card className="border-border shadow-xl">
           <CardHeader className="space-y-1 pb-4">
             <CardTitle className="text-xl">Create your profile</CardTitle>
             <CardDescription>
