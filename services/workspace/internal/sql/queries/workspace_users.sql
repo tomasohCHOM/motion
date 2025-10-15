@@ -16,10 +16,14 @@ WHERE wu.workspace_id = $1
 ORDER BY wu.joined_at ASC;
 
 -- name: GetUserWorkspaces :many
-SELECT w.id, w.name, w.description, wu.access_type, w.created_at, w.updated_at
-FROM workspace_users wu
-JOIN workspaces w ON wu.workspace_id = w.id
+SELECT
+  w.*,
+  COUNT(wu2.user_id) AS member_count
+FROM workspaces w
+JOIN workspace_users wu ON w.id = wu.workspace_id
+JOIN workspace_users wu2 ON w.id = wu2.workspace_id
 WHERE wu.user_id = $1
+GROUP BY w.id
 ORDER BY w.created_at DESC;
 
 -- name: GetUserAccessType :one

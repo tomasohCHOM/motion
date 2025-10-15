@@ -16,6 +16,7 @@ import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as AuthenticatedRouteImport } from './routes/authenticated'
 import { Route as PlannerRouteRouteImport } from './routes/planner/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as WorkspaceCreateRouteImport } from './routes/workspace/create'
 import { Route as WorkspaceWorkspaceIdRouteRouteImport } from './routes/workspace/$workspaceId/route'
 import { Route as WorkspaceWorkspaceIdManagerRouteImport } from './routes/workspace/$workspaceId/manager'
 import { Route as WorkspaceWorkspaceIdPlannerIndexRouteImport } from './routes/workspace/$workspaceId/planner/index'
@@ -56,6 +57,11 @@ const PlannerRouteRoute = PlannerRouteRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const WorkspaceCreateRoute = WorkspaceCreateRouteImport.update({
+  id: '/workspace/create',
+  path: '/workspace/create',
   getParentRoute: () => rootRouteImport,
 } as any)
 const WorkspaceWorkspaceIdRouteRoute =
@@ -104,6 +110,7 @@ export interface FileRoutesByFullPath {
   '/sign-in': typeof SignInRoute
   '/sign-up': typeof SignUpRoute
   '/workspace/$workspaceId': typeof WorkspaceWorkspaceIdRouteRouteWithChildren
+  '/workspace/create': typeof WorkspaceCreateRoute
   '/workspace/$workspaceId/manager': typeof WorkspaceWorkspaceIdManagerRoute
   '/workspace/$workspaceId/notes/$noteId': typeof WorkspaceWorkspaceIdNotesNoteIdRoute
   '/workspace/$workspaceId/files': typeof WorkspaceWorkspaceIdFilesIndexRoute
@@ -119,6 +126,7 @@ export interface FileRoutesByTo {
   '/sign-in': typeof SignInRoute
   '/sign-up': typeof SignUpRoute
   '/workspace/$workspaceId': typeof WorkspaceWorkspaceIdRouteRouteWithChildren
+  '/workspace/create': typeof WorkspaceCreateRoute
   '/workspace/$workspaceId/manager': typeof WorkspaceWorkspaceIdManagerRoute
   '/workspace/$workspaceId/notes/$noteId': typeof WorkspaceWorkspaceIdNotesNoteIdRoute
   '/workspace/$workspaceId/files': typeof WorkspaceWorkspaceIdFilesIndexRoute
@@ -135,6 +143,7 @@ export interface FileRoutesById {
   '/sign-in': typeof SignInRoute
   '/sign-up': typeof SignUpRoute
   '/workspace/$workspaceId': typeof WorkspaceWorkspaceIdRouteRouteWithChildren
+  '/workspace/create': typeof WorkspaceCreateRoute
   '/workspace/$workspaceId/manager': typeof WorkspaceWorkspaceIdManagerRoute
   '/workspace/$workspaceId/notes/$noteId': typeof WorkspaceWorkspaceIdNotesNoteIdRoute
   '/workspace/$workspaceId/files/': typeof WorkspaceWorkspaceIdFilesIndexRoute
@@ -152,6 +161,7 @@ export interface FileRouteTypes {
     | '/sign-in'
     | '/sign-up'
     | '/workspace/$workspaceId'
+    | '/workspace/create'
     | '/workspace/$workspaceId/manager'
     | '/workspace/$workspaceId/notes/$noteId'
     | '/workspace/$workspaceId/files'
@@ -167,6 +177,7 @@ export interface FileRouteTypes {
     | '/sign-in'
     | '/sign-up'
     | '/workspace/$workspaceId'
+    | '/workspace/create'
     | '/workspace/$workspaceId/manager'
     | '/workspace/$workspaceId/notes/$noteId'
     | '/workspace/$workspaceId/files'
@@ -182,6 +193,7 @@ export interface FileRouteTypes {
     | '/sign-in'
     | '/sign-up'
     | '/workspace/$workspaceId'
+    | '/workspace/create'
     | '/workspace/$workspaceId/manager'
     | '/workspace/$workspaceId/notes/$noteId'
     | '/workspace/$workspaceId/files/'
@@ -198,6 +210,7 @@ export interface RootRouteChildren {
   SignInRoute: typeof SignInRoute
   SignUpRoute: typeof SignUpRoute
   WorkspaceWorkspaceIdRouteRoute: typeof WorkspaceWorkspaceIdRouteRouteWithChildren
+  WorkspaceCreateRoute: typeof WorkspaceCreateRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -249,6 +262,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/workspace/create': {
+      id: '/workspace/create'
+      path: '/workspace/create'
+      fullPath: '/workspace/create'
+      preLoaderRoute: typeof WorkspaceCreateRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/workspace/$workspaceId': {
@@ -328,6 +348,7 @@ const rootRouteChildren: RootRouteChildren = {
   SignInRoute: SignInRoute,
   SignUpRoute: SignUpRoute,
   WorkspaceWorkspaceIdRouteRoute: WorkspaceWorkspaceIdRouteRouteWithChildren,
+  WorkspaceCreateRoute: WorkspaceCreateRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

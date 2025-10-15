@@ -48,10 +48,14 @@ func (q *Queries) GetUserAccessType(ctx context.Context, arg GetUserAccessTypePa
 }
 
 const getUserWorkspaces = `-- name: GetUserWorkspaces :many
-SELECT w.id, w.name, w.description, wu.access_type, w.created_at, w.updated_at
-FROM workspace_users wu
-JOIN workspaces w ON wu.workspace_id = w.id
+SELECT
+  w.id, w.name, w.description, w.created_at, w.updated_at,
+  COUNT(wu2.user_id) AS member_count
+FROM workspaces w
+JOIN workspace_users wu ON w.id = wu.workspace_id
+JOIN workspace_users wu2 ON w.id = wu2.workspace_id
 WHERE wu.user_id = $1
+GROUP BY w.id
 ORDER BY w.created_at DESC
 `
 
@@ -59,9 +63,9 @@ type GetUserWorkspacesRow struct {
 	ID          pgtype.UUID      `json:"id"`
 	Name        string           `json:"name"`
 	Description pgtype.Text      `json:"description"`
-	AccessType  pgtype.Text      `json:"access_type"`
 	CreatedAt   pgtype.Timestamp `json:"created_at"`
 	UpdatedAt   pgtype.Timestamp `json:"updated_at"`
+	MemberCount int64            `json:"member_count"`
 }
 
 func (q *Queries) GetUserWorkspaces(ctx context.Context, userID string) ([]GetUserWorkspacesRow, error) {
@@ -77,9 +81,9 @@ func (q *Queries) GetUserWorkspaces(ctx context.Context, userID string) ([]GetUs
 			&i.ID,
 			&i.Name,
 			&i.Description,
-			&i.AccessType,
 			&i.CreatedAt,
 			&i.UpdatedAt,
+			&i.MemberCount,
 		); err != nil {
 			return nil, err
 		}

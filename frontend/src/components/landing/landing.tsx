@@ -32,7 +32,7 @@ const LandingNavbar: React.FC = () => {
             ) : auth.isAuthenticated ? (
               <a href={workspaceHref}>
                 <Button>
-                  Go to workspace
+                  Go to dashboard
                   <ArrowRight className="h-4 w-4 ml-2" />
                 </Button>
               </a>
@@ -80,7 +80,7 @@ const Hero: React.FC = () => {
             {auth.isAuthenticated ? (
               <a href={DEFAULT_AUTH_REDIRECT}>
                 <Button size="lg" className="text-lg px-8 py-6">
-                  Go to workspace
+                  Go to dashboard
                   <ArrowRight className="h-5 w-5 ml-2" />
                 </Button>
               </a>
