@@ -86,7 +86,7 @@ func main() {
 		poolMu.RUnlock()
 
 		userHandler := handlers.NewUserHandler(store)
-		mux.HandleFunc("POST /users", userHandler.CreateUserHandler)
+		mux.HandleFunc("POST /users", userHandler.CreateUser)
 		mux.HandleFunc("GET /users/", userHandler.GetUser)
 		log.Println("User handler routes registered")
 

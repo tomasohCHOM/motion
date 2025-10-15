@@ -53,7 +53,7 @@ func (h *UserHandler) GetUser(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(user)
 }
 
-func (h *UserHandler) CreateUserHandler(w http.ResponseWriter, r *http.Request) {
+func (h *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 	var u UserRequestData
 	if err := json.NewDecoder(r.Body).Decode(&u); err != nil {
 		http.Error(w, "Invalid JSON", http.StatusBadRequest)
