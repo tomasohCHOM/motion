@@ -1,4 +1,4 @@
-name: File Upload Microservice CI
+name: Workspace Microservice CI
 
 on:
   pull_request:
@@ -7,7 +7,7 @@ on:
 
 jobs:
   build:
-    name: File Upload CI Checks
+    name: Workspace CI Checks
     runs-on: ubuntu-latest
     defaults:
       run:
