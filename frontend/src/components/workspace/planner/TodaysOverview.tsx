@@ -1,4 +1,4 @@
-import * as React from 'react'
+import { Card } from '@/components/ui/card'
 
 export function TodaysOverview({
   total,
@@ -8,23 +8,26 @@ export function TodaysOverview({
   typeCounts: Array<{ label: string; count: number }>
 }) {
   return (
-    <div className="rounded-xl border p-4">
-      <div className="text-base font-medium mb-3">Today's Overview</div>
-      <div className="space-y-2">
-        <OverviewRow label="Total Events" value={total} />
-        {typeCounts.map(({ label, count }) => (
-          <OverviewRow key={label.toLowerCase()} label={label} value={count} />
-        ))}
+    <Card className="rounded-xl border p-4">
+      <div className="text-base font-medium mb-2">Today’s Overview</div>
+      <div className="text-sm text-muted-foreground mb-3">
+        {total} {total === 1 ? 'event' : 'events'}
       </div>
-    </div>
-  )
-}
-
-function OverviewRow({ label, value }: { label: string; value: number }) {
-  return (
-    <div className="flex items-center justify-between rounded-lg border px-3 py-2">
-      <div className="text-sm text-muted-foreground">{label}</div>
-      <div className="text-base font-semibold">{value}</div>
-    </div>
+      <div className="flex flex-wrap gap-2">
+        {typeCounts.length === 0 ? (
+          <div className="text-sm text-muted-foreground">No types yet.</div>
+        ) : (
+          typeCounts.map((t) => (
+            <span
+              key={t.label}
+              className="rounded-full border px-2 py-0.5 text-xs"
+              title={`${t.count} ${t.label}`}
+            >
+              {t.label} · {t.count}
+            </span>
+          ))
+        )}
+      </div>
+    </Card>
   )
 }

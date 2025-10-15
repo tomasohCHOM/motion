@@ -13,7 +13,7 @@ import type {
   PlannerEvent,
   PlannerTypeColor,
 } from '@/store/planner/planner-store'
-import type { Task, TaskPriority } from '@/store/planner/tasks-store'
+import type { TaskPriority } from '@/store/planner/tasks-store'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
@@ -457,80 +457,6 @@ function AddEventForm({
   )
 }
 
-function AddTaskInlineForm({
-  onClose,
-  defaultDate,
-  onAddTask,
-}: {
-  onClose: () => void
-  defaultDate: Date
-  onAddTask: (payload: {
-    title: string
-    description: string
-    due: Date
-    priority: TaskPriority
-  }) => void
-}) {
-  const [title, setTitle] = React.useState('')
-  const [description, setDescription] = React.useState('')
-  const [due, setDue] = React.useState<Date>(() => startOfDay(defaultDate))
-  const [priority, setPriority] = React.useState<TaskPriority>('medium')
-
-  const submit: React.FormEventHandler = (e) => {
-    e.preventDefault()
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-    if (!title || !due) return
-    onAddTask({ title: title.trim(), description, due, priority })
-    onClose()
-  }
-
-  return (
-    <form id="add-task-form" onSubmit={submit} className="space-y-4">
-      <div className="space-y-2">
-        <Label htmlFor="task-title">Title</Label>
-        <Input
-          id="task-title"
-          placeholder="Complete project documentation"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-        />
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="task-desc">Description</Label>
-        <Textarea
-          id="task-desc"
-          placeholder="Add task details..."
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-        />
-      </div>
-
-      <div className="space-y-2">
-        <Label>Priority</Label>
-        <Select
-          value={priority}
-          onValueChange={(v) => setPriority(v as TaskPriority)}
-        >
-          <SelectTrigger className="w-full">
-            <SelectValue placeholder="Medium" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="low">Low</SelectItem>
-            <SelectItem value="medium">Medium</SelectItem>
-            <SelectItem value="high">High</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-
-      <div className="space-y-2">
-        <Label>Due date</Label>
-        <DatePicker date={due} setDate={setDue} />
-      </div>
-    </form>
-  )
-}
-
 function DatePicker({
   date,
   setDate,
@@ -640,5 +566,79 @@ function TypeColorPicker({
         </DropdownMenuContent>
       </DropdownMenu>
     </div>
+  )
+}
+
+function AddTaskInlineForm({
+  onClose,
+  defaultDate,
+  onAddTask,
+}: {
+  onClose: () => void
+  defaultDate: Date
+  onAddTask: (payload: {
+    title: string
+    description: string
+    due: Date
+    priority: TaskPriority
+  }) => void
+}) {
+  const [title, setTitle] = React.useState('')
+  const [description, setDescription] = React.useState('')
+  const [due, setDue] = React.useState<Date>(() => startOfDay(defaultDate))
+  const [priority, setPriority] = React.useState<TaskPriority>('medium')
+
+  const submit: React.FormEventHandler = (e) => {
+    e.preventDefault()
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+    if (!title || !due) return
+    onAddTask({ title: title.trim(), description, due, priority })
+    onClose()
+  }
+
+  return (
+    <form id="add-task-form" onSubmit={submit} className="space-y-4">
+      <div className="space-y-2">
+        <Label htmlFor="task-title">Title</Label>
+        <Input
+          id="task-title"
+          placeholder="Complete project documentation"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+        />
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="task-desc">Description</Label>
+        <Textarea
+          id="task-desc"
+          placeholder="Add task details..."
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+        />
+      </div>
+
+      <div className="space-y-2">
+        <Label>Priority</Label>
+        <Select
+          value={priority}
+          onValueChange={(v) => setPriority(v as TaskPriority)}
+        >
+          <SelectTrigger className="w-full">
+            <SelectValue placeholder="Medium" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="low">Low</SelectItem>
+            <SelectItem value="medium">Medium</SelectItem>
+            <SelectItem value="high">High</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div className="space-y-2">
+        <Label>Due date</Label>
+        <DatePicker date={due} setDate={setDue} />
+      </div>
+    </form>
   )
 }

@@ -1,5 +1,8 @@
 import * as React from 'react'
-import type { ScheduleItem } from '@/store/planner/planner-store'
+import type {
+  PlannerEvent,
+  PlannerTypeColor,
+} from '@/store/planner/planner-store'
 import {
   Dialog,
   DialogContent,
@@ -7,106 +10,223 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
+  DialogTrigger,
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { plannerActions } from '@/store/planner/planner-store'
 import { DateTimePicker } from '@/components/workspace/planner/date-time-picker'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 
-interface AddEventDialogProps {
-  isOpen: boolean
-  onOpenChange: (isOpen: boolean) => void
-  selectedDate: Date
+import { plannerActions, usePlannerStore } from '@/store/planner/planner-store'
+
+/* color dot UI */
+function ColorDot({ c }: { c: PlannerTypeColor }) {
+  const HEX: Record<PlannerTypeColor, string> = {
+    default: '#E5E7EB',
+    gray: '#9CA3AF',
+    brown: '#8B4513',
+    orange: '#F97316',
+    yellow: '#F59E0B',
+    green: '#10B981',
+    blue: '#3B82F6',
+    purple: '#8B5CF6',
+    pink: '#EC4899',
+    red: '#EF4444',
+  }
+  return (
+    <span
+      aria-hidden
+      className="inline-block h-3 w-3 rounded-full border border-black/10"
+      style={{ backgroundColor: HEX[c] }}
+    />
+  )
+}
+
+const COLOR_LABELS: Record<PlannerTypeColor, string> = {
+  default: 'Default',
+  gray: 'Gray',
+  brown: 'Brown',
+  orange: 'Orange',
+  yellow: 'Yellow',
+  green: 'Green',
+  blue: 'Blue',
+  purple: 'Purple',
+  pink: 'Pink',
+  red: 'Red',
 }
 
 export function AddEventDialog({
-  isOpen,
+  open,
   onOpenChange,
-  selectedDate,
-}: AddEventDialogProps) {
+  defaultDate,
+  trigger,
+}: {
+  open: boolean
+  onOpenChange: (v: boolean) => void
+  defaultDate?: Date
+  trigger?: React.ReactNode
+}) {
+  const getEventTypeColor = usePlannerStore((s) => s.getEventTypeColor)
+  const setEventTypeColor = usePlannerStore((s) => s.setEventTypeColor)
+
   const [title, setTitle] = React.useState('')
   const [type, setType] = React.useState('Meeting')
-  const [dateTime, setDateTime] = React.useState<Date | undefined>(selectedDate)
+  const [typeColor, setTypeColor] = React.useState<PlannerTypeColor>(
+    getEventTypeColor('Meeting'),
+  )
+  const [dateTime, setDateTime] = React.useState<Date | undefined>(
+    defaultDate ?? new Date(),
+  )
+  const [duration, setDuration] = React.useState<string>('')
+  const [attendees, setAttendees] = React.useState<string>('')
 
   React.useEffect(() => {
-    if (isOpen) {
-      const newDateTime = new Date(selectedDate.getTime())
-      // Default to the next hour from now, or 9 AM if it's in the past
-      const now = new Date()
-      const nextHour = new Date(
-        now.getFullYear(),
-        now.getMonth(),
-        now.getDate(),
-        now.getHours() + 1,
-      )
-      if (newDateTime.getTime() < nextHour.getTime()) {
-        newDateTime.setHours(9, 0, 0, 0)
-      } else {
-        newDateTime.setHours(nextHour.getHours(), 0, 0, 0)
-      }
-      setDateTime(newDateTime)
-    }
-  }, [isOpen, selectedDate])
+    setTypeColor(getEventTypeColor(type))
+  }, [type, getEventTypeColor])
 
-  const handleSubmit = (e: React.FormEvent) => {
+  function toTimeString(d: Date) {
+    const hh = String(d.getHours()).padStart(2, '0')
+    const mm = String(d.getMinutes()).padStart(2, '0')
+    return `${hh}:${mm}`
+  }
+
+  const onSubmit: React.FormEventHandler = (e) => {
     e.preventDefault()
     if (!title || !type || !dateTime) return
 
-    const date = new Date(dateTime)
-    date.setHours(0, 0, 0, 0)
-    const time = `${String(dateTime.getHours()).padStart(2, '0')}:${String(
-      dateTime.getMinutes(),
-    ).padStart(2, '0')}`
+    const dt = new Date(dateTime)
+    const onlyDate = new Date(dt)
+    onlyDate.setHours(0, 0, 0, 0)
 
-    plannerActions.addScheduleItem({
-      title,
-      type,
-      date,
-      time,
-    })
+    const event: PlannerEvent = {
+      id: crypto.randomUUID(), // fixes “id missing” error
+      title: title.trim(),
+      type: type.trim(),
+      date: onlyDate,
+      time: toTimeString(dt),
+      durationMinutes: duration
+        ? Math.max(0, parseInt(duration, 10))
+        : undefined,
+      attendees: attendees ? Math.max(0, parseInt(attendees, 10)) : undefined,
+    }
 
-    setTitle('')
-    setType('Meeting')
+    setEventTypeColor(event.type, typeColor)
+    plannerActions.addScheduleItem(event) // typed alias of addEvent
     onOpenChange(false)
   }
 
   return (
-    <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
-        <form onSubmit={handleSubmit}>
-          <DialogHeader>
-            <DialogTitle>Add New Event</DialogTitle>
-            <DialogDescription>
-              Fill in the details for your new schedule item.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="grid gap-4 py-4">
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      {trigger ? <DialogTrigger asChild>{trigger}</DialogTrigger> : null}
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Add Event</DialogTitle>
+          <DialogDescription className="sr-only">
+            Create a new calendar event.
+          </DialogDescription>
+        </DialogHeader>
+
+        <form
+          id="add-event-dialog-form"
+          onSubmit={onSubmit}
+          className="space-y-4"
+        >
+          <div className="space-y-2">
+            <Label htmlFor="evt-title">Title</Label>
+            <Input
+              id="evt-title"
+              placeholder="Team Standup"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+            />
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="space-y-2">
-              <Label htmlFor="title">Title</Label>
+              <Label htmlFor="evt-type">Type</Label>
               <Input
-                id="title"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                required
+                id="evt-type"
+                placeholder="Meeting"
+                value={type}
+                onChange={(e) => setType(e.target.value)}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label>Color</Label>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" className="w-full justify-start">
+                    <span className="mr-2">
+                      <ColorDot c={typeColor} />
+                    </span>
+                    <span className="truncate">{COLOR_LABELS[typeColor]}</span>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-44">
+                  <DropdownMenuLabel>Colors</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuRadioGroup
+                    value={typeColor}
+                    onValueChange={(v) => setTypeColor(v as PlannerTypeColor)}
+                  >
+                    {(Object.keys(COLOR_LABELS) as Array<PlannerTypeColor>).map(
+                      (c) => (
+                        <DropdownMenuRadioItem key={c} value={c}>
+                          <span className="mr-2">
+                            <ColorDot c={c} />
+                          </span>
+                          {COLOR_LABELS[c]}
+                        </DropdownMenuRadioItem>
+                      ),
+                    )}
+                  </DropdownMenuRadioGroup>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label>Date &amp; time</Label>
+            <DateTimePicker date={dateTime} setDate={setDateTime} />
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="space-y-2">
+              <Label htmlFor="evt-duration">Duration (minutes)</Label>
+              <Input
+                id="evt-duration"
+                type="number"
+                min={0}
+                placeholder="30"
+                value={duration}
+                onChange={(e) => setDuration(e.target.value)}
               />
             </div>
             <div className="space-y-2">
-              <DateTimePicker date={dateTime} setDate={setDateTime} />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="type">Type</Label>
+              <Label htmlFor="evt-attendees">Attendees</Label>
               <Input
-                id="type"
-                value={type}
-                onChange={(e) => setType(e.target.value)}
-                placeholder="e.g., Meeting, Deadline"
-                required
+                id="evt-attendees"
+                type="number"
+                min={0}
+                placeholder="6"
+                value={attendees}
+                onChange={(e) => setAttendees(e.target.value)}
               />
             </div>
           </div>
+
           <DialogFooter>
-            <Button type="submit">Add Event</Button>
+            <Button type="submit">Add</Button>
           </DialogFooter>
         </form>
       </DialogContent>
