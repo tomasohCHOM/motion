@@ -14,9 +14,11 @@ import { Route as SignInRouteImport } from './routes/sign-in'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as AuthenticatedRouteImport } from './routes/authenticated'
+import { Route as PlannerRouteRouteImport } from './routes/planner/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as WorkspaceWorkspaceIdRouteRouteImport } from './routes/workspace/$workspaceId/route'
 import { Route as WorkspaceWorkspaceIdManagerRouteImport } from './routes/workspace/$workspaceId/manager'
+import { Route as WorkspaceWorkspaceIdPlannerIndexRouteImport } from './routes/workspace/$workspaceId/planner/index'
 import { Route as WorkspaceWorkspaceIdNotesIndexRouteImport } from './routes/workspace/$workspaceId/notes/index'
 import { Route as WorkspaceWorkspaceIdFilesIndexRouteImport } from './routes/workspace/$workspaceId/files/index'
 import { Route as WorkspaceWorkspaceIdNotesNoteIdRouteImport } from './routes/workspace/$workspaceId/notes/$noteId'
@@ -46,6 +48,11 @@ const AuthenticatedRoute = AuthenticatedRouteImport.update({
   path: '/authenticated',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PlannerRouteRoute = PlannerRouteRouteImport.update({
+  id: '/planner',
+  path: '/planner',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -61,6 +68,12 @@ const WorkspaceWorkspaceIdManagerRoute =
   WorkspaceWorkspaceIdManagerRouteImport.update({
     id: '/manager',
     path: '/manager',
+    getParentRoute: () => WorkspaceWorkspaceIdRouteRoute,
+  } as any)
+const WorkspaceWorkspaceIdPlannerIndexRoute =
+  WorkspaceWorkspaceIdPlannerIndexRouteImport.update({
+    id: '/planner/',
+    path: '/planner/',
     getParentRoute: () => WorkspaceWorkspaceIdRouteRoute,
   } as any)
 const WorkspaceWorkspaceIdNotesIndexRoute =
@@ -84,6 +97,7 @@ const WorkspaceWorkspaceIdNotesNoteIdRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/planner': typeof PlannerRouteRoute
   '/authenticated': typeof AuthenticatedRoute
   '/dashboard': typeof DashboardRoute
   '/onboarding': typeof OnboardingRoute
@@ -94,9 +108,11 @@ export interface FileRoutesByFullPath {
   '/workspace/$workspaceId/notes/$noteId': typeof WorkspaceWorkspaceIdNotesNoteIdRoute
   '/workspace/$workspaceId/files': typeof WorkspaceWorkspaceIdFilesIndexRoute
   '/workspace/$workspaceId/notes': typeof WorkspaceWorkspaceIdNotesIndexRoute
+  '/workspace/$workspaceId/planner': typeof WorkspaceWorkspaceIdPlannerIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/planner': typeof PlannerRouteRoute
   '/authenticated': typeof AuthenticatedRoute
   '/dashboard': typeof DashboardRoute
   '/onboarding': typeof OnboardingRoute
@@ -107,10 +123,12 @@ export interface FileRoutesByTo {
   '/workspace/$workspaceId/notes/$noteId': typeof WorkspaceWorkspaceIdNotesNoteIdRoute
   '/workspace/$workspaceId/files': typeof WorkspaceWorkspaceIdFilesIndexRoute
   '/workspace/$workspaceId/notes': typeof WorkspaceWorkspaceIdNotesIndexRoute
+  '/workspace/$workspaceId/planner': typeof WorkspaceWorkspaceIdPlannerIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/planner': typeof PlannerRouteRoute
   '/authenticated': typeof AuthenticatedRoute
   '/dashboard': typeof DashboardRoute
   '/onboarding': typeof OnboardingRoute
@@ -121,11 +139,13 @@ export interface FileRoutesById {
   '/workspace/$workspaceId/notes/$noteId': typeof WorkspaceWorkspaceIdNotesNoteIdRoute
   '/workspace/$workspaceId/files/': typeof WorkspaceWorkspaceIdFilesIndexRoute
   '/workspace/$workspaceId/notes/': typeof WorkspaceWorkspaceIdNotesIndexRoute
+  '/workspace/$workspaceId/planner/': typeof WorkspaceWorkspaceIdPlannerIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/planner'
     | '/authenticated'
     | '/dashboard'
     | '/onboarding'
@@ -136,9 +156,11 @@ export interface FileRouteTypes {
     | '/workspace/$workspaceId/notes/$noteId'
     | '/workspace/$workspaceId/files'
     | '/workspace/$workspaceId/notes'
+    | '/workspace/$workspaceId/planner'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/planner'
     | '/authenticated'
     | '/dashboard'
     | '/onboarding'
@@ -149,9 +171,11 @@ export interface FileRouteTypes {
     | '/workspace/$workspaceId/notes/$noteId'
     | '/workspace/$workspaceId/files'
     | '/workspace/$workspaceId/notes'
+    | '/workspace/$workspaceId/planner'
   id:
     | '__root__'
     | '/'
+    | '/planner'
     | '/authenticated'
     | '/dashboard'
     | '/onboarding'
@@ -162,10 +186,12 @@ export interface FileRouteTypes {
     | '/workspace/$workspaceId/notes/$noteId'
     | '/workspace/$workspaceId/files/'
     | '/workspace/$workspaceId/notes/'
+    | '/workspace/$workspaceId/planner/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  PlannerRouteRoute: typeof PlannerRouteRoute
   AuthenticatedRoute: typeof AuthenticatedRoute
   DashboardRoute: typeof DashboardRoute
   OnboardingRoute: typeof OnboardingRoute
@@ -211,6 +237,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/planner': {
+      id: '/planner'
+      path: '/planner'
+      fullPath: '/planner'
+      preLoaderRoute: typeof PlannerRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -230,6 +263,13 @@ declare module '@tanstack/react-router' {
       path: '/manager'
       fullPath: '/workspace/$workspaceId/manager'
       preLoaderRoute: typeof WorkspaceWorkspaceIdManagerRouteImport
+      parentRoute: typeof WorkspaceWorkspaceIdRouteRoute
+    }
+    '/workspace/$workspaceId/planner/': {
+      id: '/workspace/$workspaceId/planner/'
+      path: '/planner'
+      fullPath: '/workspace/$workspaceId/planner'
+      preLoaderRoute: typeof WorkspaceWorkspaceIdPlannerIndexRouteImport
       parentRoute: typeof WorkspaceWorkspaceIdRouteRoute
     }
     '/workspace/$workspaceId/notes/': {
@@ -261,6 +301,7 @@ interface WorkspaceWorkspaceIdRouteRouteChildren {
   WorkspaceWorkspaceIdNotesNoteIdRoute: typeof WorkspaceWorkspaceIdNotesNoteIdRoute
   WorkspaceWorkspaceIdFilesIndexRoute: typeof WorkspaceWorkspaceIdFilesIndexRoute
   WorkspaceWorkspaceIdNotesIndexRoute: typeof WorkspaceWorkspaceIdNotesIndexRoute
+  WorkspaceWorkspaceIdPlannerIndexRoute: typeof WorkspaceWorkspaceIdPlannerIndexRoute
 }
 
 const WorkspaceWorkspaceIdRouteRouteChildren: WorkspaceWorkspaceIdRouteRouteChildren =
@@ -269,6 +310,8 @@ const WorkspaceWorkspaceIdRouteRouteChildren: WorkspaceWorkspaceIdRouteRouteChil
     WorkspaceWorkspaceIdNotesNoteIdRoute: WorkspaceWorkspaceIdNotesNoteIdRoute,
     WorkspaceWorkspaceIdFilesIndexRoute: WorkspaceWorkspaceIdFilesIndexRoute,
     WorkspaceWorkspaceIdNotesIndexRoute: WorkspaceWorkspaceIdNotesIndexRoute,
+    WorkspaceWorkspaceIdPlannerIndexRoute:
+      WorkspaceWorkspaceIdPlannerIndexRoute,
   }
 
 const WorkspaceWorkspaceIdRouteRouteWithChildren =
@@ -278,6 +321,7 @@ const WorkspaceWorkspaceIdRouteRouteWithChildren =
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  PlannerRouteRoute: PlannerRouteRoute,
   AuthenticatedRoute: AuthenticatedRoute,
   DashboardRoute: DashboardRoute,
   OnboardingRoute: OnboardingRoute,
