@@ -56,7 +56,7 @@ function DashboardPage() {
   return (
     <div>
       <UserNavbar />
-      <main className="max-w-[1280px] mx-auto px-6 mt-24 w-full">
+      <main className="max-w-[1280px] mx-auto px-6 pt-24 pb-16 w-full">
         <div className="flex flex-col items-start gap-6 py-4 justify-between border-b-2 border-border md:items-center md:flex-row">
           <div className="flex flex-col gap-1">
             <h1 className="text-xl md:text-3xl font-semibold">
