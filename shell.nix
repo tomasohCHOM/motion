@@ -6,7 +6,6 @@ mkShell {
     nodejs
     go
     go-tools
-    minio
     delve
     terraform
     just
