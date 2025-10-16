@@ -65,6 +65,12 @@ function CreateWorkspacePage() {
       setNameError('Workspace name must be less than 50 characters')
       return false
     }
+    if (!/^[A-Za-z0-9\s]*$/.test(name)) {
+      setNameError(
+        'Workspace name must only contain letters, numbers, and spaces',
+      )
+      return false
+    }
     setNameError('')
     return true
   }
