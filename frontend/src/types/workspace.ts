@@ -1,12 +1,17 @@
-export type UserWorkspacesResponse = Array<{
+export type WorkspaceResponse = {
   id: string
   name: string
   description: string
-  access_type: string
-  member_count: number
   created_at: string
   updated_at: string
-}>
+}
+
+export type UserWorkspacesResponse = Array<
+  WorkspaceResponse & {
+    access_type: string
+    member_count: number
+  }
+>
 
 export type UserWorkspace = {
   id: string

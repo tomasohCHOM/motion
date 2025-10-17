@@ -18,8 +18,10 @@ export const Route = createFileRoute('/dashboard')({
     }
     try {
       const { user } = context.auth
-      await context.queryClient.ensureQueryData(userQueryOptions(user!.id))
-      return { user }
+      const { first_name } = await context.queryClient.ensureQueryData(
+        userQueryOptions(user!.id),
+      )
+      return { user, first_name }
     } catch (err) {
       if ((err as Error).message === 'USER_NOT_FOUND') {
         throw redirect({
@@ -30,9 +32,12 @@ export const Route = createFileRoute('/dashboard')({
       throw err
     }
   },
-  loader: ({ context }) => {
-    const { user, queryClient } = context
-    return queryClient.ensureQueryData(userWorkspacesQueryOptions(user!.id))
+  loader: async ({ context }) => {
+    const { user, first_name, queryClient } = context
+    const workspaces = await queryClient.ensureQueryData(
+      userWorkspacesQueryOptions(user!.id),
+    )
+    return { workspaces, first_name }
   },
   component: DashboardPage,
 })
@@ -46,7 +51,7 @@ type WorkspaceInvite = {
 
 function DashboardPage() {
   const router = useRouter()
-  const workspaces = Route.useLoaderData()
+  const { workspaces, first_name: firstName } = Route.useLoaderData()
   const workspaceInvites: Array<WorkspaceInvite> = []
 
   const onCreateWorkspace: React.MouseEventHandler<HTMLButtonElement> = () => {
@@ -56,11 +61,11 @@ function DashboardPage() {
   return (
     <div>
       <UserNavbar />
-      <main className="max-w-[1280px] mx-auto px-6 mt-24 w-full">
+      <main className="max-w-[1280px] mx-auto px-6 pt-24 pb-16 w-full">
         <div className="flex flex-col items-start gap-6 py-4 justify-between border-b-2 border-border md:items-center md:flex-row">
           <div className="flex flex-col gap-1">
             <h1 className="text-xl md:text-3xl font-semibold">
-              Welcome Back, Tomas!
+              Welcome Back, {firstName}!
             </h1>
             <p className="text-sm md:text-[1rem] text-muted-foreground">
               Select a workspace to continue or create a new one

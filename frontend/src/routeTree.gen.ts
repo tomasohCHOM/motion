@@ -14,7 +14,6 @@ import { Route as SignInRouteImport } from './routes/sign-in'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as AuthenticatedRouteImport } from './routes/authenticated'
-import { Route as PlannerRouteRouteImport } from './routes/planner/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as WorkspaceCreateRouteImport } from './routes/workspace/create'
 import { Route as WorkspaceWorkspaceIdRouteRouteImport } from './routes/workspace/$workspaceId/route'
@@ -47,11 +46,6 @@ const DashboardRoute = DashboardRouteImport.update({
 const AuthenticatedRoute = AuthenticatedRouteImport.update({
   id: '/authenticated',
   path: '/authenticated',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PlannerRouteRoute = PlannerRouteRouteImport.update({
-  id: '/planner',
-  path: '/planner',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -103,7 +97,6 @@ const WorkspaceWorkspaceIdNotesNoteIdRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/planner': typeof PlannerRouteRoute
   '/authenticated': typeof AuthenticatedRoute
   '/dashboard': typeof DashboardRoute
   '/onboarding': typeof OnboardingRoute
@@ -119,7 +112,6 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/planner': typeof PlannerRouteRoute
   '/authenticated': typeof AuthenticatedRoute
   '/dashboard': typeof DashboardRoute
   '/onboarding': typeof OnboardingRoute
@@ -136,7 +128,6 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/planner': typeof PlannerRouteRoute
   '/authenticated': typeof AuthenticatedRoute
   '/dashboard': typeof DashboardRoute
   '/onboarding': typeof OnboardingRoute
@@ -154,7 +145,6 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/planner'
     | '/authenticated'
     | '/dashboard'
     | '/onboarding'
@@ -170,7 +160,6 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/planner'
     | '/authenticated'
     | '/dashboard'
     | '/onboarding'
@@ -186,7 +175,6 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
-    | '/planner'
     | '/authenticated'
     | '/dashboard'
     | '/onboarding'
@@ -203,7 +191,6 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  PlannerRouteRoute: typeof PlannerRouteRoute
   AuthenticatedRoute: typeof AuthenticatedRoute
   DashboardRoute: typeof DashboardRoute
   OnboardingRoute: typeof OnboardingRoute
@@ -248,13 +235,6 @@ declare module '@tanstack/react-router' {
       path: '/authenticated'
       fullPath: '/authenticated'
       preLoaderRoute: typeof AuthenticatedRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/planner': {
-      id: '/planner'
-      path: '/planner'
-      fullPath: '/planner'
-      preLoaderRoute: typeof PlannerRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -341,7 +321,6 @@ const WorkspaceWorkspaceIdRouteRouteWithChildren =
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  PlannerRouteRoute: PlannerRouteRoute,
   AuthenticatedRoute: AuthenticatedRoute,
   DashboardRoute: DashboardRoute,
   OnboardingRoute: OnboardingRoute,

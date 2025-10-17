@@ -30,9 +30,7 @@ export const WorkspaceInvites: React.FC<Props> = ({ workspaceInvites }) => {
             <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center mx-auto mb-3">
               <Mail className="w-6 h-6 text-slate-400" />
             </div>
-            <p className="text-sm text-slate-600">
-              No pending workspaceInvites
-            </p>
+            <p className="text-sm text-slate-600">No pending invites</p>
           </div>
         ) : (
           <div className="space-y-4">

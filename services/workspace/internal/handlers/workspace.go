@@ -97,6 +97,9 @@ func (h *WorkspaceHandler) ListUserWorkspaces(w http.ResponseWriter, r *http.Req
 		http.Error(w, "failed to list user workspaces", http.StatusInternalServerError)
 		return
 	}
+	if workspaces == nil {
+		workspaces = make([]models.GetUserWorkspacesRow, 0)
+	}
 	w.WriteHeader(http.StatusOK)
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(workspaces)
