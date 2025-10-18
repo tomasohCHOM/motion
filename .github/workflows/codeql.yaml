@@ -1,0 +1,119 @@
+name: CodeQL
+
+on:
+  push:
+    branches: ['main']
+    paths:
+      - 'frontend/**'
+      - 'services/**'
+      - '.github/workflows/codeql.yml'
+      - '**/*.ts'
+      - '**/*.tsx'
+      - '**/*.js'
+      - '**/*.go'
+  pull_request:
+    branches: ['main']
+    paths:
+      - 'frontend/**'
+      - 'services/**'
+      - '.github/workflows/codeql.yml'
+      - '**/*.ts'
+      - '**/*.tsx'
+      - '**/*.js'
+      - '**/*.go'
+  schedule:
+    - cron: '19 5 * * 0'
+
+permissions:
+  contents: read
+  security-events: write
+  actions: read
+
+concurrency:
+  group: codeql-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  analyze-jsts:
+    name: CodeQL (JavaScript/TypeScript)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Resolve Node version
+        shell: bash
+        run: |
+          echo "NODE_VERSION=20" >> $GITHUB_ENV
+          if [ -f .nvmrc ]; then
+            echo "NODE_VERSION=$(cat .nvmrc)" >> $GITHUB_ENV
+          fi
+          echo "Using Node $NODE_VERSION"
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: |
+            frontend/package-lock.json
+
+      - name: Initialize CodeQL (JS/TS)
+        uses: github/codeql-action/init@v3
+        with:
+          languages: javascript-typescript
+          queries: security-extended,security-and-quality
+
+      - name: Install & build frontend
+        working-directory: frontend
+        run: |
+          npm ci
+          npm run build --if-present
+
+      - name: Perform CodeQL Analysis (JS/TS)
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: '/language:javascript-typescript'
+
+  analyze-go:
+    name: CodeQL (Go)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.22.x'
+          check-latest: true
+          cache: true
+
+      - name: Initialize CodeQL (Go)
+        uses: github/codeql-action/init@v3
+        with:
+          languages: go
+          queries: security-extended,security-and-quality
+
+      - name: Build all Go modules
+        shell: bash
+        run: |
+          set -euo pipefail
+          found=0
+          for d in services/*; do
+            if [ -f "$d/go.mod" ]; then
+              echo "==> Building $d"
+              (cd "$d" && go build ./...)
+              found=1
+            fi
+          done
+          if [ "$found" -eq 0 ]; then
+            echo "No Go modules found under services/"
+          fi
+
+      - name: Perform CodeQL Analysis (Go)
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: '/language:go'
