@@ -53,12 +53,13 @@ export function OnboardingForm() {
   }
   const [firstName, setFirstName] = useState(user.firstName || '')
   const [lastName, setLastName] = useState(user.lastName || '')
+  const [username, setUsername] = useState('')
   const [email, _] = useState(user.primaryEmailAddress?.emailAddress || '')
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     createUser(
-      { id: user.id, firstName, lastName, email },
+      { id: user.id, email, firstName, lastName, username },
       {
         onSuccess: () => {
           navigate({ to: '/dashboard' })
@@ -66,6 +67,9 @@ export function OnboardingForm() {
       },
     )
   }
+
+  const disabled =
+    isPending || !firstName.trim() || !lastName.trim() || !username.trim()
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br px-4 py-12">
@@ -83,10 +87,8 @@ export function OnboardingForm() {
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-5">
-              {/* First Name */}
               <div className="space-y-2">
                 <Label htmlFor="firstName" className="flex items-center gap-2">
-                  <UserCircle className="w-4 h-4 text-slate-500" />
                   First Name
                 </Label>
                 <Input
@@ -99,11 +101,8 @@ export function OnboardingForm() {
                   className="transition-all focus:ring-2 focus:ring-blue-500/20"
                 />
               </div>
-
-              {/* Last Name */}
               <div className="space-y-2">
                 <Label htmlFor="lastName" className="flex items-center gap-2">
-                  <UserCircle className="w-4 h-4 text-slate-500" />
                   Last Name
                 </Label>
                 <Input
@@ -116,8 +115,24 @@ export function OnboardingForm() {
                   className="transition-all focus:ring-2 focus:ring-blue-500/20"
                 />
               </div>
-
-              {/* Email (Disabled) */}
+              <div className="space-y-2">
+                <Label htmlFor="lastName" className="flex items-center gap-2">
+                  <UserCircle className="w-4 h-4 text-slate-500" />
+                  Username
+                </Label>
+                <Input
+                  id="lastName"
+                  type="text"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  placeholder="Enter your username"
+                  required
+                  className="transition-all focus:ring-2 focus:ring-blue-500/20"
+                />
+                <p className="pl-2 text-muted-foreground text-xs">
+                  Must be between 6-20 characters (only letters and numbers)
+                </p>
+              </div>
               <div className="space-y-2">
                 <Label htmlFor="email" className="flex items-center gap-2">
                   <Mail className="w-4 h-4 text-slate-500" />
@@ -136,7 +151,7 @@ export function OnboardingForm() {
               </div>
               <Button
                 type="submit"
-                disabled={isPending || !firstName.trim() || !lastName.trim()}
+                disabled={disabled}
                 className="w-full shadow-md hover:shadow-lg transition-all duration-200 mt-6"
               >
                 {isPending ? (

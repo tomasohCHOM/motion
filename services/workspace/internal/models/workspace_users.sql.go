@@ -96,7 +96,7 @@ func (q *Queries) GetUserWorkspaces(ctx context.Context, userID string) ([]GetUs
 }
 
 const getWorkspaceUsers = `-- name: GetWorkspaceUsers :many
-SELECT u.id, u.email, u.first_name, u.last_name, wu.access_type, wu.joined_at
+SELECT u.id, u.email, u.first_name, u.last_name, u.username, wu.access_type, wu.joined_at
 FROM workspace_users wu
 JOIN users u ON wu.user_id = u.id
 WHERE wu.workspace_id = $1
@@ -108,6 +108,7 @@ type GetWorkspaceUsersRow struct {
 	Email      string           `json:"email"`
 	FirstName  string           `json:"first_name"`
 	LastName   string           `json:"last_name"`
+	Username   string           `json:"username"`
 	AccessType pgtype.Text      `json:"access_type"`
 	JoinedAt   pgtype.Timestamp `json:"joined_at"`
 }
@@ -126,6 +127,7 @@ func (q *Queries) GetWorkspaceUsers(ctx context.Context, workspaceID pgtype.UUID
 			&i.Email,
 			&i.FirstName,
 			&i.LastName,
+			&i.Username,
 			&i.AccessType,
 			&i.JoinedAt,
 		); err != nil {
