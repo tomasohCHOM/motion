@@ -26,6 +26,7 @@ type UserRequestData struct {
 	Email     string `json:"email"`
 	FirstName string `json:"first_name"`
 	LastName  string `json:"last_name"`
+	Username  string `json:"username"`
 }
 
 func (h *UserHandler) GetUser(w http.ResponseWriter, r *http.Request) {
@@ -58,7 +59,7 @@ func (h *UserHandler) CreateUserHandler(w http.ResponseWriter, r *http.Request) 
 		http.Error(w, "Invalid JSON", http.StatusBadRequest)
 		return
 	}
-	if u.ID == "" || u.Email == "" || u.FirstName == "" || u.LastName == "" {
+	if u.ID == "" || u.Email == "" || u.FirstName == "" || u.LastName == "" || u.Username == "" {
 		http.Error(w, "Missing required fields", http.StatusBadRequest)
 		return
 	}
@@ -67,6 +68,7 @@ func (h *UserHandler) CreateUserHandler(w http.ResponseWriter, r *http.Request) 
 		Email:     u.Email,
 		FirstName: u.FirstName,
 		LastName:  u.LastName,
+		Username:  u.Username,
 	})
 	fmt.Println(err)
 	if err != nil {

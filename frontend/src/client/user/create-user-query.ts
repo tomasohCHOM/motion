@@ -2,9 +2,10 @@ import { useMutation } from '@tanstack/react-query'
 
 type UserRequestData = {
   id: string
+  email: string
   firstName: string
   lastName: string
-  email: string
+  username: string
 }
 
 async function createUser(userReqData: UserRequestData) {
@@ -16,6 +17,7 @@ async function createUser(userReqData: UserRequestData) {
       email: userReqData.email,
       first_name: userReqData.firstName,
       last_name: userReqData.lastName,
+      username: userReqData.username,
     }),
   })
   if (!res.ok) throw new Error('Failed to create user')
