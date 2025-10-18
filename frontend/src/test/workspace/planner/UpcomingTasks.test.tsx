@@ -10,7 +10,7 @@ const start = (iso: string) => {
 }
 
 describe('UpcomingTasksCard', () => {
-  it('renders tasks and toggles completion via checkbox', async () => {
+  it('renders tasks and toggles completion via checkbox', () => {
     const onToggle = vi.fn()
 
     const tasks: Array<Task> = [
