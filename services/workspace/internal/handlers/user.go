@@ -9,7 +9,6 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/tomasohchom/motion/services/workspace/internal/models"
 	"github.com/tomasohchom/motion/services/workspace/internal/services"
 )
 
@@ -63,13 +62,13 @@ func (h *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Missing required fields", http.StatusBadRequest)
 		return
 	}
-	err := h.s.CreateUser(r.Context(), models.CreateUserParams{
-		ID:        u.ID,
-		Email:     u.Email,
-		FirstName: u.FirstName,
-		LastName:  u.LastName,
-		Username:  u.Username,
-	})
+	err := h.s.CreateUser(r.Context(),
+		u.ID,
+		u.Email,
+		u.FirstName,
+		u.LastName,
+		u.Username,
+	)
 	fmt.Println(err)
 	if err != nil {
 		http.Error(w, "Failed to sync user", http.StatusInternalServerError)

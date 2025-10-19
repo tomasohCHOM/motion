@@ -9,7 +9,7 @@ import (
 
 type UserServicer interface {
 	GetUser(ctx context.Context, id string) (models.User, error)
-	CreateUser(ctx context.Context, params models.CreateUserParams) error
+	CreateUser(ctx context.Context, id, email, firstName, lastName, userName string) error
 }
 
 type UserService struct {
@@ -31,8 +31,15 @@ func (s *UserService) GetUser(ctx context.Context, id string) (models.User, erro
 	return user, nil
 }
 
-func (s *UserService) CreateUser(ctx context.Context, params models.CreateUserParams) error {
-	_, err := s.s.Queries.CreateUser(ctx, params)
+func (s *UserService) CreateUser(ctx context.Context, id, email, firstName, lastName,
+	userName string) error {
+	_, err := s.s.Queries.CreateUser(ctx, models.CreateUserParams{
+		ID:        id,
+		Email:     email,
+		FirstName: firstName,
+		LastName:  lastName,
+		Username:  userName,
+	})
 	return err
 
 }
