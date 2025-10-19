@@ -10,11 +10,13 @@ import (
 	"strings"
 
 	"github.com/tomasohchom/motion/services/workspace/internal/models"
+	"github.com/tomasohchom/motion/services/workspace/internal/services"
 	"github.com/tomasohchom/motion/services/workspace/internal/store"
 )
 
 type UserHandler struct {
 	Store *store.Store
+	s     *services.UserService
 }
 
 func NewUserHandler(store *store.Store) *UserHandler {
@@ -39,7 +41,7 @@ func (h *UserHandler) GetUser(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Missing user ID", http.StatusBadRequest)
 		return
 	}
-	user, err := h.Store.Queries.GetUserByID(r.Context(), userId)
+	user, err := h.s.GetUser(r.Context(), userId)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			http.Error(w, "User not found", http.StatusNotFound)
