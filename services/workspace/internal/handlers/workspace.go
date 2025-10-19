@@ -2,6 +2,8 @@ package handlers
 
 import (
 	"encoding/json"
+	"errors"
+	"log"
 	"net/http"
 
 	"github.com/tomasohchom/motion/services/workspace/internal/services"
@@ -37,7 +39,13 @@ func (h *WorkspaceHandler) CreateWorkspace(w http.ResponseWriter, r *http.Reques
 		workspaceReq.OwnerId,
 	)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		// Map domain errors to HTTP status codes
+		if errors.Is(err, services.ErrMissingWorkspaceFields) {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		log.Printf("Failed to create workspace: %v", err)
+		http.Error(w, "failed to create workspace", http.StatusInternalServerError)
 		return
 	}
 
@@ -52,12 +60,23 @@ func (h *WorkspaceHandler) GetWorkspaceById(w http.ResponseWriter, r *http.Reque
 		http.Error(w, "missing workspace id", http.StatusBadRequest)
 		return
 	}
+
 	workspace, err := h.s.GetUserWorkspace(r.Context(), id)
 	if err != nil {
-		// TODO: Multiple types of errors can be found here, handle them
-		http.Error(w, "workspace not found", http.StatusNotFound)
+		// Map domain errors to HTTP status codes
+		if errors.Is(err, services.ErrWorkspaceNotFound) {
+			http.Error(w, "workspace not found", http.StatusNotFound)
+			return
+		}
+		if errors.Is(err, services.ErrInvalidWorkspaceData) {
+			http.Error(w, "invalid workspace id", http.StatusBadRequest)
+			return
+		}
+		log.Printf("Failed to fetch workspace %s: %v", id, err)
+		http.Error(w, "internal server error", http.StatusInternalServerError)
 		return
 	}
+
 	w.WriteHeader(http.StatusOK)
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(workspace)
@@ -69,12 +88,19 @@ func (h *WorkspaceHandler) ListUserWorkspaces(w http.ResponseWriter, r *http.Req
 		http.Error(w, "missing user id", http.StatusBadRequest)
 		return
 	}
-	ctx := r.Context()
-	workspaces, err := h.s.ListUserWorkspaces(ctx, userId)
+
+	workspaces, err := h.s.ListUserWorkspaces(r.Context(), userId)
 	if err != nil {
+		// Map domain errors to HTTP status codes
+		if errors.Is(err, services.ErrInvalidWorkspaceData) {
+			http.Error(w, "invalid user id", http.StatusBadRequest)
+			return
+		}
+		log.Printf("Failed to list workspaces for user %s: %v", userId, err)
 		http.Error(w, "failed to list user workspaces", http.StatusInternalServerError)
 		return
 	}
+
 	w.WriteHeader(http.StatusOK)
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(workspaces)

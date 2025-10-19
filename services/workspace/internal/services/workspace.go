@@ -2,12 +2,22 @@ package services
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 
 	"github.com/tomasohchom/motion/services/workspace/internal/models"
 	"github.com/tomasohchom/motion/services/workspace/internal/store"
+)
+
+// Domain errors
+var (
+	ErrWorkspaceNotFound      = errors.New("workspace not found")
+	ErrInvalidWorkspaceData   = errors.New("invalid workspace data")
+	ErrMissingWorkspaceFields = errors.New("missing required workspace fields")
+	ErrWorkspaceAccessDenied  = errors.New("workspace access denied")
 )
 
 type WorkspaceServicer interface {
@@ -30,14 +40,23 @@ func NewWorkspaceService(store *store.Store) *WorkspaceService {
 }
 
 func (s *WorkspaceService) GetUserWorkspace(ctx context.Context, id string) (models.Workspace, error) {
+	// Business validation
+	if id == "" {
+		return models.Workspace{}, ErrInvalidWorkspaceData
+	}
+
 	var uuid pgtype.UUID
 	if err := uuid.Scan(id); err != nil {
-		return models.Workspace{}, err
+		return models.Workspace{}, ErrInvalidWorkspaceData
 	}
 
 	workspace, err := s.s.Queries.GetWorkspaceById(ctx, uuid)
 	if err != nil {
-		return models.Workspace{}, err
+		// Translate database errors to domain errors
+		if errors.Is(err, pgx.ErrNoRows) {
+			return models.Workspace{}, ErrWorkspaceNotFound
+		}
+		return models.Workspace{}, fmt.Errorf("failed to get workspace: %w", err)
 	}
 	return workspace, nil
 }
@@ -56,11 +75,8 @@ func (s *WorkspaceService) CreateWorkspaceWithOwner(ctx context.Context,
 	name string, description string, ownerId string) (models.Workspace, error) {
 
 	// Business validation
-	if ownerId == "" {
-		return models.Workspace{}, fmt.Errorf("owner ID is required")
-	}
-	if name == "" {
-		return models.Workspace{}, fmt.Errorf("workspace name is required")
+	if ownerId == "" || name == "" {
+		return models.Workspace{}, ErrMissingWorkspaceFields
 	}
 
 	// Start transaction
@@ -105,13 +121,17 @@ func (s *WorkspaceService) AddUser(ctx context.Context, params models.AddUserToW
 
 func (s *WorkspaceService) ListUserWorkspaces(ctx context.Context,
 	id string) ([]models.GetUserWorkspacesRow, error) {
+	// Business validation
+	if id == "" {
+		return nil, ErrInvalidWorkspaceData
+	}
+
 	workspaces, err := s.s.Queries.GetUserWorkspaces(ctx, id)
 	if err != nil {
-		return []models.GetUserWorkspacesRow{}, nil
+		return nil, fmt.Errorf("failed to list user workspaces: %w", err)
 	}
 	if workspaces == nil {
 		workspaces = make([]models.GetUserWorkspacesRow, 0)
 	}
 	return workspaces, nil
-
 }
