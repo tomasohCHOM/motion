@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/tomasohchom/motion/services/workspace/internal/models"
 	"github.com/tomasohchom/motion/services/workspace/internal/services"
 )
 
@@ -29,32 +28,16 @@ func (h *WorkspaceHandler) CreateWorkspace(w http.ResponseWriter, r *http.Reques
 		http.Error(w, "invalid request body", http.StatusBadRequest)
 		return
 	}
-	if workspaceReq.OwnerId == "" {
-		http.Error(w, "Missing workspace owner ID", http.StatusBadRequest)
-		return
-	}
-	if workspaceReq.Name == "" {
-		http.Error(w, "Missing workspace name", http.StatusBadRequest)
-		return
-	}
 
-	ctx := r.Context()
-	workspace, err := h.s.CreateWorkspace(ctx, models.CreateWorkspaceParams{
-		Name:        workspaceReq.Name,
-		Description: pgtype.Text{String: workspaceReq.Description, Valid: true},
-	})
+	// Single service call with all the business logic
+	workspace, err := h.s.CreateWorkspaceWithOwner(
+		r.Context(),
+		workspaceReq.Name,
+		workspaceReq.Description,
+		workspaceReq.OwnerId,
+	)
 	if err != nil {
-		http.Error(w, "failed to create workspace", http.StatusInternalServerError)
-		return
-	}
-
-	err = h.s.AddUser(ctx, models.AddUserToWorkspaceParams{
-		WorkspaceID: workspace.ID,
-		UserID:      workspaceReq.OwnerId,
-		AccessType:  pgtype.Text{String: "owner", Valid: true},
-	})
-	if err != nil {
-		http.Error(w, "failed to add user to workspace", http.StatusInternalServerError)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
