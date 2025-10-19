@@ -15,6 +15,7 @@ import (
 
 	"github.com/tomasohchom/motion/services/workspace/internal/config"
 	"github.com/tomasohchom/motion/services/workspace/internal/handlers"
+	"github.com/tomasohchom/motion/services/workspace/internal/services"
 	"github.com/tomasohchom/motion/services/workspace/internal/store"
 )
 
@@ -85,7 +86,8 @@ func main() {
 		store := store.NewStore(pool)
 		poolMu.RUnlock()
 
-		userHandler := handlers.NewUserHandler(store)
+		userService := services.NewUserService(store)
+		userHandler := handlers.NewUserHandler(userService)
 		mux.HandleFunc("POST /users", userHandler.CreateUser)
 		mux.HandleFunc("GET /users/", userHandler.GetUser)
 		log.Println("User handler routes registered")

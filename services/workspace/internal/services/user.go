@@ -19,6 +19,10 @@ type UserService struct {
 // Compile time interface implementation check
 var _ UserServicer = (*UserService)(nil)
 
+func NewUserService(store *store.Store) *UserService {
+	return &UserService{s: store}
+}
+
 func (s *UserService) GetUser(ctx context.Context, id string) (models.User, error) {
 	user, err := s.s.Queries.GetUserByID(ctx, id)
 	if err != nil {
