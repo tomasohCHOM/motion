@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"log"
 	"net/http"
 	"strings"
@@ -69,7 +68,6 @@ func (h *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 		u.LastName,
 		u.Username,
 	)
-	fmt.Println(err)
 	if err != nil {
 		http.Error(w, "Failed to sync user", http.StatusInternalServerError)
 		return
