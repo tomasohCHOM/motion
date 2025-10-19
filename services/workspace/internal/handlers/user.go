@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"database/sql"
 	"encoding/json"
 	"errors"
 	"log"
@@ -37,16 +36,23 @@ func (h *UserHandler) GetUser(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Missing user ID", http.StatusBadRequest)
 		return
 	}
+
 	user, err := h.s.GetUser(r.Context(), userId)
 	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
+		// Map domain errors to HTTP status codes
+		if errors.Is(err, services.ErrUserNotFound) {
 			http.Error(w, "User not found", http.StatusNotFound)
+			return
+		}
+		if errors.Is(err, services.ErrInvalidUserData) {
+			http.Error(w, "Invalid user ID", http.StatusBadRequest)
 			return
 		}
 		log.Printf("Failed to fetch user %s: %v", userId, err)
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
+
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(user)
 }
@@ -57,10 +63,7 @@ func (h *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Invalid JSON", http.StatusBadRequest)
 		return
 	}
-	if u.ID == "" || u.Email == "" || u.FirstName == "" || u.LastName == "" || u.Username == "" {
-		http.Error(w, "Missing required fields", http.StatusBadRequest)
-		return
-	}
+
 	err := h.s.CreateUser(r.Context(),
 		u.ID,
 		u.Email,
@@ -69,9 +72,16 @@ func (h *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 		u.Username,
 	)
 	if err != nil {
-		http.Error(w, "Failed to sync user", http.StatusInternalServerError)
+		// Map domain errors to HTTP status codes
+		if errors.Is(err, services.ErrMissingUserFields) {
+			http.Error(w, "Missing required fields", http.StatusBadRequest)
+			return
+		}
+		log.Printf("Failed to create user: %v", err)
+		http.Error(w, "Failed to create user", http.StatusInternalServerError)
 		return
 	}
+
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(map[string]string{"status": "user created"})
 }
