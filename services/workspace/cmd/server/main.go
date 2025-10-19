@@ -92,7 +92,8 @@ func main() {
 		mux.HandleFunc("GET /users/", userHandler.GetUser)
 		log.Println("User handler routes registered")
 
-		workspaceHandler := handlers.NewWorkspaceHandler(store)
+		workspaceService := services.NewWorkspaceService(store)
+		workspaceHandler := handlers.NewWorkspaceHandler(workspaceService)
 		mux.HandleFunc("POST /workspaces", workspaceHandler.CreateWorkspace)
 		mux.HandleFunc("GET /workspaces/{id}", workspaceHandler.GetWorkspaceById)
 		mux.HandleFunc("GET /users/{user_id}/workspaces", workspaceHandler.ListUserWorkspaces)
