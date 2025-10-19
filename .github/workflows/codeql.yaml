@@ -42,28 +42,19 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Resolve Node version
-        shell: bash
-        run: |
-          echo "NODE_VERSION=20" >> $GITHUB_ENV
-          if [ -f .nvmrc ]; then
-            echo "NODE_VERSION=$(cat .nvmrc)" >> $GITHUB_ENV
-          fi
-          echo "Using Node $NODE_VERSION"
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: npm
-          cache-dependency-path: |
-            frontend/package-lock.json
-
       - name: Initialize CodeQL (JS/TS)
         uses: github/codeql-action/init@v3
         with:
           languages: javascript-typescript
           queries: security-extended,security-and-quality
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: frontend/.nvmrc
+          cache: npm
+          cache-dependency-path: |
+            frontend/package-lock.json
 
       - name: Install & build frontend
         working-directory: frontend
