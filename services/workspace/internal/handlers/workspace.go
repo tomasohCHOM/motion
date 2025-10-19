@@ -2,19 +2,20 @@ package handlers
 
 import (
 	"encoding/json"
+	"errors"
+	"log"
 	"net/http"
 
-	"github.com/jackc/pgx/v5/pgtype"
-	"github.com/tomasohchom/motion/services/workspace/internal/models"
-	"github.com/tomasohchom/motion/services/workspace/internal/store"
+	"github.com/tomasohchom/motion/services/workspace/internal/services"
 )
 
 type WorkspaceHandler struct {
-	Store *store.Store
+	// Store *store.Store
+	s services.WorkspaceServicer
 }
 
-func NewWorkspaceHandler(store *store.Store) *WorkspaceHandler {
-	return &WorkspaceHandler{Store: store}
+func NewWorkspaceHandler(service services.WorkspaceServicer) *WorkspaceHandler {
+	return &WorkspaceHandler{s: service}
 }
 
 type WorkspaceRequestData struct {
@@ -29,32 +30,22 @@ func (h *WorkspaceHandler) CreateWorkspace(w http.ResponseWriter, r *http.Reques
 		http.Error(w, "invalid request body", http.StatusBadRequest)
 		return
 	}
-	if workspaceReq.OwnerId == "" {
-		http.Error(w, "Missing workspace owner ID", http.StatusBadRequest)
-		return
-	}
-	if workspaceReq.Name == "" {
-		http.Error(w, "Missing workspace name", http.StatusBadRequest)
-		return
-	}
 
-	ctx := r.Context()
-	workspace, err := h.Store.Queries.CreateWorkspace(ctx, models.CreateWorkspaceParams{
-		Name:        workspaceReq.Name,
-		Description: pgtype.Text{String: workspaceReq.Description, Valid: true},
-	})
+	// Single service call with all the business logic
+	workspace, err := h.s.CreateWorkspaceWithOwner(
+		r.Context(),
+		workspaceReq.Name,
+		workspaceReq.Description,
+		workspaceReq.OwnerId,
+	)
 	if err != nil {
+		// Map domain errors to HTTP status codes
+		if errors.Is(err, services.ErrMissingWorkspaceFields) {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		log.Printf("Failed to create workspace: %v", err)
 		http.Error(w, "failed to create workspace", http.StatusInternalServerError)
-		return
-	}
-
-	err = h.Store.Queries.AddUserToWorkspace(ctx, models.AddUserToWorkspaceParams{
-		WorkspaceID: workspace.ID,
-		UserID:      workspaceReq.OwnerId,
-		AccessType:  pgtype.Text{String: "owner", Valid: true},
-	})
-	if err != nil {
-		http.Error(w, "failed to add user to workspace", http.StatusInternalServerError)
 		return
 	}
 
@@ -64,22 +55,28 @@ func (h *WorkspaceHandler) CreateWorkspace(w http.ResponseWriter, r *http.Reques
 }
 
 func (h *WorkspaceHandler) GetWorkspaceById(w http.ResponseWriter, r *http.Request) {
-	pathId := r.PathValue("id")
-	if pathId == "" {
+	id := r.PathValue("id")
+	if id == "" {
 		http.Error(w, "missing workspace id", http.StatusBadRequest)
 		return
 	}
-	var id pgtype.UUID
-	if err := id.Scan(pathId); err != nil {
-		http.Error(w, "invalid id format", http.StatusBadRequest)
-		return
-	}
-	ctx := r.Context()
-	workspace, err := h.Store.Queries.GetWorkspaceById(ctx, id)
+
+	workspace, err := h.s.GetUserWorkspace(r.Context(), id)
 	if err != nil {
-		http.Error(w, "workspace not found", http.StatusNotFound)
+		// Map domain errors to HTTP status codes
+		if errors.Is(err, services.ErrWorkspaceNotFound) {
+			http.Error(w, "workspace not found", http.StatusNotFound)
+			return
+		}
+		if errors.Is(err, services.ErrInvalidWorkspaceData) {
+			http.Error(w, "invalid workspace id", http.StatusBadRequest)
+			return
+		}
+		log.Printf("Failed to fetch workspace %s: %v", id, err)
+		http.Error(w, "internal server error", http.StatusInternalServerError)
 		return
 	}
+
 	w.WriteHeader(http.StatusOK)
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(workspace)
@@ -91,15 +88,19 @@ func (h *WorkspaceHandler) ListUserWorkspaces(w http.ResponseWriter, r *http.Req
 		http.Error(w, "missing user id", http.StatusBadRequest)
 		return
 	}
-	ctx := r.Context()
-	workspaces, err := h.Store.Queries.GetUserWorkspaces(ctx, userId)
+
+	workspaces, err := h.s.ListUserWorkspaces(r.Context(), userId)
 	if err != nil {
+		// Map domain errors to HTTP status codes
+		if errors.Is(err, services.ErrInvalidWorkspaceData) {
+			http.Error(w, "invalid user id", http.StatusBadRequest)
+			return
+		}
+		log.Printf("Failed to list workspaces for user %s: %v", userId, err)
 		http.Error(w, "failed to list user workspaces", http.StatusInternalServerError)
 		return
 	}
-	if workspaces == nil {
-		workspaces = make([]models.GetUserWorkspacesRow, 0)
-	}
+
 	w.WriteHeader(http.StatusOK)
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(workspaces)
