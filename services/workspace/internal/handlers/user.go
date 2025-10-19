@@ -11,16 +11,14 @@ import (
 
 	"github.com/tomasohchom/motion/services/workspace/internal/models"
 	"github.com/tomasohchom/motion/services/workspace/internal/services"
-	"github.com/tomasohchom/motion/services/workspace/internal/store"
 )
 
 type UserHandler struct {
-	Store *store.Store
-	s     *services.UserService
+	s     services.UserServicer
 }
 
-func NewUserHandler(store *store.Store) *UserHandler {
-	return &UserHandler{Store: store}
+func NewUserHandler(service services.UserServicer) *UserHandler {
+	return &UserHandler{s: service}
 }
 
 type UserRequestData struct {
@@ -65,7 +63,7 @@ func (h *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Missing required fields", http.StatusBadRequest)
 		return
 	}
-	_, err := h.Store.Queries.CreateUser(r.Context(), models.CreateUserParams{
+	err := h.s.CreateUser(r.Context(), models.CreateUserParams{
 		ID:        u.ID,
 		Email:     u.Email,
 		FirstName: u.FirstName,

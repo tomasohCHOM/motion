@@ -20,20 +20,11 @@ type UserService struct {
 var _ UserServicer = (*UserService)(nil)
 
 func (s *UserService) GetUser(ctx context.Context, id string) (models.User, error) {
-
 	user, err := s.s.Queries.GetUserByID(ctx, id)
 	if err != nil {
-		// if errors.Is(err, sql.ErrNoRows) {
-		// 	http.Error(w, "User not found", http.StatusNotFound)
-		// 	return
-		// }
-		// log.Printf("Failed to fetch user %s: %v", userId, err)
-		// http.Error(w, "Internal server error", http.StatusInternalServerError)
-		// return
 		return models.User{}, err
 	}
 	return user, nil
-
 }
 
 func (s *UserService) CreateUser(ctx context.Context, params models.CreateUserParams) error {
