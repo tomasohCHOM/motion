@@ -14,15 +14,19 @@ import (
 )
 
 func main() {
-
 	log.SetPrefix("[SERVER] ")
 	cfg := config.Load()
+
+	// Setup storage client ========================================================================
 	storageClient, err := clients.NewStorageClient(cfg)
 	if err != nil {
 		log.Fatalf("Failed to create %s storage client: %v", cfg.Storage.Provider, err)
 	}
 	log.Printf("Successfully created %s storage client\n", cfg.Storage.Provider)
 
+	// Setup metadata store ========================================================================
+
+	// Setup api server ============================================================================
 	uploadService := services.NewUploadService(storageClient, cfg)
 	uploadHandler := handlers.NewUploadHandler(uploadService, cfg)
 	mux := http.NewServeMux()
