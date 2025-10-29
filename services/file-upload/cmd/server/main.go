@@ -1,12 +1,15 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
+	"sync"
+	"time"
 
-	_ "github.com/jackc/pgx/v5/pgxpool"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/rs/cors"
 
 	"github.com/tomasohchom/motion/services/file-upload/internal/clients"
@@ -27,8 +30,53 @@ func main() {
 	log.Printf("Successfully created %s storage client\n", cfg.Storage.Provider)
 
 	// Setup metadata store ========================================================================
+	var (
+		pool   *pgxpool.Pool
+		poolMu sync.RWMutex
+	)
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	go func() {
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			default:
+			}
+			dbpool, err := pgxpool.New(ctx, cfg.Server.DbEndpoint)
+			if err == nil {
+				if err := dbpool.Ping(ctx); err == nil {
+					poolMu.Lock()
+					pool = dbpool
+					poolMu.Unlock()
+					log.Println("Successfully connected to database")
+					return
+				}
+			}
+			log.Printf("WARNING: Unable to connect to database: %v\n", err)
+			log.Printf("Trying again in 5 seconds...")
+			time.Sleep(time.Second * 5)
+		}
+	}()
 
 	// Setup api server ============================================================================
+
+	go func() {
+		for {
+			poolMu.Unlock()
+			ready := pool != nil
+			poolMu.Lock()
+			if ready {
+				break
+			}
+			time.Sleep(time.Second)
+		}
+
+		_ = pool
+	}()
+
 	uploadService := services.NewUploadService(storageClient, cfg)
 	uploadHandler := handlers.NewUploadHandler(uploadService, cfg)
 	mux := http.NewServeMux()

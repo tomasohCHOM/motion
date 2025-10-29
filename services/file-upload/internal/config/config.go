@@ -15,6 +15,7 @@ type ServerConfig struct {
 	Port           string
 	Environment    string
 	AllowedOrigins []string
+	DbEndpoint     string
 }
 
 type StorageConfig struct {
@@ -34,6 +35,7 @@ func Load() *Config {
 			Port:           getEnv("PORT", "8080"),
 			Environment:    getEnv("ENV", "development"),
 			AllowedOrigins: getEnvAsSlice("CORS_ALLOWED_ORIGINS", []string{"*"}),
+			DbEndpoint:     getEnv("DATABASE_URL", "postgres://dev:password@database:5433/dev_db"),
 		},
 		Storage: StorageConfig{
 			Provider:  getEnv("STORAGE_PROVIDER", "minio"),
