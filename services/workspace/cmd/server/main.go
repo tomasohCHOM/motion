@@ -35,7 +35,6 @@ func registerRoutes(mux *http.ServeMux, routes []Route) {
 func main() {
 	cfg := config.Load()
 	clerk.SetKey(cfg.ClerkKey)
-
 	mux := http.NewServeMux()
 	var (
 		pool   *pgxpool.Pool
