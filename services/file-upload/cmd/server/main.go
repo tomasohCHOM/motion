@@ -3,9 +3,11 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/rs/cors"
 	"log"
 	"net/http"
+
+	_ "github.com/jackc/pgx/v5/pgxpool"
+	"github.com/rs/cors"
 
 	"github.com/tomasohchom/motion/services/file-upload/internal/clients"
 	"github.com/tomasohchom/motion/services/file-upload/internal/config"
