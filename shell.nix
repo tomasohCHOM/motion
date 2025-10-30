@@ -10,5 +10,6 @@ mkShell {
     terraform
     just
     xh
+    sqlc
   ];
 }
