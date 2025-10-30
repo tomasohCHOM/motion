@@ -10,17 +10,17 @@ INSERT INTO files (
 SELECT * FROM files
 WHERE id = $1;
 
---name: ListFilesByUser :many
+-- name: ListFilesByUser :many
 SELECT * FROM files
 WHERE user_id = $1
 ORDER BY uploaded_at DESC
 LIMIT $2 OFFSET $3;
 
---name: SearchFilesByMetadata :many
+-- name: SearchFilesByMetadata :many
 SELECT * FROM files
 WHERE user_id = $1 AND metadata @> $2::jsonb
 ORDER BY uploaded_at DESC;
 
---name: DeleteFile :exec
+-- name: DeleteFile :exec
 DELETE FROM files
 WHERE id = $1 AND user_id = $2;
