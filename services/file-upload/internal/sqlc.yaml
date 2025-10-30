@@ -1,12 +1,12 @@
 version: "2"
 sql:
   - engine: "postgresql"
-    schema: "sql/schemas/"
+    # schema: "sql/schemas/"
     queries: "sql/queries/"
     gen:
       go:
-        package: "dbmodels"
+        package: "db"
         sql_package: "pgx/v5"
-        out: "models"
+        out: "db"
         json_tags_id_uppercase: true
         emit_json_tags: true
