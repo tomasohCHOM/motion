@@ -1,20 +1,16 @@
-import { Outlet, createFileRoute, redirect } from '@tanstack/react-router'
+import { Outlet, createFileRoute } from '@tanstack/react-router'
 import { SidebarProvider } from '@/components/ui/sidebar'
 import AppNavbar from '@/components/workspace/layout/navbar'
 import AppSidebar from '@/components/workspace/layout/sidebar'
 import PageContent from '@/components/workspace/layout/page-content'
+import { requireAuth } from '@/auth/requireAuth'
+import { requireUser } from '@/auth/requireUser'
 
 export const Route = createFileRoute('/workspace/$workspaceId')({
-  beforeLoad: ({ context, location }) => {
-    // If auth is missing or user isn't signed in, redirect to sign-in with the original path
-    if (!context.auth?.isAuthenticated) {
-      throw redirect({
-        to: '/sign-in',
-        search: {
-          redirect: location.pathname,
-        },
-      })
-    }
+  beforeLoad: async ({ context, location }) => {
+    requireAuth(context, location.pathname)
+    const user = await requireUser(context.queryClient, context.auth!)
+    return { user, first_name: user.first_name, auth: context.auth! }
   },
   component: WorkspaceLayout,
 })

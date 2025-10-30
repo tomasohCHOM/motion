@@ -1,41 +1,25 @@
-import { createFileRoute, redirect, useRouter } from '@tanstack/react-router'
+import { createFileRoute, useRouter } from '@tanstack/react-router'
 import { LayoutGrid, Plus } from 'lucide-react'
-import { userQueryOptions } from '@/client/user/get-user-query'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { userWorkspacesQueryOptions } from '@/client/workspaces/get-user-workspaces'
 import { UserNavbar } from '@/components/user/navbar'
 import { UserWorkspaces } from '@/components/user/user-workspaces'
 import { WorkspaceInvites } from '@/components/user/workspace-invites'
+import { requireAuth } from '@/auth/requireAuth'
+import { requireUser } from '@/auth/requireUser'
 
 export const Route = createFileRoute('/dashboard')({
   beforeLoad: async ({ context, location }) => {
-    if (!context.auth?.isAuthenticated) {
-      throw redirect({
-        to: '/sign-in',
-        search: { redirect: location.pathname },
-      })
-    }
-    try {
-      const { user } = context.auth
-      const { first_name } = await context.queryClient.ensureQueryData(
-        userQueryOptions(user!.id),
-      )
-      return { user, first_name }
-    } catch (err) {
-      if ((err as Error).message === 'USER_NOT_FOUND') {
-        throw redirect({
-          to: '/onboarding',
-          search: { redirect: '/onboarding' },
-        })
-      }
-      throw err
-    }
+    requireAuth(context, location.pathname)
+    const user = await requireUser(context.queryClient, context.auth!)
+    return { user, first_name: user.first_name, auth: context.auth! }
   },
   loader: async ({ context }) => {
-    const { user, first_name, queryClient } = context
+    const { user, first_name, queryClient, auth } = context
+    const token = await auth.getToken({ skipCache: true })
     const workspaces = await queryClient.ensureQueryData(
-      userWorkspacesQueryOptions(user!.id),
+      userWorkspacesQueryOptions(user.id, token),
     )
     return { workspaces, first_name }
   },

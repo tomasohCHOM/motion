@@ -1,4 +1,5 @@
 import { useMutation } from '@tanstack/react-query'
+import { useApiClient } from '../apiClient'
 
 type UserRequestData = {
   id: string
@@ -8,24 +9,20 @@ type UserRequestData = {
   username: string
 }
 
-async function createUser(userReqData: UserRequestData) {
-  const res = await fetch('http://localhost:8081/users', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      id: userReqData.id,
-      email: userReqData.email,
-      first_name: userReqData.firstName,
-      last_name: userReqData.lastName,
-      username: userReqData.username,
-    }),
-  })
-  if (!res.ok) throw new Error('Failed to create user')
-  return res.json()
-}
-
 export function useCreateUser() {
+  const { apiFetch } = useApiClient()
+
   return useMutation({
-    mutationFn: (userReqData: UserRequestData) => createUser(userReqData),
+    mutationFn: (userReqData: UserRequestData) =>
+      apiFetch('http://localhost:8081/users', {
+        method: 'POST',
+        body: JSON.stringify({
+          id: userReqData.id,
+          email: userReqData.email,
+          first_name: userReqData.firstName,
+          last_name: userReqData.lastName,
+          username: userReqData.username,
+        }),
+      }),
   })
 }

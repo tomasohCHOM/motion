@@ -3,6 +3,7 @@ package middleware
 import (
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/clerk/clerk-sdk-go/v2"
 	"github.com/clerk/clerk-sdk-go/v2/jwks"
@@ -22,8 +23,11 @@ func init() {
 
 // AuthMiddleware verifies the JWT and injects the Clerk user info into context.
 func AuthMiddleware(next http.HandlerFunc) http.HandlerFunc {
-	clock := clerk.NewClock()
-
+	if cfg.Environment == "development" {
+		return func(w http.ResponseWriter, r *http.Request) {
+			next(w, r)
+		}
+	}
 	return func(w http.ResponseWriter, r *http.Request) {
 		token := getSessionToken(r)
 		if token == "" {
@@ -43,10 +47,12 @@ func AuthMiddleware(next http.HandlerFunc) http.HandlerFunc {
 			http.Error(w, "invalid key", http.StatusUnauthorized)
 			return
 		}
+		clock := clerk.NewClock()
 		_, err = jwt.Verify(r.Context(), &jwt.VerifyParams{
-			Token: token,
-			JWK:   jwk,
-			Clock: clock,
+			Token:  token,
+			JWK:    jwk,
+			Clock:  clock,
+			Leeway: time.Second * 10,
 		})
 		if err != nil {
 			http.Error(w, "unauthorized", http.StatusUnauthorized)
