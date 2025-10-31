@@ -15,14 +15,26 @@ import (
 
 	"github.com/tomasohchom/motion/services/workspace/internal/config"
 	"github.com/tomasohchom/motion/services/workspace/internal/handlers"
+	"github.com/tomasohchom/motion/services/workspace/internal/middleware"
 	"github.com/tomasohchom/motion/services/workspace/internal/services"
 	"github.com/tomasohchom/motion/services/workspace/internal/store"
 )
 
+type Route struct {
+	Method  string
+	Path    string
+	Handler http.HandlerFunc
+}
+
+func registerRoutes(mux *http.ServeMux, routes []Route) {
+	for _, r := range routes {
+		mux.HandleFunc(fmt.Sprintf("%s %s", r.Method, r.Path), middleware.AuthMiddleware(r.Handler))
+	}
+}
+
 func main() {
 	cfg := config.Load()
 	clerk.SetKey(cfg.ClerkKey)
-
 	mux := http.NewServeMux()
 	var (
 		pool   *pgxpool.Pool
@@ -88,15 +100,19 @@ func main() {
 
 		userService := services.NewUserService(store)
 		userHandler := handlers.NewUserHandler(userService)
-		mux.HandleFunc("POST /users", userHandler.CreateUser)
-		mux.HandleFunc("GET /users/", userHandler.GetUser)
+		registerRoutes(mux, []Route{
+			{"POST", "/users", userHandler.CreateUser},
+			{"GET", "/users/", userHandler.GetUser},
+		})
 		log.Println("User handler routes registered")
 
 		workspaceService := services.NewWorkspaceService(store)
 		workspaceHandler := handlers.NewWorkspaceHandler(workspaceService)
-		mux.HandleFunc("POST /workspaces", workspaceHandler.CreateWorkspace)
-		mux.HandleFunc("GET /workspaces/{id}", workspaceHandler.GetWorkspaceById)
-		mux.HandleFunc("GET /users/{user_id}/workspaces", workspaceHandler.ListUserWorkspaces)
+		registerRoutes(mux, []Route{
+			{"POST", "/workspaces", workspaceHandler.CreateWorkspace},
+			{"GET", "/workspaces/{id}", workspaceHandler.GetWorkspaceById},
+			{"GET", "/users/{user_id}/workspaces", workspaceHandler.ListUserWorkspaces},
+		})
 		log.Println("Workspace handler routes registered")
 	}()
 

@@ -1,9 +1,17 @@
 import { ClerkProvider, useAuth, useUser } from '@clerk/clerk-react'
 
+type GetTokenOptions = {
+  template?: string
+  organizationId?: string
+  leewayInSeconds?: number
+  skipCache?: boolean
+}
+
 export type AuthState = {
   isAuthenticated: boolean
   user: { id: string; username: string; email: string } | null
   isLoading: boolean
+  getToken: (options?: GetTokenOptions) => Promise<string | null>
   login: () => void
   logout: () => void
 }
@@ -17,7 +25,7 @@ export function ClerkWrapper({ children }: { children: React.ReactNode }) {
 }
 
 export function useClerkAuth(): AuthState {
-  const { isSignedIn, isLoaded } = useAuth()
+  const { isSignedIn, isLoaded, getToken } = useAuth()
   const { user } = useUser()
 
   return {
@@ -31,6 +39,7 @@ export function useClerkAuth(): AuthState {
         }
       : null,
     isLoading: !isLoaded,
+    getToken: getToken,
     login: () => {
       // Clerk handles login through components
       window.location.href = '/sign-in'

@@ -1,17 +1,17 @@
 import { queryOptions } from '@tanstack/react-query'
 import type { UserWorkspace, UserWorkspacesResponse } from '@/types/workspace'
+import { apiFetchWithToken } from '@/client/apiClient'
 
 async function fetchUserWorkspaces(
   userId: string,
+  token: string | null,
 ): Promise<Array<UserWorkspace>> {
-  const res = await fetch(
+  const data: UserWorkspacesResponse = await apiFetchWithToken(
     `${import.meta.env.VITE_WORKSPACE_SERVICE_URL}/users/${userId}/workspaces`,
+    token,
   )
-  if (!res.ok) {
-    throw new Error(`Failed to fetch workspaces ${res.status}`)
-  }
-  const data: UserWorkspacesResponse = await res.json()
-  const userWorkspaces: Array<UserWorkspace> = data.map((workspaceData) => ({
+
+  return data.map((workspaceData) => ({
     id: workspaceData.id,
     name: workspaceData.name,
     description: workspaceData.description,
@@ -20,13 +20,15 @@ async function fetchUserWorkspaces(
     createdAt: workspaceData.created_at,
     lastUpdated: workspaceData.updated_at,
   }))
-  return userWorkspaces
 }
 
-export function userWorkspacesQueryOptions(userId: string) {
+export function userWorkspacesQueryOptions(
+  userId: string,
+  token: string | null,
+) {
   return queryOptions({
     queryKey: ['user-workspaces', userId],
-    queryFn: () => fetchUserWorkspaces(userId),
+    queryFn: () => fetchUserWorkspaces(userId, token),
     staleTime: 10_000,
   })
 }

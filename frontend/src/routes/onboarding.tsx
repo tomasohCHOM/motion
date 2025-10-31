@@ -1,4 +1,4 @@
-import { useUser } from '@clerk/clerk-react'
+import { useAuth, useUser } from '@clerk/clerk-react'
 import {
   createFileRoute,
   isRedirect,
@@ -19,18 +19,18 @@ import {
 } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { requireAuth } from '@/auth/requireAuth'
 
 export const Route = createFileRoute('/onboarding')({
   beforeLoad: async ({ context, location }) => {
-    if (!context.auth?.isAuthenticated) {
-      throw redirect({
-        to: '/sign-in',
-        search: { redirect: location.pathname },
-      })
-    }
+    requireAuth(context, location.pathname)
     try {
-      const { user } = context.auth
-      await context.queryClient.ensureQueryData(userQueryOptions(user!.id))
+      const auth = context.auth!
+      const { user } = auth
+      const token = await auth.getToken({ skipCache: true })
+      await context.queryClient.ensureQueryData(
+        userQueryOptions(user!.id, token),
+      )
       throw redirect({ to: '/dashboard' })
     } catch (err) {
       if (isRedirect(err)) throw err
@@ -42,6 +42,7 @@ export const Route = createFileRoute('/onboarding')({
 
 export function OnboardingForm() {
   const { user, isLoaded } = useUser()
+  const { getToken } = useAuth()
   const navigate = useNavigate()
   const { mutate: createUser, isPending } = useCreateUser()
   if (!isLoaded) {
@@ -56,8 +57,10 @@ export function OnboardingForm() {
   const [username, setUsername] = useState('')
   const [email, _] = useState(user.primaryEmailAddress?.emailAddress || '')
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    const token = await getToken({ skipCache: true })
+    if (!token) return
     createUser(
       { id: user.id, email, firstName, lastName, username },
       {

@@ -1,4 +1,4 @@
-import { createFileRoute, redirect, useRouter } from '@tanstack/react-router'
+import { createFileRoute, useRouter } from '@tanstack/react-router'
 import { useState } from 'react'
 import { useUser } from '@clerk/clerk-react'
 import { AlertCircle } from 'lucide-react'
@@ -8,31 +8,14 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Button } from '@/components/ui/button'
 import { useCreateWorkspace } from '@/client/workspaces/create-workspace'
-import { userQueryOptions } from '@/client/user/get-user-query'
+import { requireAuth } from '@/auth/requireAuth'
+import { requireUser } from '@/auth/requireUser'
 
 export const Route = createFileRoute('/workspace/create')({
   beforeLoad: async ({ context, location }) => {
-    if (!context.auth?.isAuthenticated) {
-      throw redirect({
-        to: '/sign-in',
-        search: { redirect: location.pathname },
-      })
-    }
-    try {
-      const { user } = context.auth
-      const userData = await context.queryClient.ensureQueryData(
-        userQueryOptions(user!.id),
-      )
-      return { userId: userData.id }
-    } catch (err) {
-      if ((err as Error).message === 'USER_NOT_FOUND') {
-        throw redirect({
-          to: '/onboarding',
-          search: { redirect: '/onboarding' },
-        })
-      }
-      throw err
-    }
+    requireAuth(context, location.pathname)
+    const user = await requireUser(context.queryClient, context.auth!)
+    return { user, first_name: user.first_name }
   },
   component: CreateWorkspacePage,
 })

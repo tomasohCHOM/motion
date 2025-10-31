@@ -1,4 +1,5 @@
-import { queryOptions, useQuery } from '@tanstack/react-query'
+import { queryOptions } from '@tanstack/react-query'
+import { apiFetchWithToken } from '../apiClient'
 
 type User = {
   id: string
@@ -7,27 +8,22 @@ type User = {
   last_name: string
 }
 
-async function fetchUser(userId: string): Promise<User> {
-  const res = await fetch(
+export async function fetchUser(
+  userId: string,
+  token: string | null,
+): Promise<User> {
+  return apiFetchWithToken(
     `${import.meta.env.VITE_WORKSPACE_SERVICE_URL}/users/${userId}`,
+    token,
   )
-  if (res.status === 404) {
-    throw new Error('USER_NOT_FOUND')
-  }
-  if (!res.ok) {
-    throw new Error(`Failed to fetch user: ${res.status}`)
-  }
-  return res.json()
 }
 
-export function userQueryOptions(userId: string) {
+export function userQueryOptions(userId: string, token: string | null) {
   return queryOptions({
     queryKey: ['user', userId],
-    queryFn: () => fetchUser(userId),
+    queryFn: async () => {
+      return fetchUser(userId, token)
+    },
     staleTime: 10_000,
   })
-}
-
-export function useUserQuery(userId: string) {
-  return useQuery(userQueryOptions(userId))
 }
