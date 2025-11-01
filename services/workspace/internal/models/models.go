@@ -26,6 +26,19 @@ type Workspace struct {
 	UpdatedAt   pgtype.Timestamp `json:"updated_at"`
 }
 
+type WorkspaceInvite struct {
+	ID           pgtype.UUID        `json:"id"`
+	WorkspaceID  pgtype.UUID        `json:"workspace_id"`
+	InvitedBy    string             `json:"invited_by"`
+	InviteeID    string             `json:"invitee_id"`
+	InviteeEmail string             `json:"invitee_email"`
+	AccessType   pgtype.Text        `json:"access_type"`
+	Token        string             `json:"token"`
+	Status       pgtype.Text        `json:"status"`
+	CreatedAt    pgtype.Timestamptz `json:"created_at"`
+	ExpiresAt    pgtype.Timestamptz `json:"expires_at"`
+}
+
 type WorkspaceUser struct {
 	UserID      string           `json:"user_id"`
 	WorkspaceID pgtype.UUID      `json:"workspace_id"`
