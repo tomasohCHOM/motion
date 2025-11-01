@@ -1,10 +1,10 @@
 import { FolderKanban, Plus } from 'lucide-react'
 import { Card, CardContent } from '../ui/card'
 import { Button } from '../ui/button'
+import { Spinner } from '../ui/spinner'
 import { UserWorkspaceCard } from './user-workspace'
 import type { UserWorkspace } from '@/types/workspace'
 import type React from 'react'
-import { Spinner } from '../ui/spinner'
 
 type Props = {
   workspaces: Array<UserWorkspace>

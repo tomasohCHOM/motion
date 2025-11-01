@@ -1,5 +1,5 @@
-import type React from 'react'
 import { Spinner } from '../ui/spinner'
+import type React from 'react'
 
 export const LoadingPage: React.FC = () => {
   return (
