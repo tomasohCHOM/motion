@@ -4,9 +4,6 @@ services:
     ports:
       - "9000:9000"
       - "9001:9001" # console
-    environment:
-      MINIO_ROOT_USER: minioadmin
-      MINIO_ROOT_PASSWORD: minioadmin
     command: server /data --console-address ":9001"
     volumes:
       - minio_data:/data
@@ -20,12 +17,8 @@ services:
     build: .
     ports:
       - "8080:8080"
-    environment:
-      STORAGE_PROVIDER: minio
-      MINIO_ENDPOINT: localhost:9000
-      STORAGE_BUCKET: uploads
-      MINIO_ROOT_USER: minioadmin
-      MINIO_ROOT_PASSWORD: minioadmin
+    env_file:
+      - .env
     depends_on:
       - minio
 
