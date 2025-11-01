@@ -10,6 +10,8 @@ import { Button } from '@/components/ui/button'
 import { useCreateWorkspace } from '@/client/workspaces/create-workspace'
 import { requireAuth } from '@/auth/requireAuth'
 import { requireUser } from '@/auth/requireUser'
+import { LoadingPage } from '@/components/common/loading'
+import { Spinner } from '@/components/ui/spinner'
 
 export const Route = createFileRoute('/workspace/create')({
   beforeLoad: async ({ context, location }) => {
@@ -17,15 +19,13 @@ export const Route = createFileRoute('/workspace/create')({
     const user = await requireUser(context.queryClient, context.auth!)
     return { user, first_name: user.first_name }
   },
+  pendingComponent: () => <LoadingPage />,
   component: CreateWorkspacePage,
 })
 
 function CreateWorkspacePage() {
   const router = useRouter()
-  const { user, isLoaded } = useUser()
-  if (!isLoaded) {
-    return <p className="text-center mt-20 text-muted-foreground">Loading...</p>
-  }
+  const { user } = useUser()
   if (!user) {
     router.navigate({ to: '/sign-in' })
     return null
@@ -33,7 +33,9 @@ function CreateWorkspacePage() {
   const [name, setName] = useState('')
   const [nameError, setNameError] = useState('')
   const [description, setDescription] = useState('')
-  const { mutate: createWorkspace, isPending, isError } = useCreateWorkspace()
+  const [creatingWorkspace, setCreatingWorkspace] = useState(false)
+  const [cancelling, setCancelling] = useState(false)
+  const { mutate: createWorkspace, isError } = useCreateWorkspace()
 
   const validateName = (name: string) => {
     if (!name.trim()) {
@@ -58,7 +60,11 @@ function CreateWorkspacePage() {
     return true
   }
 
-  const onBack = () => router.navigate({ to: '/dashboard' })
+  const onCancel = async () => {
+    setCancelling(true)
+    await router.navigate({ to: '/dashboard' })
+    setCancelling(false)
+  }
 
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newName = e.target.value
@@ -71,14 +77,16 @@ function CreateWorkspacePage() {
   const handleCreate = (e: React.FormEvent) => {
     e.preventDefault()
     if (!validateName(name)) return
+    setCreatingWorkspace(true)
     createWorkspace(
       { name, description: description.trim() || undefined, userId: user.id },
       {
-        onSuccess: ({ id }) => {
-          router.navigate({
+        onSuccess: async ({ id }) => {
+          await router.navigate({
             to: '/workspace/$workspaceId',
             params: { workspaceId: id },
           })
+          setCreatingWorkspace(false)
         },
       },
     )
@@ -146,17 +154,24 @@ function CreateWorkspacePage() {
           </p>
         )}
         <div className="flex items-center justify-between pt-4 pb-8">
-          <Button variant="outline" onClick={onBack}>
+          <Button disabled={cancelling} variant="outline" onClick={onCancel}>
             Cancel
           </Button>
           <Button
             size="lg"
             type="submit"
-            disabled={!canCreate || isPending}
+            disabled={!canCreate || creatingWorkspace || cancelling}
             className="cursor-pointer shadow-md hover:shadow-lg transition-all
             disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {!isPending ? 'Create workspace' : 'Creating...'}
+            {!creatingWorkspace ? (
+              'Create workspace'
+            ) : (
+              <>
+                <Spinner />
+                Creating Workspace...
+              </>
+            )}
           </Button>
         </div>
       </main>
