@@ -10,6 +10,7 @@ import { routeTree } from './routeTree.gen'
 
 import './styles.css'
 import reportWebVitals from './reportWebVitals.ts'
+import { LoadingPage } from './components/common/loading.tsx'
 
 // Create a new router instance
 
@@ -36,11 +37,7 @@ function InnerApp() {
   const auth = useClerkAuth()
 
   if (auth.isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        Loading...
-      </div>
-    )
+    return <LoadingPage />
   }
 
   // Build full router context expected by the root route

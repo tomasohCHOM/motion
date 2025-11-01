@@ -20,6 +20,8 @@ import {
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { requireAuth } from '@/auth/requireAuth'
+import { LoadingPage } from '@/components/common/loading'
+import { Spinner } from '@/components/ui/spinner'
 
 export const Route = createFileRoute('/onboarding')({
   beforeLoad: async ({ context, location }) => {
@@ -37,17 +39,15 @@ export const Route = createFileRoute('/onboarding')({
       if ((err as Error).message === 'USER_NOT_FOUND') return
     }
   },
+  pendingComponent: () => <LoadingPage />,
   component: OnboardingForm,
 })
 
 export function OnboardingForm() {
-  const { user, isLoaded } = useUser()
+  const { user } = useUser()
   const { getToken } = useAuth()
   const navigate = useNavigate()
   const { mutate: createUser, isPending } = useCreateUser()
-  if (!isLoaded) {
-    return <p className="text-center mt-20 text-muted-foreground">Loading...</p>
-  }
   if (!user) {
     navigate({ to: '/sign-in' })
     return null
@@ -159,7 +159,7 @@ export function OnboardingForm() {
               >
                 {isPending ? (
                   <span className="flex items-center gap-2">
-                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    <Spinner />
                     Creating your profile...
                   </span>
                 ) : (

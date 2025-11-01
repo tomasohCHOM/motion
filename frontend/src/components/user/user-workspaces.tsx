@@ -1,17 +1,20 @@
 import { FolderKanban, Plus } from 'lucide-react'
 import { Card, CardContent } from '../ui/card'
 import { Button } from '../ui/button'
+import { Spinner } from '../ui/spinner'
 import { UserWorkspaceCard } from './user-workspace'
 import type { UserWorkspace } from '@/types/workspace'
 import type React from 'react'
 
 type Props = {
   workspaces: Array<UserWorkspace>
+  redirectingCreatePage: boolean
   onCreateWorkspace: React.MouseEventHandler<HTMLButtonElement>
 }
 
 export const UserWorkspaces: React.FC<Props> = ({
   workspaces,
+  redirectingCreatePage,
   onCreateWorkspace,
 }) => {
   return (
@@ -27,9 +30,22 @@ export const UserWorkspaces: React.FC<Props> = ({
               <p className="text-slate-600 text-center mb-4 text-sm">
                 Create your first workspace to get started with your team
               </p>
-              <Button onClick={onCreateWorkspace} variant="outline">
-                <Plus className="w-4 h-4 mr-2" />
-                Create Workspace
+              <Button
+                disabled={redirectingCreatePage}
+                onClick={onCreateWorkspace}
+                variant="outline"
+              >
+                {redirectingCreatePage ? (
+                  <>
+                    <Spinner />
+                    Loading
+                  </>
+                ) : (
+                  <>
+                    <Plus className="w-5 h-5 mr-2" />
+                    New Workspace
+                  </>
+                )}
               </Button>
             </CardContent>
           </Card>
