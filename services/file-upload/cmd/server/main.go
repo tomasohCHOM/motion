@@ -16,6 +16,7 @@ import (
 	"github.com/tomasohchom/motion/services/file-upload/internal/config"
 	"github.com/tomasohchom/motion/services/file-upload/internal/handlers"
 	"github.com/tomasohchom/motion/services/file-upload/internal/services"
+	"github.com/tomasohchom/motion/services/file-upload/internal/store"
 )
 
 func main() {
@@ -29,7 +30,7 @@ func main() {
 	}
 	log.Printf("Successfully created %s storage client\n", cfg.Storage.Provider)
 
-	// Setup metadata store ========================================================================
+	// Setup metadata storage ======================================================================
 	var (
 		pool   *pgxpool.Pool
 		poolMu sync.RWMutex
@@ -38,6 +39,7 @@ func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
+	dbConnected := make(chan bool)
 	go func() {
 		for {
 			select {
@@ -58,29 +60,18 @@ func main() {
 			log.Printf("WARNING: Unable to connect to database: %v\n", err)
 			log.Printf("Trying again in 5 seconds...")
 			time.Sleep(time.Second * 5)
+			dbConnected <- true
 		}
 	}()
 
 	// Setup api server ============================================================================
+	<-dbConnected // block until DB is connected, following code depends on it being up
+	store := store.NewStore(pool)
 
-	go func() {
-		for {
-			poolMu.Unlock()
-			ready := pool != nil
-			poolMu.Lock()
-			if ready {
-				break
-			}
-			time.Sleep(time.Second)
-		}
+	uploadService := services.NewUploadService(storageClient, cfg, store)
+	uploadHandler := handlers.NewUploadHandler(uploadService)
 
-		_ = pool
-	}()
-
-	uploadService := services.NewUploadService(storageClient, cfg)
-	uploadHandler := handlers.NewUploadHandler(uploadService, cfg)
 	mux := http.NewServeMux()
-
 	mux.HandleFunc("GET /health", func(w http.ResponseWriter, r *http.Request) {
 		storageOnline := storageClient.IsOnline()
 

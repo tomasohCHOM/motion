@@ -10,17 +10,21 @@ import (
 
 	"github.com/tomasohchom/motion/services/file-upload/internal/config"
 	"github.com/tomasohchom/motion/services/file-upload/internal/interfaces"
+	"github.com/tomasohchom/motion/services/file-upload/internal/store"
 )
 
 type UploadService struct {
 	storage interfaces.StorageClient
 	config  *config.Config
+	store   *store.Store
 }
 
-func NewUploadService(storage interfaces.StorageClient, cfg *config.Config) *UploadService {
+func NewUploadService(storage interfaces.StorageClient, cfg *config.Config,
+	store *store.Store) *UploadService {
 	service := &UploadService{
 		storage: storage,
 		config:  cfg,
+		store:   store,
 	}
 	service.MakeBucket(context.Background())
 	return service
