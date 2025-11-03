@@ -10,6 +10,7 @@ import (
 	"github.com/tomasohchom/motion/services/file-upload/internal/config"
 	"github.com/tomasohchom/motion/services/file-upload/internal/mocks"
 	"github.com/tomasohchom/motion/services/file-upload/internal/services"
+	"github.com/tomasohchom/motion/services/file-upload/internal/store"
 )
 
 func TestMakeBucket(t *testing.T) {
@@ -21,8 +22,8 @@ func TestMakeBucket(t *testing.T) {
 	}
 
 	mockStorage := &mocks.MockStorageClient{}
-	uploadService := services.NewUploadService(mockStorage, cfg)
-	_ = NewUploadHandler(uploadService, cfg)
+	uploadService := services.NewUploadService(mockStorage, cfg, &store.Store{})
+	_ = NewUploadHandler(uploadService)
 
 	// Assert that the MakeBucket function on the mock storage client was called
 	if !mockStorage.MakeBucketCalled {

@@ -6,20 +6,18 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/tomasohchom/motion/services/file-upload/internal/config"
 	"github.com/tomasohchom/motion/services/file-upload/internal/models"
 	"github.com/tomasohchom/motion/services/file-upload/internal/services"
 )
 
 type UploadHandler struct {
 	uploadService *services.UploadService
-	config        *config.Config
+	// config        *config.Config
 }
 
-func NewUploadHandler(uploadService *services.UploadService, cfg *config.Config) *UploadHandler {
+func NewUploadHandler(uploadService *services.UploadService) *UploadHandler {
 	return &UploadHandler{
 		uploadService: uploadService,
-		config:        cfg,
 	}
 }
 
