@@ -36,8 +36,12 @@ services:
       - "8080:8080"
     env_file:
       - .env
+    environment:
+      - DATABASE_URL=postgres://dev:password@database:5432/dev_db
     depends_on:
       - minio
+      - database
 
 volumes:
   minio_data:
+  db-data:
