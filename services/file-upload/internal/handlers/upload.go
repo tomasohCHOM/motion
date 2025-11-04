@@ -3,6 +3,7 @@ package handlers
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"time"
 
@@ -12,7 +13,6 @@ import (
 
 type UploadHandler struct {
 	uploadService services.UploadServicer
-	// config        *config.Config
 }
 
 func NewUploadHandler(uploadService services.UploadServicer) *UploadHandler {
@@ -73,6 +73,13 @@ func (h *UploadHandler) CompleteUpload(w http.ResponseWriter, r *http.Request) {
 	// 	http.Error(w, "Failed to verify upload", http.StatusInternalServerError)
 	// 	return
 	// }
+
+	err := h.uploadService.CompleteUpload(r.Context(), req.Key, req.UserID)
+	if err != nil {
+		log.Printf("Failed to complete upload: %v", err)
+		http.Error(w, "Failed to complete upload", http.StatusInternalServerError)
+		return
+	}
 
 	// Here you might save metadata to a database, send notifications, etc.
 	response := models.CompleteUploadResponse{
