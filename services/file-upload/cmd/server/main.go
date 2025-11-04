@@ -3,10 +3,13 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
-	"sync"
+	"os"
+	"os/signal"
+	"syscall"
 	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -21,68 +24,40 @@ import (
 
 func main() {
 	log.SetPrefix("[SERVER] ")
+	if err := run(); err != nil {
+		log.Fatalf("Application error: %v", err)
+	}
+}
+
+func run() error {
 	cfg := config.Load()
+	ctx := context.Background()
 
 	// Setup storage client ========================================================================
 	storageClient, err := clients.NewStorageClient(cfg)
 	if err != nil {
-		log.Fatalf("Failed to create %s storage client: %v", cfg.Storage.Provider, err)
+		return fmt.Errorf("Failed to create %s storage client: %v", cfg.Storage.Provider, err)
 	}
+	// TODO: create a defered shutdown func
 	log.Printf("Successfully created %s storage client\n", cfg.Storage.Provider)
 
 	// Setup metadata storage ======================================================================
-	var (
-		pool   *pgxpool.Pool
-		poolMu sync.RWMutex
-	)
-
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-
-	dbConnected := make(chan bool)
-	go func() {
-		for {
-			select {
-			case <-ctx.Done():
-				return
-			default:
-			}
-			dbpool, err := pgxpool.New(ctx, cfg.Server.DbEndpoint)
-			if err == nil {
-				if err := dbpool.Ping(ctx); err == nil {
-					poolMu.Lock()
-					pool = dbpool
-					poolMu.Unlock()
-					log.Println("Successfully connected to database")
-					return
-				}
-			}
-			log.Printf("WARNING: Unable to connect to database: %v\n", err)
-			log.Printf("Trying again in 5 seconds...")
-			time.Sleep(time.Second * 5)
-			dbConnected <- true
-		}
-	}()
+	pool, err := connectWithRetry(ctx, cfg.Server.DbEndpoint, 10, 5*time.Second)
+	if err != nil {
+		return fmt.Errorf("failed to connect to database: %w", err)
+	}
+	defer pool.Close()
+	log.Println("Successfully connected to database")
 
 	// Setup api server ============================================================================
-	<-dbConnected // block until DB is connected, following code depends on it being up
+	// Services
 	store := store.NewStore(pool)
-
 	uploadService := services.NewUploadService(storageClient, cfg, store)
 	uploadHandler := handlers.NewUploadHandler(uploadService)
 
+	// Router
 	mux := http.NewServeMux()
-	mux.HandleFunc("GET /health", func(w http.ResponseWriter, r *http.Request) {
-		storageOnline := storageClient.IsOnline()
-
-		if storageOnline {
-			handlers.HealthCheck(w, r)
-		} else {
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusServiceUnavailable)
-			json.NewEncoder(w).Encode(map[string]string{"status": "storage offline"})
-		}
-	})
+	mux.HandleFunc("GET /health", healthCheckHandler(storageClient))
 	mux.HandleFunc("POST /upload/presigned", uploadHandler.GetPresignedURL)
 	mux.HandleFunc("POST /upload/complete", uploadHandler.CompleteUpload)
 
@@ -95,11 +70,80 @@ func main() {
 		Debug:            cfg.Server.Environment == "development",
 	})
 
-	handler := c.Handler(mux)
+	srv := &http.Server{
+		Addr:    fmt.Sprintf(":%s", cfg.Server.Port),
+		Handler: c.Handler(mux),
+	}
 
-	addr := fmt.Sprintf(":%s", cfg.Server.Port)
-	log.Printf("\033[32mServer started on http://localhost%s\033[0m\n", addr)
-	if err := http.ListenAndServe(addr, handler); err != nil {
-		log.Fatalf("Server failed to start: %v", err)
+	serverErrors := make(chan error, 1)
+	go func() {
+		log.Printf("\033[32mServer started on http://localhost%s\033[0m\n", srv.Addr)
+		serverErrors <- srv.ListenAndServe()
+	}()
+
+	// Wait for interrupt signal
+	shutdown := make(chan os.Signal, 1)
+	signal.Notify(shutdown, os.Interrupt, syscall.SIGTERM)
+
+	// Block until error or shutdown signal
+	select {
+	case err := <-serverErrors:
+		if err != nil && !errors.Is(err, http.ErrServerClosed) {
+			return fmt.Errorf("server error: %w", err)
+		}
+	case sig := <-shutdown:
+		log.Printf("Received signal %v, starting graceful shutdown", sig)
+
+		// Give outstanding requests 30s to complete
+		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+		defer cancel()
+
+		if err := srv.Shutdown(ctx); err != nil {
+			srv.Close()
+			return fmt.Errorf("server shutdown error: %w", err)
+		}
+		log.Println("Server gracefully stopped")
+	}
+
+	return nil
+}
+
+// connectWithRetry attempts to connect to the database with exponential backoff
+func connectWithRetry(ctx context.Context, connString string, maxRetries int,
+	retryInterval time.Duration) (*pgxpool.Pool, error) {
+	var pool *pgxpool.Pool
+	var err error
+
+	for i := range maxRetries {
+		pool, err = pgxpool.New(ctx, connString)
+		if err == nil {
+			if err = pool.Ping(ctx); err == nil {
+				return pool, nil
+			}
+			pool.Close()
+		}
+
+		if i < maxRetries-1 {
+			log.Printf("WARNING: Unable to connect to database (attempt %d/%d): %v", i+1, maxRetries, err)
+			log.Printf("Retrying in %v...", retryInterval)
+			time.Sleep(retryInterval)
+		}
+	}
+
+	return nil, fmt.Errorf("failed to connect after %d attempts: %w", maxRetries, err)
+}
+
+// healthCheckHandler returns a handler that checks both storage and responds appropriately
+func healthCheckHandler(storageClient interface{ IsOnline() bool }) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+
+		if storageClient.IsOnline() {
+			w.WriteHeader(http.StatusOK)
+			json.NewEncoder(w).Encode(map[string]string{"status": "ok"})
+		} else {
+			w.WriteHeader(http.StatusServiceUnavailable)
+			json.NewEncoder(w).Encode(map[string]string{"status": "storage offline"})
+		}
 	}
 }
