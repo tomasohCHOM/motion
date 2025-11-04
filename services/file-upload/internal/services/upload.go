@@ -13,11 +13,18 @@ import (
 	"github.com/tomasohchom/motion/services/file-upload/internal/store"
 )
 
+type UploadServicer interface {
+	MakeBucket(ctx context.Context) error
+	GenerateUploadURL(ctx context.Context, filename string) (string, error)
+}
+
 type UploadService struct {
 	storage interfaces.StorageClient
 	config  *config.Config
 	store   *store.Store
 }
+
+var _ UploadServicer = (*UploadService)(nil)
 
 func NewUploadService(storage interfaces.StorageClient, cfg *config.Config,
 	store *store.Store) *UploadService {

@@ -11,11 +11,11 @@ import (
 )
 
 type UploadHandler struct {
-	uploadService *services.UploadService
+	uploadService services.UploadServicer
 	// config        *config.Config
 }
 
-func NewUploadHandler(uploadService *services.UploadService) *UploadHandler {
+func NewUploadHandler(uploadService services.UploadServicer) *UploadHandler {
 	return &UploadHandler{
 		uploadService: uploadService,
 	}
