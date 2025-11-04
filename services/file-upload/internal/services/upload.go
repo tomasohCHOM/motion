@@ -7,12 +7,13 @@ package services
 import (
 	"context"
 	"errors"
-	"time"
 	"fmt"
+	"time"
 
 	"github.com/tomasohchom/motion/services/file-upload/internal/config"
 	"github.com/tomasohchom/motion/services/file-upload/internal/db"
 	"github.com/tomasohchom/motion/services/file-upload/internal/interfaces"
+	"github.com/tomasohchom/motion/services/file-upload/internal/models"
 	"github.com/tomasohchom/motion/services/file-upload/internal/store"
 	"github.com/tomasohchom/motion/services/file-upload/utils"
 )
@@ -26,6 +27,7 @@ type UploadServicer interface {
 	MakeBucket(ctx context.Context) error
 	GenerateUploadURL(ctx context.Context, filename string) (string, error)
 	CompleteUpload(ctx context.Context, key, userID string) error
+	ListFiles(ctx context.Context, filters ...any) ([]models.FileInfo, error)
 }
 
 type UploadService struct {
@@ -76,4 +78,8 @@ func (u *UploadService) CompleteUpload(ctx context.Context, key, userID string) 
 		return fmt.Errorf("failed to create file metadata in DB: %w", err)
 	}
 	return nil
+}
+
+func (u *UploadService) ListFiles(ctx context.Context, filters ...any) ([]models.FileInfo, error) {
+	return []models.FileInfo{}, nil
 }
