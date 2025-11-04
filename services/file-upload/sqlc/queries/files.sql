@@ -10,6 +10,9 @@ INSERT INTO files (
 SELECT * FROM files
 WHERE id = $1;
 
+-- name: ListFiles :many
+SELECT * FROM files;
+
 -- name: ListFilesByUser :many
 SELECT * FROM files
 WHERE user_id = $1

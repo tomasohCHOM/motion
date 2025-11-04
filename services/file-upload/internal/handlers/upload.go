@@ -111,6 +111,10 @@ func (h *UploadHandler) GetUploadStatus(w http.ResponseWriter, r *http.Request) 
 	// json.NewEncoder(w).Encode(status)
 }
 
+func (h *UploadHandler) ListFiles(w http.ResponseWriter, r *http.Request) {
+
+}
+
 // Helper function to generate unique file keys
 func generateFileKey(filename, userID string) string {
 	timestamp := time.Now().Unix()
