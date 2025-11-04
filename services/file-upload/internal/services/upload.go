@@ -27,7 +27,7 @@ type UploadServicer interface {
 	MakeBucket(ctx context.Context) error
 	GenerateUploadURL(ctx context.Context, filename string) (string, error)
 	CompleteUpload(ctx context.Context, key, userID string) error
-	ListFiles(ctx context.Context, filters ...any) ([]models.FileInfo, error)
+	ListFiles(ctx context.Context, userID string) ([]models.FileInfo, error)
 }
 
 type UploadService struct {
@@ -80,6 +80,40 @@ func (u *UploadService) CompleteUpload(ctx context.Context, key, userID string) 
 	return nil
 }
 
-func (u *UploadService) ListFiles(ctx context.Context, filters ...any) ([]models.FileInfo, error) {
-	return []models.FileInfo{}, nil
+func (u *UploadService) ListFiles(ctx context.Context, userID string) ([]models.FileInfo, error) {
+	var dbFiles []db.File
+	var err error
+
+	if userID == "" {
+		dbFiles, err = u.store.Queries.ListFiles(ctx)
+		if err != nil {
+			return []models.FileInfo{}, fmt.Errorf("could not list files: %w", err)
+		}
+	} else {
+		userIDUUID, err := utils.StringToUUID(userID)
+		if err != nil {
+			return []models.FileInfo{}, ErrInvalidUUID
+		}
+		dbFiles, err = u.store.Queries.ListFilesByUser(ctx, db.ListFilesByUserParams{
+			UserID: userIDUUID,
+		})
+		if err != nil {
+			return []models.FileInfo{}, fmt.Errorf("Could not list files: %w", err)
+		}
+	}
+
+	files := make([]models.FileInfo, len(dbFiles))
+	for i, dbFile := range dbFiles {
+		files[i] = toFileInfo(dbFile)
+	}
+	return files, nil
+}
+
+func toFileInfo(dbFile db.File) models.FileInfo {
+	return models.FileInfo{
+		Key:       dbFile.ID.String(), // Convert UUID to string
+		UserID:    dbFile.UserID.String(),
+		Size:      dbFile.SizeBytes,
+		CreatedAt: dbFile.CreatedAt.Time, // Handle pgtype.Timestamp
+	}
 }
