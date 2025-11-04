@@ -67,3 +67,7 @@ type FileInfo struct {
 	Size      int64
 	CreatedAt time.Time
 }
+
+type ListFilesResponse struct {
+	Files []FileInfo `json:"files"`
+}
