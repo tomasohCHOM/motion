@@ -4,6 +4,7 @@ go 1.24.6
 
 require (
 	github.com/clerk/clerk-sdk-go/v2 v2.4.2
+	github.com/google/uuid v1.6.0
 	github.com/jackc/pgx/v5 v5.7.6
 	github.com/rs/cors v1.11.1
 )

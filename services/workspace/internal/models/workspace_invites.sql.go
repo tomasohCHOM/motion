@@ -20,7 +20,7 @@ WHERE
     token = $1
     AND status = 'pending'
     AND expires_at > NOW()
-RETURNING id, workspace_id, invited_by, invitee_id, invitee_email, access_type, token, status, created_at, expires_at
+RETURNING id, workspace_id, workspace_name, invited_by, invitee_id, invitee_email, access_type, token, status, created_at, expires_at
 `
 
 type AcceptWorkspaceInviteParams struct {
@@ -34,6 +34,7 @@ func (q *Queries) AcceptWorkspaceInvite(ctx context.Context, arg AcceptWorkspace
 	err := row.Scan(
 		&i.ID,
 		&i.WorkspaceID,
+		&i.WorkspaceName,
 		&i.InvitedBy,
 		&i.InviteeID,
 		&i.InviteeEmail,
@@ -49,6 +50,7 @@ func (q *Queries) AcceptWorkspaceInvite(ctx context.Context, arg AcceptWorkspace
 const createWorkspaceInvite = `-- name: CreateWorkspaceInvite :one
 INSERT INTO workspace_invites (
     workspace_id,
+    workspace_name,
     invited_by,
     invitee_id,
     invitee_email,
@@ -56,37 +58,41 @@ INSERT INTO workspace_invites (
     token
 ) VALUES (
     $1,  -- workspace_id
-    $2,  -- invited_by (user_id)
+    $2,  -- workspace_name
+    $3,  -- invited_by (user_id)
     $4,  -- invitee_id (nullable)
-    $3,  -- invitee_email
-    COALESCE($5, 'member'),  -- access_type
-    $6   -- token (e.g. UUID or secure random string)
+    $5,  -- invitee_email
+    COALESCE($6, 'member'),  -- access_type
+    $7   -- token (e.g. UUID or secure random string)
 )
-RETURNING id, workspace_id, invited_by, invitee_id, invitee_email, access_type, token, status, created_at, expires_at
+RETURNING id, workspace_id, workspace_name, invited_by, invitee_id, invitee_email, access_type, token, status, created_at, expires_at
 `
 
 type CreateWorkspaceInviteParams struct {
-	WorkspaceID  pgtype.UUID `json:"workspace_id"`
-	InvitedBy    string      `json:"invited_by"`
-	InviteeEmail string      `json:"invitee_email"`
-	InviteeID    string      `json:"invitee_id"`
-	Column5      interface{} `json:"column_5"`
-	Token        string      `json:"token"`
+	WorkspaceID   pgtype.UUID `json:"workspace_id"`
+	WorkspaceName string      `json:"workspace_name"`
+	InvitedBy     string      `json:"invited_by"`
+	InviteeID     string      `json:"invitee_id"`
+	InviteeEmail  string      `json:"invitee_email"`
+	Column6       interface{} `json:"column_6"`
+	Token         string      `json:"token"`
 }
 
 func (q *Queries) CreateWorkspaceInvite(ctx context.Context, arg CreateWorkspaceInviteParams) (WorkspaceInvite, error) {
 	row := q.db.QueryRow(ctx, createWorkspaceInvite,
 		arg.WorkspaceID,
+		arg.WorkspaceName,
 		arg.InvitedBy,
-		arg.InviteeEmail,
 		arg.InviteeID,
-		arg.Column5,
+		arg.InviteeEmail,
+		arg.Column6,
 		arg.Token,
 	)
 	var i WorkspaceInvite
 	err := row.Scan(
 		&i.ID,
 		&i.WorkspaceID,
+		&i.WorkspaceName,
 		&i.InvitedBy,
 		&i.InviteeID,
 		&i.InviteeEmail,
@@ -109,8 +115,31 @@ func (q *Queries) DeleteWorkspaceInvite(ctx context.Context, id pgtype.UUID) err
 	return err
 }
 
+const getInviteByToken = `-- name: GetInviteByToken :one
+SELECT id, workspace_id, workspace_name, invited_by, invitee_id, invitee_email, access_type, token, status, created_at, expires_at FROM workspace_invites WHERE token = $1
+`
+
+func (q *Queries) GetInviteByToken(ctx context.Context, token string) (WorkspaceInvite, error) {
+	row := q.db.QueryRow(ctx, getInviteByToken, token)
+	var i WorkspaceInvite
+	err := row.Scan(
+		&i.ID,
+		&i.WorkspaceID,
+		&i.WorkspaceName,
+		&i.InvitedBy,
+		&i.InviteeID,
+		&i.InviteeEmail,
+		&i.AccessType,
+		&i.Token,
+		&i.Status,
+		&i.CreatedAt,
+		&i.ExpiresAt,
+	)
+	return i, err
+}
+
 const listInvitesForUser = `-- name: ListInvitesForUser :many
-SELECT id, workspace_id, invited_by, invitee_id, invitee_email, access_type, token, status, created_at, expires_at
+SELECT id, workspace_id, workspace_name, invited_by, invitee_id, invitee_email, access_type, token, status, created_at, expires_at
 FROM workspace_invites
 WHERE
     (invitee_id = $1 OR invitee_email = $2)
@@ -136,6 +165,7 @@ func (q *Queries) ListInvitesForUser(ctx context.Context, arg ListInvitesForUser
 		if err := rows.Scan(
 			&i.ID,
 			&i.WorkspaceID,
+			&i.WorkspaceName,
 			&i.InvitedBy,
 			&i.InviteeID,
 			&i.InviteeEmail,

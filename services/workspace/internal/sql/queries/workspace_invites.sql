@@ -1,6 +1,7 @@
 -- name: CreateWorkspaceInvite :one
 INSERT INTO workspace_invites (
     workspace_id,
+    workspace_name,
     invited_by,
     invitee_id,
     invitee_email,
@@ -8,13 +9,17 @@ INSERT INTO workspace_invites (
     token
 ) VALUES (
     $1,  -- workspace_id
-    $2,  -- invited_by (user_id)
+    $2,  -- workspace_name
+    $3,  -- invited_by (user_id)
     $4,  -- invitee_id (nullable)
-    $3,  -- invitee_email
-    COALESCE($5, 'member'),  -- access_type
-    $6   -- token (e.g. UUID or secure random string)
+    $5,  -- invitee_email
+    COALESCE($6, 'member'),  -- access_type
+    $7   -- token (e.g. UUID or secure random string)
 )
 RETURNING *;
+
+-- name: GetInviteByToken :one
+SELECT * FROM workspace_invites WHERE token = $1;
 
 -- name: ListInvitesForUser :many
 SELECT *
