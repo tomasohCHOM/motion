@@ -60,6 +60,10 @@ func run() error {
 	mux.HandleFunc("GET /health", healthCheckHandler(storageClient))
 	mux.HandleFunc("POST /upload/presigned", uploadHandler.GetPresignedURL)
 	mux.HandleFunc("POST /upload/complete", uploadHandler.CompleteUpload)
+	mux.HandleFunc("GET /files", uploadHandler.ListFiles)
+	mux.HandleFunc("GET /users/{user_id}/files", uploadHandler.ListFiles)
+	// mux.HandleFunc("GET /workspaces/{workspace_id}/files", uploadHandler.ListFiles)
+
 
 	c := cors.New(cors.Options{
 		AllowedOrigins:   cfg.Server.AllowedOrigins, // from CORS_ALLOWED_ORIGINS
