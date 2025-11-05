@@ -65,7 +65,7 @@ func (u *UploadService) CompleteUpload(ctx context.Context, key, userID string) 
 	if err != nil {
 		return ErrInvalidUUID
 	}
-	userIDUUID, err := utils.StringToUUID(key)
+	userIDUUID, err := utils.StringToUUID(userID)
 	if err != nil {
 		return ErrInvalidUUID
 	}
