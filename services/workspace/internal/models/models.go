@@ -34,7 +34,6 @@ type WorkspaceInvite struct {
 	InviteeID     string             `json:"invitee_id"`
 	InviteeEmail  string             `json:"invitee_email"`
 	AccessType    pgtype.Text        `json:"access_type"`
-	Token         string             `json:"token"`
 	Status        pgtype.Text        `json:"status"`
 	CreatedAt     pgtype.Timestamptz `json:"created_at"`
 	ExpiresAt     pgtype.Timestamptz `json:"expires_at"`

@@ -6,7 +6,6 @@ CREATE TABLE workspace_invites (
     invitee_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     invitee_email TEXT NOT NULL,
     access_type TEXT DEFAULT 'member', -- 'member', 'owner'
-    token TEXT UNIQUE NOT NULL,
     status TEXT DEFAULT 'pending', -- 'pending', 'accepted', 'declined', 'expired'
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     expires_at TIMESTAMPTZ NOT NULL DEFAULT (NOW() + INTERVAL '7 days'),

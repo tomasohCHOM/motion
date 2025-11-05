@@ -17,19 +17,19 @@ SET
     status = 'accepted',
     invitee_id = $2
 WHERE
-    token = $1
+    id = $1
     AND status = 'pending'
     AND expires_at > NOW()
-RETURNING id, workspace_id, workspace_name, invited_by, invitee_id, invitee_email, access_type, token, status, created_at, expires_at
+RETURNING id, workspace_id, workspace_name, invited_by, invitee_id, invitee_email, access_type, status, created_at, expires_at
 `
 
 type AcceptWorkspaceInviteParams struct {
-	Token     string `json:"token"`
-	InviteeID string `json:"invitee_id"`
+	ID        pgtype.UUID `json:"id"`
+	InviteeID string      `json:"invitee_id"`
 }
 
 func (q *Queries) AcceptWorkspaceInvite(ctx context.Context, arg AcceptWorkspaceInviteParams) (WorkspaceInvite, error) {
-	row := q.db.QueryRow(ctx, acceptWorkspaceInvite, arg.Token, arg.InviteeID)
+	row := q.db.QueryRow(ctx, acceptWorkspaceInvite, arg.ID, arg.InviteeID)
 	var i WorkspaceInvite
 	err := row.Scan(
 		&i.ID,
@@ -39,7 +39,6 @@ func (q *Queries) AcceptWorkspaceInvite(ctx context.Context, arg AcceptWorkspace
 		&i.InviteeID,
 		&i.InviteeEmail,
 		&i.AccessType,
-		&i.Token,
 		&i.Status,
 		&i.CreatedAt,
 		&i.ExpiresAt,
@@ -54,18 +53,16 @@ INSERT INTO workspace_invites (
     invited_by,
     invitee_id,
     invitee_email,
-    access_type,
-    token
+    access_type
 ) VALUES (
     $1,  -- workspace_id
     $2,  -- workspace_name
     $3,  -- invited_by (user_id)
-    $4,  -- invitee_id (nullable)
+    $4,  -- invitee_id
     $5,  -- invitee_email
-    COALESCE($6, 'member'),  -- access_type
-    $7   -- token (e.g. UUID or secure random string)
+    COALESCE($6, 'member')  -- access_type
 )
-RETURNING id, workspace_id, workspace_name, invited_by, invitee_id, invitee_email, access_type, token, status, created_at, expires_at
+RETURNING id, workspace_id, workspace_name, invited_by, invitee_id, invitee_email, access_type, status, created_at, expires_at
 `
 
 type CreateWorkspaceInviteParams struct {
@@ -75,7 +72,6 @@ type CreateWorkspaceInviteParams struct {
 	InviteeID     string      `json:"invitee_id"`
 	InviteeEmail  string      `json:"invitee_email"`
 	Column6       interface{} `json:"column_6"`
-	Token         string      `json:"token"`
 }
 
 func (q *Queries) CreateWorkspaceInvite(ctx context.Context, arg CreateWorkspaceInviteParams) (WorkspaceInvite, error) {
@@ -86,7 +82,6 @@ func (q *Queries) CreateWorkspaceInvite(ctx context.Context, arg CreateWorkspace
 		arg.InviteeID,
 		arg.InviteeEmail,
 		arg.Column6,
-		arg.Token,
 	)
 	var i WorkspaceInvite
 	err := row.Scan(
@@ -97,7 +92,59 @@ func (q *Queries) CreateWorkspaceInvite(ctx context.Context, arg CreateWorkspace
 		&i.InviteeID,
 		&i.InviteeEmail,
 		&i.AccessType,
-		&i.Token,
+		&i.Status,
+		&i.CreatedAt,
+		&i.ExpiresAt,
+	)
+	return i, err
+}
+
+const createWorkspaceInviteByIdentifier = `-- name: CreateWorkspaceInviteByIdentifier :one
+INSERT INTO workspace_invites (
+    workspace_id,
+    workspace_name,
+    invited_by,
+    invitee_id,
+    invitee_email,
+    access_type
+)
+SELECT
+    $1,          -- workspace_id
+    $2,          -- workspace_name
+    $3,          -- invited_by
+    u.id,        -- invitee_id from lookoup
+    u.email,     -- invitee_email from lookup
+    $4           -- access_type
+FROM users u
+WHERE u.email = $5 OR u.username = $5
+RETURNING id, workspace_id, workspace_name, invited_by, invitee_id, invitee_email, access_type, status, created_at, expires_at
+`
+
+type CreateWorkspaceInviteByIdentifierParams struct {
+	WorkspaceID   pgtype.UUID `json:"workspace_id"`
+	WorkspaceName string      `json:"workspace_name"`
+	InvitedBy     string      `json:"invited_by"`
+	AccessType    pgtype.Text `json:"access_type"`
+	Identifier    string      `json:"identifier"`
+}
+
+func (q *Queries) CreateWorkspaceInviteByIdentifier(ctx context.Context, arg CreateWorkspaceInviteByIdentifierParams) (WorkspaceInvite, error) {
+	row := q.db.QueryRow(ctx, createWorkspaceInviteByIdentifier,
+		arg.WorkspaceID,
+		arg.WorkspaceName,
+		arg.InvitedBy,
+		arg.AccessType,
+		arg.Identifier,
+	)
+	var i WorkspaceInvite
+	err := row.Scan(
+		&i.ID,
+		&i.WorkspaceID,
+		&i.WorkspaceName,
+		&i.InvitedBy,
+		&i.InviteeID,
+		&i.InviteeEmail,
+		&i.AccessType,
 		&i.Status,
 		&i.CreatedAt,
 		&i.ExpiresAt,
@@ -115,12 +162,12 @@ func (q *Queries) DeleteWorkspaceInvite(ctx context.Context, id pgtype.UUID) err
 	return err
 }
 
-const getInviteByToken = `-- name: GetInviteByToken :one
-SELECT id, workspace_id, workspace_name, invited_by, invitee_id, invitee_email, access_type, token, status, created_at, expires_at FROM workspace_invites WHERE token = $1
+const getInviteById = `-- name: GetInviteById :one
+SELECT id, workspace_id, workspace_name, invited_by, invitee_id, invitee_email, access_type, status, created_at, expires_at FROM workspace_invites WHERE id = $1
 `
 
-func (q *Queries) GetInviteByToken(ctx context.Context, token string) (WorkspaceInvite, error) {
-	row := q.db.QueryRow(ctx, getInviteByToken, token)
+func (q *Queries) GetInviteById(ctx context.Context, id pgtype.UUID) (WorkspaceInvite, error) {
+	row := q.db.QueryRow(ctx, getInviteById, id)
 	var i WorkspaceInvite
 	err := row.Scan(
 		&i.ID,
@@ -130,7 +177,6 @@ func (q *Queries) GetInviteByToken(ctx context.Context, token string) (Workspace
 		&i.InviteeID,
 		&i.InviteeEmail,
 		&i.AccessType,
-		&i.Token,
 		&i.Status,
 		&i.CreatedAt,
 		&i.ExpiresAt,
@@ -139,7 +185,7 @@ func (q *Queries) GetInviteByToken(ctx context.Context, token string) (Workspace
 }
 
 const listInvitesForUser = `-- name: ListInvitesForUser :many
-SELECT id, workspace_id, workspace_name, invited_by, invitee_id, invitee_email, access_type, token, status, created_at, expires_at
+SELECT id, workspace_id, workspace_name, invited_by, invitee_id, invitee_email, access_type, status, created_at, expires_at
 FROM workspace_invites
 WHERE
     (invitee_id = $1 OR invitee_email = $2)
@@ -170,7 +216,6 @@ func (q *Queries) ListInvitesForUser(ctx context.Context, arg ListInvitesForUser
 			&i.InviteeID,
 			&i.InviteeEmail,
 			&i.AccessType,
-			&i.Token,
 			&i.Status,
 			&i.CreatedAt,
 			&i.ExpiresAt,

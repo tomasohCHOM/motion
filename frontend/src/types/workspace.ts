@@ -23,6 +23,20 @@ export type UserWorkspace = {
   lastUpdated: string
 }
 
+export type WorkspaceInvitesResponse = Array<{
+  id: string
+  workspace_id: string
+  workspace_name: string
+  invited_by: string
+  invitee_id: string
+  invitee_email: string
+  access_type: string
+  token: string
+  status: string
+  created_at: string
+  expires_at: string
+}>
+
 export type WorkspaceInvite = {
   id: string
   workspaceName: string

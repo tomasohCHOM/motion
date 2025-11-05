@@ -6,9 +6,6 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5/pgtype"
-	"github.com/tomasohchom/motion/services/workspace/internal/models"
 	"github.com/tomasohchom/motion/services/workspace/internal/services"
 )
 
@@ -21,24 +18,17 @@ func NewInviteHandler(service services.InviteServicer) *InviteHandler {
 }
 
 func (h *InviteHandler) CreateUserInvite(w http.ResponseWriter, r *http.Request) {
-	workspaceIDStr := r.PathValue("workspaceId")
-	if workspaceIDStr == "" {
+	workspaceId := r.PathValue("workspaceId")
+	if workspaceId == "" {
 		http.Error(w, "missing workspace id", http.StatusBadRequest)
-		return
-	}
-
-	var workspaceID pgtype.UUID
-	if err := workspaceID.Scan(workspaceIDStr); err != nil {
-		http.Error(w, "invalid workspace id", http.StatusBadRequest)
 		return
 	}
 
 	type requestBody struct {
 		WorkspaceName string `json:"workspace_name"`
-		InviteeEmail  string `json:"invitee_email"`
-		InviteeUserID string `json:"invitee_user_id,omitempty"`
-		AccessType    string `json:"access_type,omitempty"`
 		InvitedBy     string `json:"invited_by"`
+		AccessType    string `json:"access_type,omitempty"`
+		Identifier    string `json:"identifier"`
 	}
 
 	var req requestBody
@@ -47,26 +37,20 @@ func (h *InviteHandler) CreateUserInvite(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	if req.InvitedBy == "" || req.InviteeEmail == "" {
+	if req.InvitedBy == "" || req.Identifier == "" {
 		http.Error(w, "missing required fields", http.StatusBadRequest)
 		return
 	}
 
-	params := models.CreateWorkspaceInviteParams{
-		WorkspaceID:  workspaceID,
-		InvitedBy:    req.InvitedBy,
-		InviteeEmail: req.InviteeEmail,
-		InviteeID:    req.InviteeUserID,
-		Token:        uuid.NewString(),
-	}
-
-	invite, err := h.s.CreateWorkspaceInvite(r.Context(), params)
+	invite, err := h.s.CreateWorkspaceInviteByIdentifier(r.Context(), workspaceId,
+		req.WorkspaceName, req.InvitedBy, req.AccessType, req.Identifier,
+	)
 	if err != nil {
 		if errors.Is(err, services.ErrInvalidInviteData) {
 			http.Error(w, "invalid invite data", http.StatusBadRequest)
 			return
 		}
-		log.Printf("Failed to create invite for workspace %s: %v", workspaceIDStr, err)
+		log.Printf("Failed to create invite for workspace %s: %v", workspaceId, err)
 		http.Error(w, "failed to create invite", http.StatusInternalServerError)
 		return
 	}
@@ -99,11 +83,10 @@ func (h *InviteHandler) ListUserInvites(w http.ResponseWriter, r *http.Request) 
 	json.NewEncoder(w).Encode(invites)
 }
 
-// /invites/:inviteId/accept
 func (h *InviteHandler) AcceptInvite(w http.ResponseWriter, r *http.Request) {
-	token := r.PathValue("token")
-	if token == "" {
-		http.Error(w, "missing invite token", http.StatusBadRequest)
+	inviteId := r.PathValue("invite_id")
+	if inviteId == "" {
+		http.Error(w, "missing invite id", http.StatusBadRequest)
 		return
 	}
 
@@ -120,7 +103,7 @@ func (h *InviteHandler) AcceptInvite(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	invite, err := h.s.AcceptWorkspaceInvite(r.Context(), token, req.UserID)
+	invite, err := h.s.AcceptWorkspaceInvite(r.Context(), inviteId, req.UserID)
 	if err != nil {
 		switch {
 		case errors.Is(err, services.ErrInviteExpired):
@@ -130,7 +113,7 @@ func (h *InviteHandler) AcceptInvite(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "invalid invite data", http.StatusBadRequest)
 			return
 		default:
-			log.Printf("Failed to accept invite token=%s: %v", token, err)
+			log.Printf("Failed to accept invite id=%s: %v", inviteId, err)
 			http.Error(w, "failed to accept invite", http.StatusInternalServerError)
 			return
 		}
@@ -142,9 +125,9 @@ func (h *InviteHandler) AcceptInvite(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *InviteHandler) DeclineInvite(w http.ResponseWriter, r *http.Request) {
-	token := r.PathValue("token")
-	if token == "" {
-		http.Error(w, "missing invite token", http.StatusBadRequest)
+	inviteId := r.PathValue("invite_id")
+	if inviteId == "" {
+		http.Error(w, "missing invite id", http.StatusBadRequest)
 		return
 	}
 
@@ -161,14 +144,14 @@ func (h *InviteHandler) DeclineInvite(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err := h.s.DeclineWorkspaceInvite(r.Context(), token, req.UserID)
+	err := h.s.DeclineWorkspaceInvite(r.Context(), inviteId, req.UserID)
 	if err != nil {
 		switch {
 		case errors.Is(err, services.ErrInvalidInviteData):
 			http.Error(w, "invalid invite data", http.StatusBadRequest)
 			return
 		default:
-			log.Printf("Failed to decline invite token=%s: %v", token, err)
+			log.Printf("Failed to decline invite id=%s: %v", inviteId, err)
 			http.Error(w, "failed to decline invite", http.StatusInternalServerError)
 			return
 		}
@@ -178,15 +161,9 @@ func (h *InviteHandler) DeclineInvite(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *InviteHandler) DeleteInvite(w http.ResponseWriter, r *http.Request) {
-	inviteIDStr := r.PathValue("inviteId")
-	if inviteIDStr == "" {
+	inviteID := r.PathValue("inviteId")
+	if inviteID == "" {
 		http.Error(w, "missing invite id", http.StatusBadRequest)
-		return
-	}
-
-	var inviteID pgtype.UUID
-	if err := inviteID.Scan(inviteIDStr); err != nil {
-		http.Error(w, "invalid invite id", http.StatusBadRequest)
 		return
 	}
 
@@ -196,7 +173,7 @@ func (h *InviteHandler) DeleteInvite(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "invalid invite data", http.StatusBadRequest)
 			return
 		}
-		log.Printf("Failed to delete invite %s: %v", inviteIDStr, err)
+		log.Printf("Failed to delete invite %s: %v", inviteID, err)
 		http.Error(w, "failed to delete invite", http.StatusInternalServerError)
 		return
 	}

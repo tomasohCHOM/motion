@@ -120,8 +120,8 @@ func main() {
 		registerRoutes(mux, []Route{
 			{"POST", "/workspaces/{workspaceId}/invites", inviteHandler.CreateUserInvite},
 			{"GET", "/users/{user_id}/invites", inviteHandler.ListUserInvites},
-			{"POST", "/invites/:token/accept", inviteHandler.AcceptInvite},
-			{"POST", "/invites/:token/decline", inviteHandler.DeleteInvite},
+			{"POST", "/invites/{invite_id}/accept", inviteHandler.AcceptInvite},
+			{"POST", "/invites/{invite_id}/decline", inviteHandler.DeleteInvite},
 			{"DELETE", "/invites/:inviteId", inviteHandler.DeleteInvite},
 		})
 		log.Println("Invite handler routes registered")

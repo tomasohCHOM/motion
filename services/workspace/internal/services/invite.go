@@ -21,10 +21,11 @@ var (
 
 type InviteServicer interface {
 	CreateWorkspaceInvite(ctx context.Context, params models.CreateWorkspaceInviteParams) (models.WorkspaceInvite, error)
+	CreateWorkspaceInviteByIdentifier(ctx context.Context, workspaceId, workspaceName, accessType, invitedBy, identifier string) (models.WorkspaceInvite, error)
 	ListUserInvites(ctx context.Context, userID string) ([]models.WorkspaceInvite, error)
 	AcceptWorkspaceInvite(ctx context.Context, token string, userID string) (models.WorkspaceInvite, error)
 	DeclineWorkspaceInvite(ctx context.Context, token string, userId string) error
-	DeleteWorkspaceInvite(ctx context.Context, id pgtype.UUID) error
+	DeleteWorkspaceInvite(ctx context.Context, id string) error
 }
 
 type InviteService struct {
@@ -50,6 +51,32 @@ func (s *InviteService) CreateWorkspaceInvite(ctx context.Context, params models
 	return invite, nil
 }
 
+func (s *InviteService) CreateWorkspaceInviteByIdentifier(ctx context.Context,
+	workspaceId, workspaceName, invitedBy, accessType, identifier string) (models.WorkspaceInvite, error) {
+	if workspaceId == "" || workspaceName == "" || invitedBy == "" || identifier == "" {
+		return models.WorkspaceInvite{}, ErrInvalidInviteData
+	}
+
+	var uuid pgtype.UUID
+	if err := uuid.Scan(workspaceId); err != nil {
+		return models.WorkspaceInvite{}, ErrInvalidWorkspaceData
+	}
+
+	params := models.CreateWorkspaceInviteByIdentifierParams{
+		WorkspaceID:   uuid,
+		WorkspaceName: workspaceName,
+		InvitedBy:     invitedBy,
+		AccessType:    pgtype.Text{String: accessType, Valid: true},
+		Identifier:    identifier,
+	}
+
+	invite, err := s.s.Queries.CreateWorkspaceInviteByIdentifier(ctx, params)
+	if err != nil {
+		return models.WorkspaceInvite{}, fmt.Errorf("failed to create invite: %w", err)
+	}
+	return invite, nil
+}
+
 func (s *InviteService) ListUserInvites(ctx context.Context, userID string) ([]models.WorkspaceInvite, error) {
 	if userID == "" {
 		return nil, ErrInvalidInviteData
@@ -68,8 +95,13 @@ func (s *InviteService) ListUserInvites(ctx context.Context, userID string) ([]m
 	return invites, nil
 }
 
-func (s *InviteService) AcceptWorkspaceInvite(ctx context.Context, token string, userID string) (models.WorkspaceInvite, error) {
-	if token == "" || userID == "" {
+func (s *InviteService) AcceptWorkspaceInvite(ctx context.Context, inviteId, userID string) (models.WorkspaceInvite, error) {
+	if inviteId == "" || userID == "" {
+		return models.WorkspaceInvite{}, ErrInvalidInviteData
+	}
+
+	var uuid pgtype.UUID
+	if err := uuid.Scan(inviteId); err != nil {
 		return models.WorkspaceInvite{}, ErrInvalidInviteData
 	}
 
@@ -82,7 +114,7 @@ func (s *InviteService) AcceptWorkspaceInvite(ctx context.Context, token string,
 	qtx := s.s.Queries.WithTx(tx)
 
 	invite, err := qtx.AcceptWorkspaceInvite(ctx, models.AcceptWorkspaceInviteParams{
-		Token:     token,
+		ID:        uuid,
 		InviteeID: userID,
 	})
 	if err != nil {
@@ -109,8 +141,13 @@ func (s *InviteService) AcceptWorkspaceInvite(ctx context.Context, token string,
 	return invite, nil
 }
 
-func (s *InviteService) DeclineWorkspaceInvite(ctx context.Context, token string, userID string) error {
-	invite, err := s.s.Queries.GetInviteByToken(ctx, token)
+func (s *InviteService) DeclineWorkspaceInvite(ctx context.Context, inviteId string, userID string) error {
+	var uuid pgtype.UUID
+	if err := uuid.Scan(inviteId); err != nil {
+		return ErrInvalidInviteData
+	}
+
+	invite, err := s.s.Queries.GetInviteById(ctx, uuid)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return ErrInviteNotFound
@@ -125,12 +162,13 @@ func (s *InviteService) DeclineWorkspaceInvite(ctx context.Context, token string
 	return s.s.Queries.DeleteWorkspaceInvite(ctx, invite.ID)
 }
 
-func (s *InviteService) DeleteWorkspaceInvite(ctx context.Context, id pgtype.UUID) error {
-	if !id.Valid {
+func (s *InviteService) DeleteWorkspaceInvite(ctx context.Context, id string) error {
+	var inviteId pgtype.UUID
+	if err := inviteId.Scan(id); err != nil {
 		return ErrInvalidInviteData
 	}
 
-	err := s.s.Queries.DeleteWorkspaceInvite(ctx, id)
+	err := s.s.Queries.DeleteWorkspaceInvite(ctx, inviteId)
 	if err != nil {
 		return fmt.Errorf("failed to delete invite: %w", err)
 	}
