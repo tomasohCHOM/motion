@@ -105,7 +105,7 @@ func (h *UploadHandler) GetUploadStatus(w http.ResponseWriter, r *http.Request) 
 }
 
 func (h *UploadHandler) ListFiles(w http.ResponseWriter, r *http.Request) {
-	userID := r.URL.Query().Get("id")
+	userID := r.URL.Query().Get("user_id")
 
 	files, err := h.uploadService.ListFiles(r.Context(), userID)
 	if err != nil {
