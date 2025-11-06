@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"context"
 	"net/http"
 	"strings"
 	"time"
@@ -10,6 +11,10 @@ import (
 	"github.com/clerk/clerk-sdk-go/v2/jwt"
 	"github.com/tomasohchom/motion/services/workspace/internal/config"
 )
+
+type ctxKey string
+
+const userIDKey ctxKey = "user_id"
 
 var jwksClient *jwks.Client
 var cfg *config.Config
@@ -25,7 +30,12 @@ func init() {
 func AuthMiddleware(next http.HandlerFunc) http.HandlerFunc {
 	if cfg.Environment == "development" {
 		return func(w http.ResponseWriter, r *http.Request) {
-			next(w, r)
+			devUserID := r.Header.Get("X-Dev-UserID")
+			if devUserID == "" {
+				devUserID = "user_dev_default"
+			}
+			ctx := context.WithValue(r.Context(), userIDKey, devUserID)
+			next(w, r.WithContext(ctx))
 		}
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -48,7 +58,7 @@ func AuthMiddleware(next http.HandlerFunc) http.HandlerFunc {
 			return
 		}
 		clock := clerk.NewClock()
-		_, err = jwt.Verify(r.Context(), &jwt.VerifyParams{
+		claims, err := jwt.Verify(r.Context(), &jwt.VerifyParams{
 			Token:  token,
 			JWK:    jwk,
 			Clock:  clock,
@@ -58,8 +68,15 @@ func AuthMiddleware(next http.HandlerFunc) http.HandlerFunc {
 			http.Error(w, "unauthorized", http.StatusUnauthorized)
 			return
 		}
-		next(w, r)
+		userId := claims.RegisteredClaims.Subject
+		ctx := context.WithValue(r.Context(), userIDKey, userId)
+		next(w, r.WithContext(ctx))
 	}
+}
+
+func UserIDFromContext(ctx context.Context) (string, bool) {
+	id, ok := ctx.Value(userIDKey).(string)
+	return id, ok
 }
 
 func getSessionToken(r *http.Request) string {
