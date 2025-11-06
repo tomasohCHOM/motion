@@ -61,18 +61,18 @@ func (u *UploadService) CompleteUpload(ctx context.Context, key, userID string) 
 	if key == "" || userID == "" {
 		return ErrMissingFields
 	}
-	keyUUID, err := utils.StringToUUID(key)
-	if err != nil {
-		return ErrInvalidUUID
-	}
-	userIDUUID, err := utils.StringToUUID(userID)
-	if err != nil {
-		return ErrInvalidUUID
-	}
+	// keyUUID, err := utils.StringToUUID(key)
+	// if err != nil {
+	// 	return ErrInvalidUUID
+	// }
+	// userIDUUID, err := utils.StringToUUID(userID)
+	// if err != nil {
+	// 	return ErrInvalidUUID
+	// }
 
-	_, err = u.store.Queries.CreateFile(ctx, db.CreateFileParams{
-		ID:     keyUUID,
-		UserID: userIDUUID,
+	_, err := u.store.Queries.CreateFile(ctx, db.CreateFileParams{
+		ID:     key,
+		UserID: userID,
 	})
 	if err != nil {
 		return fmt.Errorf("failed to create file metadata in DB: %w", err)
@@ -90,12 +90,12 @@ func (u *UploadService) ListFiles(ctx context.Context, userID string) ([]models.
 			return []models.FileInfo{}, fmt.Errorf("could not list files: %w", err)
 		}
 	} else {
-		userIDUUID, err := utils.StringToUUID(userID)
-		if err != nil {
-			return []models.FileInfo{}, ErrInvalidUUID
-		}
+		// userIDUUID, err := utils.StringToUUID(userID)
+		// if err != nil {
+		// 	return []models.FileInfo{}, ErrInvalidUUID
+		// }
 		dbFiles, err = u.store.Queries.ListFilesByUser(ctx, db.ListFilesByUserParams{
-			UserID: userIDUUID,
+			UserID: userID,
 		})
 		if err != nil {
 			return []models.FileInfo{}, fmt.Errorf("Could not list files: %w", err)
@@ -111,8 +111,8 @@ func (u *UploadService) ListFiles(ctx context.Context, userID string) ([]models.
 
 func toFileInfo(dbFile db.File) models.FileInfo {
 	return models.FileInfo{
-		Key:       dbFile.ID.String(), // Convert UUID to string
-		UserID:    dbFile.UserID.String(),
+		Key:       dbFile.ID, // Convert UUID to string
+		UserID:    dbFile.UserID,
 		Size:      dbFile.SizeBytes,
 		CreatedAt: dbFile.CreatedAt.Time, // Handle pgtype.Timestamp
 	}

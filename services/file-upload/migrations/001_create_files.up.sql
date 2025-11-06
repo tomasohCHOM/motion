@@ -1,6 +1,6 @@
 CREATE TABLE files (
-  id UUID PRIMARY KEY,
-  user_id UUID NOT NULL,
+  id TEXT PRIMARY KEY,
+  user_id TEXT NOT NULL,
   original_name TEXT NOT NULL,
   storage_key TEXT NOT NULL UNIQUE,
   content_type TEXT NOT NULL,

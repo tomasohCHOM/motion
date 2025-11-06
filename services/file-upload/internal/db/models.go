@@ -9,8 +9,8 @@ import (
 )
 
 type File struct {
-	ID           pgtype.UUID        `json:"id"`
-	UserID       pgtype.UUID        `json:"user_id"`
+	ID           string             `json:"id"`
+	UserID       string             `json:"user_id"`
 	OriginalName string             `json:"original_name"`
 	StorageKey   string             `json:"storage_key"`
 	ContentType  string             `json:"content_type"`

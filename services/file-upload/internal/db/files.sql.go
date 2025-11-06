@@ -7,8 +7,6 @@ package db
 
 import (
 	"context"
-
-	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const createFile = `-- name: CreateFile :one
@@ -21,13 +19,13 @@ INSERT INTO files (
 `
 
 type CreateFileParams struct {
-	ID           pgtype.UUID `json:"id"`
-	UserID       pgtype.UUID `json:"user_id"`
-	OriginalName string      `json:"original_name"`
-	StorageKey   string      `json:"storage_key"`
-	ContentType  string      `json:"content_type"`
-	SizeBytes    int64       `json:"size_bytes"`
-	Metadata     []byte      `json:"metadata"`
+	ID           string `json:"id"`
+	UserID       string `json:"user_id"`
+	OriginalName string `json:"original_name"`
+	StorageKey   string `json:"storage_key"`
+	ContentType  string `json:"content_type"`
+	SizeBytes    int64  `json:"size_bytes"`
+	Metadata     []byte `json:"metadata"`
 }
 
 func (q *Queries) CreateFile(ctx context.Context, arg CreateFileParams) (File, error) {
@@ -62,8 +60,8 @@ WHERE id = $1 AND user_id = $2
 `
 
 type DeleteFileParams struct {
-	ID     pgtype.UUID `json:"id"`
-	UserID pgtype.UUID `json:"user_id"`
+	ID     string `json:"id"`
+	UserID string `json:"user_id"`
 }
 
 func (q *Queries) DeleteFile(ctx context.Context, arg DeleteFileParams) error {
@@ -76,7 +74,7 @@ SELECT id, user_id, original_name, storage_key, content_type, size_bytes, upload
 WHERE id = $1
 `
 
-func (q *Queries) GetFileById(ctx context.Context, id pgtype.UUID) ([]File, error) {
+func (q *Queries) GetFileById(ctx context.Context, id string) ([]File, error) {
 	rows, err := q.db.Query(ctx, getFileById, id)
 	if err != nil {
 		return nil, err
@@ -150,9 +148,9 @@ LIMIT $2 OFFSET $3
 `
 
 type ListFilesByUserParams struct {
-	UserID pgtype.UUID `json:"user_id"`
-	Limit  int32       `json:"limit"`
-	Offset int32       `json:"offset"`
+	UserID string `json:"user_id"`
+	Limit  int32  `json:"limit"`
+	Offset int32  `json:"offset"`
 }
 
 func (q *Queries) ListFilesByUser(ctx context.Context, arg ListFilesByUserParams) ([]File, error) {
@@ -193,8 +191,8 @@ ORDER BY uploaded_at DESC
 `
 
 type SearchFilesByMetadataParams struct {
-	UserID  pgtype.UUID `json:"user_id"`
-	Column2 []byte      `json:"column_2"`
+	UserID  string `json:"user_id"`
+	Column2 []byte `json:"column_2"`
 }
 
 func (q *Queries) SearchFilesByMetadata(ctx context.Context, arg SearchFilesByMetadataParams) ([]File, error) {
