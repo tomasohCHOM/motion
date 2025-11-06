@@ -1,7 +1,7 @@
-import { useCreateInvite } from '@/client/invites/create-invite'
-import { Button } from '@/components/ui/button'
 import { createFileRoute } from '@tanstack/react-router'
 import { UserPlus } from 'lucide-react'
+import { useCreateInvite } from '@/client/invites/create-invite'
+import { Button } from '@/components/ui/button'
 
 export const Route = createFileRoute('/workspace/$workspaceId/team/')({
   component: WorkspaceTeam,
