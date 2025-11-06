@@ -12,7 +12,7 @@ import (
 	"github.com/tomasohchom/motion/services/workspace/internal/store"
 )
 
-// Domain errors
+// models.errors
 var (
 	ErrWorkspaceNotFound      = errors.New("workspace not found")
 	ErrInvalidWorkspaceData   = errors.New("invalid workspace data")
@@ -20,13 +20,8 @@ var (
 	ErrWorkspaceAccessDenied  = errors.New("workspace access denied")
 )
 
-type WorkspaceWithUsers struct {
-	Workspace models.Workspace              `json:"workspace"`
-	Users     []models.GetWorkspaceUsersRow `json:"users"`
-}
-
 type WorkspaceServicer interface {
-	GetUserWorkspace(ctx context.Context, workspaceId string, userId string) (WorkspaceWithUsers, error)
+	GetUserWorkspace(ctx context.Context, workspaceId string, userId string) (models.WorkspaceWithUsers, error)
 	CreateWorkspace(ctx context.Context, params models.CreateWorkspaceParams) (models.Workspace, error)
 	CreateWorkspaceWithOwner(ctx context.Context, name string, description string, ownerId string) (models.Workspace, error)
 	ListUserWorkspaces(ctx context.Context, id string) ([]models.GetUserWorkspacesRow, error)
@@ -45,15 +40,15 @@ func NewWorkspaceService(store *store.Store) *WorkspaceService {
 }
 
 func (s *WorkspaceService) GetUserWorkspace(ctx context.Context, workspaceId,
-	userId string) (WorkspaceWithUsers, error) {
+	userId string) (models.WorkspaceWithUsers, error) {
 	// Business validation
 	if workspaceId == "" || userId == "" {
-		return WorkspaceWithUsers{}, ErrInvalidWorkspaceData
+		return models.WorkspaceWithUsers{}, ErrInvalidWorkspaceData
 	}
 
 	var wid pgtype.UUID
 	if err := wid.Scan(workspaceId); err != nil {
-		return WorkspaceWithUsers{}, ErrInvalidWorkspaceData
+		return models.WorkspaceWithUsers{}, ErrInvalidWorkspaceData
 	}
 
 	// Check if user should have access to this workspace
@@ -62,26 +57,26 @@ func (s *WorkspaceService) GetUserWorkspace(ctx context.Context, workspaceId,
 		WorkspaceID: wid,
 	})
 	if err != nil {
-		return WorkspaceWithUsers{}, fmt.Errorf("failed to check membership: %w", err)
+		return models.WorkspaceWithUsers{}, fmt.Errorf("failed to check membership: %w", err)
 	}
 	if !isMember {
-		return WorkspaceWithUsers{}, ErrWorkspaceAccessDenied
+		return models.WorkspaceWithUsers{}, ErrWorkspaceAccessDenied
 	}
 
 	workspace, err := s.s.Queries.GetWorkspaceById(ctx, wid)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			return WorkspaceWithUsers{}, ErrWorkspaceNotFound
+			return models.WorkspaceWithUsers{}, ErrWorkspaceNotFound
 		}
-		return WorkspaceWithUsers{}, fmt.Errorf("failed to fetch workspace: %w", err)
+		return models.WorkspaceWithUsers{}, fmt.Errorf("failed to fetch workspace: %w", err)
 	}
 
 	users, err := s.s.Queries.GetWorkspaceUsers(ctx, wid)
 	if err != nil {
-		return WorkspaceWithUsers{}, fmt.Errorf("failed to fetch workspace users: %w", err)
+		return models.WorkspaceWithUsers{}, fmt.Errorf("failed to fetch workspace users: %w", err)
 	}
 
-	return WorkspaceWithUsers{
+	return models.WorkspaceWithUsers{
 		Workspace: workspace,
 		Users:     users,
 	}, nil
