@@ -23,6 +23,7 @@ echo "$upload_resp"
 echo
 
 # Upload metadata to postgres db
+echo xh POST :8080/upload/complete key="$key" user_id="$user"
 complete_resp=$(xh POST :8080/upload/complete key="$key" user_id="$user")
 echo "Complete response:"
 echo "$complete_resp"
