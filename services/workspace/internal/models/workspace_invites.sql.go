@@ -20,7 +20,7 @@ WHERE
     id = $1
     AND status = 'pending'
     AND expires_at > NOW()
-RETURNING id, workspace_id, workspace_name, invited_by, invitee_id, invitee_email, access_type, status, created_at, expires_at
+RETURNING id, workspace_id, invited_by, invitee_id, invitee_email, access_type, status, created_at, expires_at
 `
 
 type AcceptWorkspaceInviteParams struct {
@@ -34,7 +34,6 @@ func (q *Queries) AcceptWorkspaceInvite(ctx context.Context, arg AcceptWorkspace
 	err := row.Scan(
 		&i.ID,
 		&i.WorkspaceID,
-		&i.WorkspaceName,
 		&i.InvitedBy,
 		&i.InviteeID,
 		&i.InviteeEmail,
@@ -49,45 +48,40 @@ func (q *Queries) AcceptWorkspaceInvite(ctx context.Context, arg AcceptWorkspace
 const createWorkspaceInvite = `-- name: CreateWorkspaceInvite :one
 INSERT INTO workspace_invites (
     workspace_id,
-    workspace_name,
     invited_by,
     invitee_id,
     invitee_email,
     access_type
 ) VALUES (
     $1,  -- workspace_id
-    $2,  -- workspace_name
-    $3,  -- invited_by (user_id)
-    $4,  -- invitee_id
-    $5,  -- invitee_email
-    COALESCE($6, 'member')  -- access_type
+    $2,  -- invited_by (user_id)
+    $3,  -- invitee_id
+    $4,  -- invitee_email
+    COALESCE($5, 'member')  -- access_type
 )
-RETURNING id, workspace_id, workspace_name, invited_by, invitee_id, invitee_email, access_type, status, created_at, expires_at
+RETURNING id, workspace_id, invited_by, invitee_id, invitee_email, access_type, status, created_at, expires_at
 `
 
 type CreateWorkspaceInviteParams struct {
-	WorkspaceID   pgtype.UUID `json:"workspace_id"`
-	WorkspaceName string      `json:"workspace_name"`
-	InvitedBy     string      `json:"invited_by"`
-	InviteeID     string      `json:"invitee_id"`
-	InviteeEmail  string      `json:"invitee_email"`
-	Column6       interface{} `json:"column_6"`
+	WorkspaceID  pgtype.UUID `json:"workspace_id"`
+	InvitedBy    string      `json:"invited_by"`
+	InviteeID    string      `json:"invitee_id"`
+	InviteeEmail string      `json:"invitee_email"`
+	Column5      interface{} `json:"column_5"`
 }
 
 func (q *Queries) CreateWorkspaceInvite(ctx context.Context, arg CreateWorkspaceInviteParams) (WorkspaceInvite, error) {
 	row := q.db.QueryRow(ctx, createWorkspaceInvite,
 		arg.WorkspaceID,
-		arg.WorkspaceName,
 		arg.InvitedBy,
 		arg.InviteeID,
 		arg.InviteeEmail,
-		arg.Column6,
+		arg.Column5,
 	)
 	var i WorkspaceInvite
 	err := row.Scan(
 		&i.ID,
 		&i.WorkspaceID,
-		&i.WorkspaceName,
 		&i.InvitedBy,
 		&i.InviteeID,
 		&i.InviteeEmail,
@@ -102,7 +96,6 @@ func (q *Queries) CreateWorkspaceInvite(ctx context.Context, arg CreateWorkspace
 const createWorkspaceInviteByIdentifier = `-- name: CreateWorkspaceInviteByIdentifier :one
 INSERT INTO workspace_invites (
     workspace_id,
-    workspace_name,
     invited_by,
     invitee_id,
     invitee_email,
@@ -110,28 +103,25 @@ INSERT INTO workspace_invites (
 )
 SELECT
     $1,          -- workspace_id
-    $2,          -- workspace_name
-    $3,          -- invited_by
+    $2,          -- invited_by
     u.id,        -- invitee_id from lookoup
     u.email,     -- invitee_email from lookup
-    $4           -- access_type
+    $3           -- access_type
 FROM users u
-WHERE u.email = $5 OR u.username = $5
-RETURNING id, workspace_id, workspace_name, invited_by, invitee_id, invitee_email, access_type, status, created_at, expires_at
+WHERE u.email = $4 OR u.username = $4
+RETURNING id, workspace_id, invited_by, invitee_id, invitee_email, access_type, status, created_at, expires_at
 `
 
 type CreateWorkspaceInviteByIdentifierParams struct {
-	WorkspaceID   pgtype.UUID `json:"workspace_id"`
-	WorkspaceName string      `json:"workspace_name"`
-	InvitedBy     string      `json:"invited_by"`
-	AccessType    pgtype.Text `json:"access_type"`
-	Identifier    string      `json:"identifier"`
+	WorkspaceID pgtype.UUID `json:"workspace_id"`
+	InvitedBy   string      `json:"invited_by"`
+	AccessType  pgtype.Text `json:"access_type"`
+	Identifier  string      `json:"identifier"`
 }
 
 func (q *Queries) CreateWorkspaceInviteByIdentifier(ctx context.Context, arg CreateWorkspaceInviteByIdentifierParams) (WorkspaceInvite, error) {
 	row := q.db.QueryRow(ctx, createWorkspaceInviteByIdentifier,
 		arg.WorkspaceID,
-		arg.WorkspaceName,
 		arg.InvitedBy,
 		arg.AccessType,
 		arg.Identifier,
@@ -140,7 +130,6 @@ func (q *Queries) CreateWorkspaceInviteByIdentifier(ctx context.Context, arg Cre
 	err := row.Scan(
 		&i.ID,
 		&i.WorkspaceID,
-		&i.WorkspaceName,
 		&i.InvitedBy,
 		&i.InviteeID,
 		&i.InviteeEmail,
@@ -163,7 +152,7 @@ func (q *Queries) DeleteWorkspaceInvite(ctx context.Context, id pgtype.UUID) err
 }
 
 const getInviteById = `-- name: GetInviteById :one
-SELECT id, workspace_id, workspace_name, invited_by, invitee_id, invitee_email, access_type, status, created_at, expires_at FROM workspace_invites WHERE id = $1
+SELECT id, workspace_id, invited_by, invitee_id, invitee_email, access_type, status, created_at, expires_at FROM workspace_invites WHERE id = $1
 `
 
 func (q *Queries) GetInviteById(ctx context.Context, id pgtype.UUID) (WorkspaceInvite, error) {
@@ -172,7 +161,6 @@ func (q *Queries) GetInviteById(ctx context.Context, id pgtype.UUID) (WorkspaceI
 	err := row.Scan(
 		&i.ID,
 		&i.WorkspaceID,
-		&i.WorkspaceName,
 		&i.InvitedBy,
 		&i.InviteeID,
 		&i.InviteeEmail,
@@ -185,36 +173,52 @@ func (q *Queries) GetInviteById(ctx context.Context, id pgtype.UUID) (WorkspaceI
 }
 
 const listInvitesForUser = `-- name: ListInvitesForUser :many
-SELECT id, workspace_id, workspace_name, invited_by, invitee_id, invitee_email, access_type, status, created_at, expires_at
-FROM workspace_invites
+SELECT
+    wi.id,
+    wi.workspace_id,
+    w.name AS workspace_name,
+    wi.invited_by,
+    wi.invitee_id,
+    wi.access_type,
+    wi.status,
+    wi.created_at,
+    wi.expires_at
+FROM workspace_invites wi
+JOIN workspaces w ON wi.workspace_id = w.id
 WHERE
-    (invitee_id = $1 OR invitee_email = $2)
-    AND status = 'pending'
-    AND expires_at > NOW()
-ORDER BY created_at DESC
+    wi.invitee_id = $1
+    AND wi.status = 'pending'
+    AND wi.expires_at > NOW()
+ORDER BY wi.created_at DESC
 `
 
-type ListInvitesForUserParams struct {
-	InviteeID    string `json:"invitee_id"`
-	InviteeEmail string `json:"invitee_email"`
+type ListInvitesForUserRow struct {
+	ID            pgtype.UUID        `json:"id"`
+	WorkspaceID   pgtype.UUID        `json:"workspace_id"`
+	WorkspaceName string             `json:"workspace_name"`
+	InvitedBy     string             `json:"invited_by"`
+	InviteeID     string             `json:"invitee_id"`
+	AccessType    pgtype.Text        `json:"access_type"`
+	Status        pgtype.Text        `json:"status"`
+	CreatedAt     pgtype.Timestamptz `json:"created_at"`
+	ExpiresAt     pgtype.Timestamptz `json:"expires_at"`
 }
 
-func (q *Queries) ListInvitesForUser(ctx context.Context, arg ListInvitesForUserParams) ([]WorkspaceInvite, error) {
-	rows, err := q.db.Query(ctx, listInvitesForUser, arg.InviteeID, arg.InviteeEmail)
+func (q *Queries) ListInvitesForUser(ctx context.Context, inviteeID string) ([]ListInvitesForUserRow, error) {
+	rows, err := q.db.Query(ctx, listInvitesForUser, inviteeID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []WorkspaceInvite
+	var items []ListInvitesForUserRow
 	for rows.Next() {
-		var i WorkspaceInvite
+		var i ListInvitesForUserRow
 		if err := rows.Scan(
 			&i.ID,
 			&i.WorkspaceID,
 			&i.WorkspaceName,
 			&i.InvitedBy,
 			&i.InviteeID,
-			&i.InviteeEmail,
 			&i.AccessType,
 			&i.Status,
 			&i.CreatedAt,

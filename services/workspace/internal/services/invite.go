@@ -21,8 +21,8 @@ var (
 
 type InviteServicer interface {
 	CreateWorkspaceInvite(ctx context.Context, params models.CreateWorkspaceInviteParams) (models.WorkspaceInvite, error)
-	CreateWorkspaceInviteByIdentifier(ctx context.Context, workspaceId, workspaceName, accessType, invitedBy, identifier string) (models.WorkspaceInvite, error)
-	ListUserInvites(ctx context.Context, userID string) ([]models.WorkspaceInvite, error)
+	CreateWorkspaceInviteByIdentifier(ctx context.Context, workspaceId, accessType, invitedBy, identifier string) (models.WorkspaceInvite, error)
+	ListUserInvites(ctx context.Context, userID string) ([]models.ListInvitesForUserRow, error)
 	AcceptWorkspaceInvite(ctx context.Context, token string, userID string) (models.WorkspaceInvite, error)
 	DeclineWorkspaceInvite(ctx context.Context, token string, userId string) error
 	DeleteWorkspaceInvite(ctx context.Context, id string) error
@@ -40,7 +40,7 @@ func NewInviteService(store *store.Store) *InviteService {
 }
 
 func (s *InviteService) CreateWorkspaceInvite(ctx context.Context, params models.CreateWorkspaceInviteParams) (models.WorkspaceInvite, error) {
-	if !params.WorkspaceID.Valid || params.WorkspaceName == "" || params.InvitedBy == "" || params.InviteeEmail == "" {
+	if !params.WorkspaceID.Valid || params.InvitedBy == "" || params.InviteeEmail == "" {
 		return models.WorkspaceInvite{}, ErrInvalidInviteData
 	}
 
@@ -52,8 +52,8 @@ func (s *InviteService) CreateWorkspaceInvite(ctx context.Context, params models
 }
 
 func (s *InviteService) CreateWorkspaceInviteByIdentifier(ctx context.Context,
-	workspaceId, workspaceName, invitedBy, accessType, identifier string) (models.WorkspaceInvite, error) {
-	if workspaceId == "" || workspaceName == "" || invitedBy == "" || identifier == "" {
+	workspaceId, invitedBy, accessType, identifier string) (models.WorkspaceInvite, error) {
+	if workspaceId == "" || invitedBy == "" || identifier == "" {
 		return models.WorkspaceInvite{}, ErrInvalidInviteData
 	}
 
@@ -63,11 +63,10 @@ func (s *InviteService) CreateWorkspaceInviteByIdentifier(ctx context.Context,
 	}
 
 	params := models.CreateWorkspaceInviteByIdentifierParams{
-		WorkspaceID:   uuid,
-		WorkspaceName: workspaceName,
-		InvitedBy:     invitedBy,
-		AccessType:    pgtype.Text{String: accessType, Valid: true},
-		Identifier:    identifier,
+		WorkspaceID: uuid,
+		InvitedBy:   invitedBy,
+		AccessType:  pgtype.Text{String: accessType, Valid: true},
+		Identifier:  identifier,
 	}
 
 	invite, err := s.s.Queries.CreateWorkspaceInviteByIdentifier(ctx, params)
@@ -77,20 +76,18 @@ func (s *InviteService) CreateWorkspaceInviteByIdentifier(ctx context.Context,
 	return invite, nil
 }
 
-func (s *InviteService) ListUserInvites(ctx context.Context, userID string) ([]models.WorkspaceInvite, error) {
+func (s *InviteService) ListUserInvites(ctx context.Context, userID string) ([]models.ListInvitesForUserRow, error) {
 	if userID == "" {
 		return nil, ErrInvalidInviteData
 	}
 
-	invites, err := s.s.Queries.ListInvitesForUser(ctx, models.ListInvitesForUserParams{
-		InviteeID: userID,
-	})
+	invites, err := s.s.Queries.ListInvitesForUser(ctx, userID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to list invites: %w", err)
 	}
 
 	if invites == nil {
-		invites = make([]models.WorkspaceInvite, 0)
+		invites = make([]models.ListInvitesForUserRow, 0)
 	}
 	return invites, nil
 }

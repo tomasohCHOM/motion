@@ -3,7 +3,6 @@ import { useApiClient } from '../apiClient'
 
 type InviteRequestData = {
   workspaceId: string
-  workspaceName: string
   identifier: string
   accessType?: string
   invitedBy: string
@@ -19,7 +18,6 @@ export function useCreateInvite() {
         {
           method: 'POST',
           body: JSON.stringify({
-            workspace_name: inviteReqData.workspaceName,
             invited_by: inviteReqData.invitedBy,
             access_type: inviteReqData.accessType,
             identifier: inviteReqData.identifier,

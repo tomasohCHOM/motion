@@ -1,4 +1,4 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, useLoaderData } from '@tanstack/react-router'
 import { UserPlus } from 'lucide-react'
 import { useCreateInvite } from '@/client/invites/create-invite'
 import { Button } from '@/components/ui/button'
@@ -22,14 +22,14 @@ const TeamPageHeader: React.FC = () => {
 }
 
 function WorkspaceTeam() {
-  const { workspaceId } = Route.useParams()
+  const { user, workspace } = useLoaderData({ from: '/workspace/$workspaceId' })
   const { isPending, mutate: createInvite } = useCreateInvite()
+
   const onInviteUser = async () => {
     createInvite({
-      workspaceId,
-      workspaceName: 'CPSC 491',
-      invitedBy: 'someid',
-      identifier: 'johnd',
+      workspaceId: workspace.id,
+      invitedBy: user.id,
+      identifier: 'tomasoh',
     })
   }
 

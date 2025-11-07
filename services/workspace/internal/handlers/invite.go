@@ -25,10 +25,9 @@ func (h *InviteHandler) CreateUserInvite(w http.ResponseWriter, r *http.Request)
 	}
 
 	type requestBody struct {
-		WorkspaceName string `json:"workspace_name"`
-		InvitedBy     string `json:"invited_by"`
-		AccessType    string `json:"access_type,omitempty"`
-		Identifier    string `json:"identifier"`
+		InvitedBy  string `json:"invited_by"`
+		AccessType string `json:"access_type,omitempty"`
+		Identifier string `json:"identifier"`
 	}
 
 	var req requestBody
@@ -43,7 +42,7 @@ func (h *InviteHandler) CreateUserInvite(w http.ResponseWriter, r *http.Request)
 	}
 
 	invite, err := h.s.CreateWorkspaceInviteByIdentifier(r.Context(), workspaceId,
-		req.WorkspaceName, req.InvitedBy, req.AccessType, req.Identifier,
+		req.InvitedBy, req.AccessType, req.Identifier,
 	)
 	if err != nil {
 		if errors.Is(err, services.ErrInvalidInviteData) {

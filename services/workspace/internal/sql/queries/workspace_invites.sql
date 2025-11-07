@@ -1,25 +1,22 @@
 -- name: CreateWorkspaceInvite :one
 INSERT INTO workspace_invites (
     workspace_id,
-    workspace_name,
     invited_by,
     invitee_id,
     invitee_email,
     access_type
 ) VALUES (
     $1,  -- workspace_id
-    $2,  -- workspace_name
-    $3,  -- invited_by (user_id)
-    $4,  -- invitee_id
-    $5,  -- invitee_email
-    COALESCE($6, 'member')  -- access_type
+    $2,  -- invited_by (user_id)
+    $3,  -- invitee_id
+    $4,  -- invitee_email
+    COALESCE($5, 'member')  -- access_type
 )
 RETURNING *;
 
 -- name: CreateWorkspaceInviteByIdentifier :one
 INSERT INTO workspace_invites (
     workspace_id,
-    workspace_name,
     invited_by,
     invitee_id,
     invitee_email,
@@ -27,11 +24,10 @@ INSERT INTO workspace_invites (
 )
 SELECT
     $1,          -- workspace_id
-    $2,          -- workspace_name
-    $3,          -- invited_by
+    $2,          -- invited_by
     u.id,        -- invitee_id from lookoup
     u.email,     -- invitee_email from lookup
-    $4           -- access_type
+    $3           -- access_type
 FROM users u
 WHERE u.email = @identifier OR u.username = @identifier
 RETURNING *;
@@ -40,13 +36,23 @@ RETURNING *;
 SELECT * FROM workspace_invites WHERE id = $1;
 
 -- name: ListInvitesForUser :many
-SELECT *
-FROM workspace_invites
+SELECT
+    wi.id,
+    wi.workspace_id,
+    w.name AS workspace_name,
+    wi.invited_by,
+    wi.invitee_id,
+    wi.access_type,
+    wi.status,
+    wi.created_at,
+    wi.expires_at
+FROM workspace_invites wi
+JOIN workspaces w ON wi.workspace_id = w.id
 WHERE
-    (invitee_id = $1 OR invitee_email = $2)
-    AND status = 'pending'
-    AND expires_at > NOW()
-ORDER BY created_at DESC;
+    wi.invitee_id = sqlc.arg(invitee_id)
+    AND wi.status = 'pending'
+    AND wi.expires_at > NOW()
+ORDER BY wi.created_at DESC;
 
 -- name: AcceptWorkspaceInvite :one
 UPDATE workspace_invites
