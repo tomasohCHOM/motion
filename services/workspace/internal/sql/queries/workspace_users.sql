@@ -9,11 +9,24 @@ DELETE FROM workspace_users
 WHERE user_id = $1 AND workspace_id = $2;
 
 -- name: GetWorkspaceUsers :many
-SELECT u.id, u.email, u.first_name, u.last_name, u.username, wu.access_type, wu.joined_at
+SELECT
+  u.id,
+  u.email,
+  u.first_name,
+  u.last_name,
+  u.username,
+  wu.access_type,
+  wu.joined_at
 FROM workspace_users wu
 JOIN users u ON wu.user_id = u.id
 WHERE wu.workspace_id = $1
 ORDER BY wu.joined_at ASC;
+
+-- name: IsWorkspaceUser :one
+SELECT EXISTS (
+  SELECT 1 FROM workspace_users
+  WHERE user_id = $1 AND workspace_id = $2
+);
 
 -- name: GetUserWorkspaces :many
 SELECT

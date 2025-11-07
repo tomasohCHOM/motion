@@ -5,15 +5,26 @@ export async function apiFetchWithToken<T>(
   token: string | null,
   init?: RequestInit,
 ): Promise<T> {
-  if (!token) throw new Error('No auth token provided')
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    ...(init?.headers instanceof Headers
+      ? Object.fromEntries(init.headers.entries())
+      : Array.isArray(init?.headers)
+        ? Object.fromEntries(init.headers)
+        : (init?.headers ?? {})),
+  }
+
+  if (import.meta.env.VITE_ENV === 'production') {
+    if (!token) throw new Error('No auth token provided')
+    headers['Authorization'] = `Bearer ${token}`
+  } else {
+    const devUserId = import.meta.env.VITE_DEV_USER_ID || 'user_dev_default'
+    headers['X-Dev-UserID'] = devUserId
+  }
 
   const res = await fetch(input, {
     ...init,
-    headers: {
-      ...(init?.headers || {}),
-      Authorization: `Bearer ${token}`,
-      'Content-Type': 'application/json',
-    },
+    headers,
   })
 
   if (!res.ok) {
