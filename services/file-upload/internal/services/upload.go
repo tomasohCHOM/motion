@@ -15,12 +15,12 @@ import (
 	"github.com/tomasohchom/motion/services/file-upload/internal/interfaces"
 	"github.com/tomasohchom/motion/services/file-upload/internal/models"
 	"github.com/tomasohchom/motion/services/file-upload/internal/store"
-	"github.com/tomasohchom/motion/services/file-upload/utils"
+	// "github.com/tomasohchom/motion/services/file-upload/utils"
 )
 
 var (
 	ErrMissingFields = errors.New("missing required fields")
-	ErrInvalidUUID   = errors.New("could not cast string to UUID")
+	// ErrInvalidUUID   = errors.New("could not cast string to UUID")
 )
 
 type UploadServicer interface {
