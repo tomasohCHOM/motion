@@ -1,3 +1,5 @@
+import type { User, WorkspaceUserResponse } from '@/types/user'
+
 export type WorkspaceResponse = {
   id: string
   name: string
@@ -13,14 +15,17 @@ export type UserWorkspacesResponse = Array<
   }
 >
 
-export type UserWorkspace = {
+export type Workspace = {
   id: string
   name: string
   description: string
-  accessType: 'member' | 'owner'
-  memberCount: number
   createdAt: string
   lastUpdated: string
+}
+
+export type UserWorkspace = Workspace & {
+  accessType: 'member' | 'owner'
+  memberCount: number
 }
 
 export type WorkspaceInvitesResponse = Array<{
@@ -42,4 +47,14 @@ export type WorkspaceInvite = {
   workspaceName: string
   invitedBy: string
   invitedAt: string
+}
+
+export type WorkspaceDataResponse = {
+  workspace: WorkspaceResponse
+  users: Array<WorkspaceUserResponse>
+}
+
+export type WorkspaceData = {
+  workspace: Workspace
+  users: Array<User>
 }

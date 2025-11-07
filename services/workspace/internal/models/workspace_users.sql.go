@@ -96,7 +96,14 @@ func (q *Queries) GetUserWorkspaces(ctx context.Context, userID string) ([]GetUs
 }
 
 const getWorkspaceUsers = `-- name: GetWorkspaceUsers :many
-SELECT u.id, u.email, u.first_name, u.last_name, u.username, wu.access_type, wu.joined_at
+SELECT
+  u.id,
+  u.email,
+  u.first_name,
+  u.last_name,
+  u.username,
+  wu.access_type,
+  wu.joined_at
 FROM workspace_users wu
 JOIN users u ON wu.user_id = u.id
 WHERE wu.workspace_id = $1
@@ -139,6 +146,25 @@ func (q *Queries) GetWorkspaceUsers(ctx context.Context, workspaceID pgtype.UUID
 		return nil, err
 	}
 	return items, nil
+}
+
+const isWorkspaceUser = `-- name: IsWorkspaceUser :one
+SELECT EXISTS (
+  SELECT 1 FROM workspace_users
+  WHERE user_id = $1 AND workspace_id = $2
+)
+`
+
+type IsWorkspaceUserParams struct {
+	UserID      string      `json:"user_id"`
+	WorkspaceID pgtype.UUID `json:"workspace_id"`
+}
+
+func (q *Queries) IsWorkspaceUser(ctx context.Context, arg IsWorkspaceUserParams) (bool, error) {
+	row := q.db.QueryRow(ctx, isWorkspaceUser, arg.UserID, arg.WorkspaceID)
+	var exists bool
+	err := row.Scan(&exists)
+	return exists, err
 }
 
 const removeUserFromWorkspace = `-- name: RemoveUserFromWorkspace :exec

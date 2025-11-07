@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/tomasohchom/motion/services/workspace/internal/middleware"
 	"github.com/tomasohchom/motion/services/workspace/internal/services"
 )
 
@@ -55,13 +56,18 @@ func (h *WorkspaceHandler) CreateWorkspace(w http.ResponseWriter, r *http.Reques
 }
 
 func (h *WorkspaceHandler) GetWorkspaceById(w http.ResponseWriter, r *http.Request) {
+	userId, ok := middleware.UserIDFromContext(r.Context())
+	if !ok || userId == "" {
+		http.Error(w, "unauthorized", http.StatusUnauthorized)
+		return
+	}
 	id := r.PathValue("id")
 	if id == "" {
 		http.Error(w, "missing workspace id", http.StatusBadRequest)
 		return
 	}
 
-	workspace, err := h.s.GetUserWorkspace(r.Context(), id)
+	workspace, err := h.s.GetUserWorkspace(r.Context(), id, userId)
 	if err != nil {
 		// Map domain errors to HTTP status codes
 		if errors.Is(err, services.ErrWorkspaceNotFound) {
@@ -70,6 +76,10 @@ func (h *WorkspaceHandler) GetWorkspaceById(w http.ResponseWriter, r *http.Reque
 		}
 		if errors.Is(err, services.ErrInvalidWorkspaceData) {
 			http.Error(w, "invalid workspace id", http.StatusBadRequest)
+			return
+		}
+		if errors.Is(err, services.ErrInvalidUserData) {
+			http.Error(w, "unauthorized to access workspace", http.StatusUnauthorized)
 			return
 		}
 		log.Printf("Failed to fetch workspace %s: %v", id, err)
