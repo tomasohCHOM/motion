@@ -1,6 +1,6 @@
 import { SignedIn, UserButton } from '@clerk/clerk-react'
-import type React from 'react'
 import { Logo } from '../common/logo'
+import type React from 'react'
 
 export const UserNavbar: React.FC = () => {
   return (

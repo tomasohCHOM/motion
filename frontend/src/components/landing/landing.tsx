@@ -1,8 +1,8 @@
 import { ArrowRight } from 'lucide-react'
+import { Logo } from '../common/logo'
 import type React from 'react'
 import { Button } from '@/components/ui/button'
 import { useClerkAuth } from '@/auth/clerk'
-import { Logo } from '../common/logo'
 
 const DEFAULT_AUTH_REDIRECT = '/dashboard'
 

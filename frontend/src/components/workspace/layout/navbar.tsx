@@ -1,15 +1,15 @@
-import { Avatar, AvatarFallback } from '@/components/ui/avatar'
-import { Button } from '@/components/ui/button'
-import type { WorkspaceUser } from '@/types/user'
-import type { Workspace } from '@/types/workspace'
-import { getMemberInitials } from '@/utils/initals'
 import { SignedIn, UserButton } from '@clerk/clerk-react'
 import { useRouter } from '@tanstack/react-router'
 import { UserPlus } from 'lucide-react'
+import type { WorkspaceUser } from '@/types/user'
+import type { Workspace } from '@/types/workspace'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import { Button } from '@/components/ui/button'
+import { getMemberInitials } from '@/utils/initals'
 
 type Props = {
   workspace: Workspace
-  workspaceUsers: WorkspaceUser[]
+  workspaceUsers: Array<WorkspaceUser>
 }
 
 export const WorkspaceNavbar: React.FC<Props> = ({

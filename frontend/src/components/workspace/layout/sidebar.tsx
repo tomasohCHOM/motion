@@ -9,6 +9,8 @@ import {
   Settings,
   Users,
 } from 'lucide-react'
+import { Link, useMatchRoute } from '@tanstack/react-router'
+import type { Workspace } from '@/types/workspace'
 import {
   Sidebar,
   SidebarContent,
@@ -20,8 +22,6 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from '@/components/ui/sidebar'
-import { Link, useMatchRoute } from '@tanstack/react-router'
-import type { Workspace } from '@/types/workspace'
 
 type NavItem = {
   title: string
