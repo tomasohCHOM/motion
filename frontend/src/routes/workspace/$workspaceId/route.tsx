@@ -1,7 +1,7 @@
 import { Outlet, createFileRoute } from '@tanstack/react-router'
 import { SidebarProvider } from '@/components/ui/sidebar'
 import { WorkspaceNavbar } from '@/components/workspace/layout/navbar'
-import AppSidebar from '@/components/workspace/layout/sidebar'
+import { WorkspaceSidebar } from '@/components/workspace/layout/sidebar'
 import PageContent from '@/components/workspace/layout/page-content'
 import { requireAuth } from '@/auth/requireAuth'
 import { requireUser } from '@/auth/requireUser'
@@ -36,15 +36,17 @@ export const Route = createFileRoute('/workspace/$workspaceId')({
 })
 
 function WorkspaceLayout() {
-  const { workspace } = Route.useLoaderData()
-  const { workspaceId } = Route.useParams()
+  const { workspace, workspaceUsers } = Route.useLoaderData()
 
   return (
     <>
       <SidebarProvider>
-        <AppSidebar workspaceId={workspaceId} />
+        <WorkspaceSidebar workspace={workspace} />
         <div className="w-full">
-          <WorkspaceNavbar workspaceName={workspace.name} />
+          <WorkspaceNavbar
+            workspace={workspace}
+            workspaceUsers={workspaceUsers}
+          />
           <PageContent>
             <Outlet />
           </PageContent>

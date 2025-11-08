@@ -1,7 +1,8 @@
-import { ArrowRight, Zap } from 'lucide-react'
+import { ArrowRight } from 'lucide-react'
 import type React from 'react'
 import { Button } from '@/components/ui/button'
 import { useClerkAuth } from '@/auth/clerk'
+import { Logo } from '../common/logo'
 
 const DEFAULT_AUTH_REDIRECT = '/dashboard'
 
@@ -15,12 +16,8 @@ const LandingNavbar: React.FC = () => {
     <nav className="border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
-          {/* Logo */}
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-              <Zap className="h-5 w-5 text-primary-foreground" />
-            </div>
-            <span className="text-lg font-semibold">Motion</span>
+            <Logo /> <span className="text-lg font-semibold">Motion</span>
           </div>
 
           {/* Auth buttons */}

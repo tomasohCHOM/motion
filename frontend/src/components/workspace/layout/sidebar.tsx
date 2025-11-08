@@ -1,79 +1,151 @@
 import {
   Calendar,
+  ChevronLeft,
   File,
   FolderClock,
-  HelpCircle,
+  LayoutDashboard,
   MessageSquareDot,
   NotebookTabs,
+  Settings,
+  Users,
 } from 'lucide-react'
 import {
   Sidebar,
   SidebarContent,
-  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
+  SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
 } from '@/components/ui/sidebar'
+import { Link, useMatchRoute } from '@tanstack/react-router'
+import type { Workspace } from '@/types/workspace'
 
-export default function AppSidebar({ workspaceId }: { workspaceId: string }) {
-  const workspaceDynamicRoute = `/workspace/${workspaceId}`
-  const navItems = [
+type NavItem = {
+  title: string
+  url: string
+  icon: React.ElementType
+}
+
+type SidebarNavSectionProps = {
+  items: Array<NavItem>
+  workspaceId: string
+  matchRoute: ReturnType<typeof useMatchRoute>
+  label?: string
+}
+
+const SidebarNavSection: React.FC<SidebarNavSectionProps> = ({
+  items,
+  workspaceId,
+  matchRoute,
+  label,
+}) => {
+  return (
+    <SidebarGroup>
+      {label && <SidebarGroupLabel>{label}</SidebarGroupLabel>}
+      <SidebarGroupContent>
+        <SidebarMenu className="gap-2">
+          {items.map((item) => {
+            const to = item.url.replace('$workspaceId', workspaceId)
+            const isActive = !!matchRoute({ to })
+
+            return (
+              <SidebarMenuItem key={item.url}>
+                <SidebarMenuButton
+                  className="transition-all"
+                  isActive={isActive}
+                  asChild
+                >
+                  <Link to={item.url} params={{ workspaceId }}>
+                    <item.icon />
+                    <span>{item.title}</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            )
+          })}
+        </SidebarMenu>
+      </SidebarGroupContent>
+    </SidebarGroup>
+  )
+}
+
+type Props = {
+  workspace: Workspace
+}
+
+export const WorkspaceSidebar: React.FC<Props> = ({ workspace }) => {
+  const matchRoute = useMatchRoute()
+
+  const mainNavItems: Array<NavItem> = [
+    {
+      title: 'Dashboard',
+      url: '/workspace/$workspaceId/',
+      icon: LayoutDashboard,
+    },
+    { title: 'Team', url: '/workspace/$workspaceId/team', icon: Users },
+    {
+      title: 'Settings',
+      url: '/workspace/$workspaceId/settings',
+      icon: Settings,
+    },
+  ]
+
+  const workspaceNavItems: Array<NavItem> = [
     {
       title: 'Notes',
-      url: `${workspaceDynamicRoute}/notes`,
+      url: '/workspace/$workspaceId/notes',
       icon: NotebookTabs,
     },
     {
       title: 'Chat',
-      url: `${workspaceDynamicRoute}/chat`,
+      url: '/workspace/$workspaceId/chat',
       icon: MessageSquareDot,
     },
     {
       title: 'Planner',
-      url: `${workspaceDynamicRoute}/planner`,
+      url: '/workspace/$workspaceId/planner',
       icon: Calendar,
     },
     {
       title: 'Manager',
-      url: `${workspaceDynamicRoute}/manager`,
+      url: '/workspace/$workspaceId/manager',
       icon: FolderClock,
     },
-    {
-      title: 'Files',
-      url: `${workspaceDynamicRoute}/files`,
-      icon: File,
-    },
+    { title: 'Files', url: '/workspace/$workspaceId/files', icon: File },
   ]
+
   return (
     <Sidebar>
-      <SidebarContent className="px-2 py-4">
-        <SidebarGroup>
-          <SidebarGroupLabel>Workspace</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu className="gap-2">
-              {navItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
-                    <a href={item.url}>
-                      <item.icon />
-                      <span>{item.title}</span>
-                    </a>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-        <SidebarGroup />
+      <SidebarHeader className="pt-5">
+        <SidebarMenuButton className="transition-all">
+          <Link to="/dashboard" className="text-sm w-full">
+            <div className="flex items-center gap-1">
+              <ChevronLeft className="w-4" />
+              Back to dashboard
+            </div>
+          </Link>
+        </SidebarMenuButton>
+      </SidebarHeader>
+
+      {/* <SidebarSeparator /> */}
+
+      <SidebarContent>
+        <SidebarNavSection
+          items={mainNavItems}
+          workspaceId={workspace.id}
+          matchRoute={matchRoute}
+        />
+
+        <SidebarNavSection
+          label="WORKSPACE"
+          items={workspaceNavItems}
+          workspaceId={workspace.id}
+          matchRoute={matchRoute}
+        />
       </SidebarContent>
-      <SidebarFooter>
-        <SidebarContent className="ml-auto">
-          <HelpCircle size={16} />
-        </SidebarContent>
-      </SidebarFooter>
     </Sidebar>
   )
 }
