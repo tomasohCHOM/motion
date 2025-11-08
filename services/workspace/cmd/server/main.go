@@ -114,6 +114,17 @@ func main() {
 			{"GET", "/users/{user_id}/workspaces", workspaceHandler.ListUserWorkspaces},
 		})
 		log.Println("Workspace handler routes registered")
+
+		inviteSerive := services.NewInviteService(store)
+		inviteHandler := handlers.NewInviteHandler(inviteSerive)
+		registerRoutes(mux, []Route{
+			{"POST", "/workspaces/{workspaceId}/invites", inviteHandler.CreateUserInvite},
+			{"GET", "/users/{user_id}/invites", inviteHandler.ListUserInvites},
+			{"POST", "/invites/{invite_id}/accept", inviteHandler.AcceptInvite},
+			{"POST", "/invites/{invite_id}/decline", inviteHandler.DeclineInvite},
+			{"DELETE", "/invites/{invite_id}", inviteHandler.DeleteInvite},
+		})
+		log.Println("Invite handler routes registered")
 	}()
 
 	c := cors.New(cors.Options{
