@@ -1,7 +1,9 @@
 import { createFileRoute, useLoaderData } from '@tanstack/react-router'
 import { UserPlus } from 'lucide-react'
+import { useState } from 'react'
 import { useCreateInvite } from '@/client/invites/create-invite'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 
 export const Route = createFileRoute('/workspace/$workspaceId/team/')({
   component: WorkspaceTeam,
@@ -23,13 +25,14 @@ const TeamPageHeader: React.FC = () => {
 
 function WorkspaceTeam() {
   const { user, workspace } = useLoaderData({ from: '/workspace/$workspaceId' })
-  const { isPending, mutate: createInvite } = useCreateInvite()
+  const { isPending, isError, error, mutate: createInvite } = useCreateInvite()
+  const [identifier, setIdentifier] = useState('')
 
-  const onInviteUser = async () => {
+  const onInviteUser = () => {
     createInvite({
       workspaceId: workspace.id,
       invitedBy: user.id,
-      identifier: 'tomasoh',
+      identifier,
     })
   }
 
@@ -38,7 +41,13 @@ function WorkspaceTeam() {
       <TeamPageHeader />
       <div className="px-6">
         <div className="max-w-[768px]">
-          {isPending && 'Doing some awesome shit'}
+          {isPending && 'Inviting Member'}
+          {isError && `Unable to process request: ${error.message}`}
+          <Input
+            placeholder="The new member's username or email"
+            value={identifier}
+            onChange={(e) => setIdentifier(e.target.value)}
+          />
           <Button onClick={onInviteUser}>Invite Member</Button>
         </div>
       </div>

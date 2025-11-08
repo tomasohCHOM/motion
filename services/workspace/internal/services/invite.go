@@ -13,10 +13,11 @@ import (
 
 // Domain errors
 var (
-	ErrInviteNotFound    = errors.New("invite not found")
-	ErrInviteExpired     = errors.New("invite expired or invalid")
-	ErrInviteAlreadyUsed = errors.New("invite already accepted or declined")
-	ErrInvalidInviteData = errors.New("invalid invite data")
+	ErrInviteNotFound     = errors.New("invite not found")
+	ErrInviteExpired      = errors.New("invite expired or invalid")
+	ErrIdentifierNotFound = errors.New("identifier not found")
+	ErrInviteAlreadyUsed  = errors.New("invite already accepted or declined")
+	ErrInvalidInviteData  = errors.New("invalid invite data")
 )
 
 type InviteServicer interface {
@@ -57,6 +58,10 @@ func (s *InviteService) CreateWorkspaceInviteByIdentifier(ctx context.Context,
 		return models.WorkspaceInvite{}, ErrInvalidInviteData
 	}
 
+	if accessType == "" {
+		accessType = "member"
+	}
+
 	var uuid pgtype.UUID
 	if err := uuid.Scan(workspaceId); err != nil {
 		return models.WorkspaceInvite{}, ErrInvalidWorkspaceData
@@ -71,6 +76,9 @@ func (s *InviteService) CreateWorkspaceInviteByIdentifier(ctx context.Context,
 
 	invite, err := s.s.Queries.CreateWorkspaceInviteByIdentifier(ctx, params)
 	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return models.WorkspaceInvite{}, ErrIdentifierNotFound
+		}
 		return models.WorkspaceInvite{}, fmt.Errorf("failed to create invite: %w", err)
 	}
 	return invite, nil
@@ -129,6 +137,11 @@ func (s *InviteService) AcceptWorkspaceInvite(ctx context.Context, inviteId, use
 	})
 	if err != nil {
 		return models.WorkspaceInvite{}, fmt.Errorf("failed to add user to workspace: %w", err)
+	}
+
+	err = qtx.DeleteWorkspaceInvite(ctx, uuid)
+	if err != nil {
+		return models.WorkspaceInvite{}, fmt.Errorf("failed to delete invite after accepting: %w", err)
 	}
 
 	if err := tx.Commit(ctx); err != nil {

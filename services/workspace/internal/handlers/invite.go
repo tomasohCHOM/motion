@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/tomasohchom/motion/services/workspace/internal/middleware"
 	"github.com/tomasohchom/motion/services/workspace/internal/services"
 )
 
@@ -49,6 +50,10 @@ func (h *InviteHandler) CreateUserInvite(w http.ResponseWriter, r *http.Request)
 			http.Error(w, "invalid invite data", http.StatusBadRequest)
 			return
 		}
+		if errors.Is(err, services.ErrIdentifierNotFound) {
+			http.Error(w, "unable to find user by identifier", http.StatusNotFound)
+			return
+		}
 		log.Printf("Failed to create invite for workspace %s: %v", workspaceId, err)
 		http.Error(w, "failed to create invite", http.StatusInternalServerError)
 		return
@@ -83,26 +88,19 @@ func (h *InviteHandler) ListUserInvites(w http.ResponseWriter, r *http.Request) 
 }
 
 func (h *InviteHandler) AcceptInvite(w http.ResponseWriter, r *http.Request) {
+	userId, ok := middleware.UserIDFromContext(r.Context())
+	if !ok || userId == "" {
+		http.Error(w, "unauthorized", http.StatusUnauthorized)
+		return
+	}
+
 	inviteId := r.PathValue("invite_id")
 	if inviteId == "" {
 		http.Error(w, "missing invite id", http.StatusBadRequest)
 		return
 	}
 
-	type requestBody struct {
-		UserID string `json:"user_id"`
-	}
-	var req requestBody
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		http.Error(w, "invalid request body", http.StatusBadRequest)
-		return
-	}
-	if req.UserID == "" {
-		http.Error(w, "missing user id", http.StatusBadRequest)
-		return
-	}
-
-	invite, err := h.s.AcceptWorkspaceInvite(r.Context(), inviteId, req.UserID)
+	invite, err := h.s.AcceptWorkspaceInvite(r.Context(), inviteId, userId)
 	if err != nil {
 		switch {
 		case errors.Is(err, services.ErrInviteExpired):
@@ -124,26 +122,19 @@ func (h *InviteHandler) AcceptInvite(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *InviteHandler) DeclineInvite(w http.ResponseWriter, r *http.Request) {
+	userId, ok := middleware.UserIDFromContext(r.Context())
+	if !ok || userId == "" {
+		http.Error(w, "unauthorized", http.StatusUnauthorized)
+		return
+	}
+
 	inviteId := r.PathValue("invite_id")
 	if inviteId == "" {
 		http.Error(w, "missing invite id", http.StatusBadRequest)
 		return
 	}
 
-	type requestBody struct {
-		UserID string `json:"user_id"`
-	}
-	var req requestBody
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		http.Error(w, "invalid request body", http.StatusBadRequest)
-		return
-	}
-	if req.UserID == "" {
-		http.Error(w, "missing user id", http.StatusBadRequest)
-		return
-	}
-
-	err := h.s.DeclineWorkspaceInvite(r.Context(), inviteId, req.UserID)
+	err := h.s.DeclineWorkspaceInvite(r.Context(), inviteId, userId)
 	if err != nil {
 		switch {
 		case errors.Is(err, services.ErrInvalidInviteData):
@@ -160,7 +151,7 @@ func (h *InviteHandler) DeclineInvite(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *InviteHandler) DeleteInvite(w http.ResponseWriter, r *http.Request) {
-	inviteID := r.PathValue("inviteId")
+	inviteID := r.PathValue("invite_id")
 	if inviteID == "" {
 		http.Error(w, "missing invite id", http.StatusBadRequest)
 		return

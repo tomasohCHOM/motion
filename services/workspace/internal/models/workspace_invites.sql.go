@@ -177,7 +177,8 @@ SELECT
     wi.id,
     wi.workspace_id,
     w.name AS workspace_name,
-    wi.invited_by,
+    u.first_name AS inviter_first_name,
+    u.last_name AS inviter_last_name,
     wi.invitee_id,
     wi.access_type,
     wi.status,
@@ -185,6 +186,7 @@ SELECT
     wi.expires_at
 FROM workspace_invites wi
 JOIN workspaces w ON wi.workspace_id = w.id
+JOIN users u ON wi.invited_by = u.id
 WHERE
     wi.invitee_id = $1
     AND wi.status = 'pending'
@@ -193,15 +195,16 @@ ORDER BY wi.created_at DESC
 `
 
 type ListInvitesForUserRow struct {
-	ID            pgtype.UUID        `json:"id"`
-	WorkspaceID   pgtype.UUID        `json:"workspace_id"`
-	WorkspaceName string             `json:"workspace_name"`
-	InvitedBy     string             `json:"invited_by"`
-	InviteeID     string             `json:"invitee_id"`
-	AccessType    pgtype.Text        `json:"access_type"`
-	Status        pgtype.Text        `json:"status"`
-	CreatedAt     pgtype.Timestamptz `json:"created_at"`
-	ExpiresAt     pgtype.Timestamptz `json:"expires_at"`
+	ID               pgtype.UUID        `json:"id"`
+	WorkspaceID      pgtype.UUID        `json:"workspace_id"`
+	WorkspaceName    string             `json:"workspace_name"`
+	InviterFirstName string             `json:"inviter_first_name"`
+	InviterLastName  string             `json:"inviter_last_name"`
+	InviteeID        string             `json:"invitee_id"`
+	AccessType       pgtype.Text        `json:"access_type"`
+	Status           pgtype.Text        `json:"status"`
+	CreatedAt        pgtype.Timestamptz `json:"created_at"`
+	ExpiresAt        pgtype.Timestamptz `json:"expires_at"`
 }
 
 func (q *Queries) ListInvitesForUser(ctx context.Context, inviteeID string) ([]ListInvitesForUserRow, error) {
@@ -217,7 +220,8 @@ func (q *Queries) ListInvitesForUser(ctx context.Context, inviteeID string) ([]L
 			&i.ID,
 			&i.WorkspaceID,
 			&i.WorkspaceName,
-			&i.InvitedBy,
+			&i.InviterFirstName,
+			&i.InviterLastName,
 			&i.InviteeID,
 			&i.AccessType,
 			&i.Status,

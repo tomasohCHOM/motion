@@ -121,8 +121,8 @@ func main() {
 			{"POST", "/workspaces/{workspaceId}/invites", inviteHandler.CreateUserInvite},
 			{"GET", "/users/{user_id}/invites", inviteHandler.ListUserInvites},
 			{"POST", "/invites/{invite_id}/accept", inviteHandler.AcceptInvite},
-			{"POST", "/invites/{invite_id}/decline", inviteHandler.DeleteInvite},
-			{"DELETE", "/invites/:inviteId", inviteHandler.DeleteInvite},
+			{"POST", "/invites/{invite_id}/decline", inviteHandler.DeclineInvite},
+			{"DELETE", "/invites/{invite_id}", inviteHandler.DeleteInvite},
 		})
 		log.Println("Invite handler routes registered")
 	}()

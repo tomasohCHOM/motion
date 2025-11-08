@@ -18,7 +18,8 @@ async function fetchUserInvites(
     return {
       id: invite.id,
       workspaceName: invite.workspace_name,
-      invitedBy: invite.invited_by,
+      inviterFirstName: invite.inviter_first_name,
+      inviterLastName: invite.inviter_last_name,
       invitedAt: invite.created_at,
     }
   })
@@ -28,7 +29,7 @@ async function fetchUserInvites(
 
 export function userInvitesQueryOptions(userId: string, token: string | null) {
   return queryOptions({
-    queryKey: ['user-invites', userId],
+    queryKey: ['user-invites'],
     queryFn: async () => fetchUserInvites(userId, token),
     staleTime: 10_000,
   })

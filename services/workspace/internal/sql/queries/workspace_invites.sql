@@ -40,7 +40,8 @@ SELECT
     wi.id,
     wi.workspace_id,
     w.name AS workspace_name,
-    wi.invited_by,
+    u.first_name AS inviter_first_name,
+    u.last_name AS inviter_last_name,
     wi.invitee_id,
     wi.access_type,
     wi.status,
@@ -48,6 +49,7 @@ SELECT
     wi.expires_at
 FROM workspace_invites wi
 JOIN workspaces w ON wi.workspace_id = w.id
+JOIN users u ON wi.invited_by = u.id
 WHERE
     wi.invitee_id = sqlc.arg(invitee_id)
     AND wi.status = 'pending'

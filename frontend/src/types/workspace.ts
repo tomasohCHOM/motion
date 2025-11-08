@@ -28,11 +28,13 @@ export type UserWorkspace = Workspace & {
   memberCount: number
 }
 
-export type WorkspaceInvitesResponse = Array<{
+export type WorkspaceInviteResponse = {
   id: string
   workspace_id: string
   workspace_name: string
   invited_by: string
+  inviter_first_name: string
+  inviter_last_name: string
   invitee_id: string
   invitee_email: string
   access_type: string
@@ -40,12 +42,15 @@ export type WorkspaceInvitesResponse = Array<{
   status: string
   created_at: string
   expires_at: string
-}>
+}
+
+export type WorkspaceInvitesResponse = Array<WorkspaceInviteResponse>
 
 export type WorkspaceInvite = {
   id: string
   workspaceName: string
-  invitedBy: string
+  inviterFirstName: string
+  inviterLastName: string
   invitedAt: string
 }
 
