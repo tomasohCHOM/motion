@@ -98,7 +98,7 @@ func (u *UploadService) ListFiles(ctx context.Context, userID string) ([]models.
 			UserID: userID,
 		})
 		if err != nil {
-			return []models.FileInfo{}, fmt.Errorf("Could not list files: %w", err)
+			return []models.FileInfo{}, fmt.Errorf("could not list files: %w", err)
 		}
 	}
 

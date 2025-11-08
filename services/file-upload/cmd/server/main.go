@@ -36,7 +36,7 @@ func run() error {
 	// Setup storage client ========================================================================
 	storageClient, err := clients.NewStorageClient(cfg)
 	if err != nil {
-		return fmt.Errorf("Failed to create %s storage client: %v", cfg.Storage.Provider, err)
+		return fmt.Errorf("failed to create %s storage client: %v", cfg.Storage.Provider, err)
 	}
 	// TODO: create a defered shutdown func
 	log.Printf("Successfully created %s storage client\n", cfg.Storage.Provider)
