@@ -113,7 +113,6 @@ func (h *UploadHandler) ListFiles(w http.ResponseWriter, r *http.Request) {
 		log.Printf("Could not list files: %v", err)
 	}
 
-
 	response := models.ListFilesResponse{
 		Files: files,
 	}

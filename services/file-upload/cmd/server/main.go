@@ -64,7 +64,6 @@ func run() error {
 	mux.HandleFunc("GET /users/{user_id}/files", uploadHandler.ListFiles)
 	// mux.HandleFunc("GET /workspaces/{workspace_id}/files", uploadHandler.ListFiles)
 
-
 	c := cors.New(cors.Options{
 		AllowedOrigins:   cfg.Server.AllowedOrigins, // from CORS_ALLOWED_ORIGINS
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
