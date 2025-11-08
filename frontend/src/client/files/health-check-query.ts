@@ -10,7 +10,7 @@ async function fetchFilesServiceHealth(): Promise<HealthResponse> {
     throw new Error('Files service healthcheck failed (bad response code)')
   }
   const data: HealthResponse = await res.json()
-  if (data.status !== 'healthy') {
+  if (data.status !== 'ok') {
     throw new Error(`Files service healthcheck failed: status=${data.status}`)
   }
   return data

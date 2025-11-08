@@ -3,23 +3,21 @@ package handlers
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"time"
 
-	"github.com/tomasohchom/motion/services/file-upload/internal/config"
 	"github.com/tomasohchom/motion/services/file-upload/internal/models"
 	"github.com/tomasohchom/motion/services/file-upload/internal/services"
 )
 
 type UploadHandler struct {
-	uploadService *services.UploadService
-	config        *config.Config
+	uploadService services.UploadServicer
 }
 
-func NewUploadHandler(uploadService *services.UploadService, cfg *config.Config) *UploadHandler {
+func NewUploadHandler(uploadService services.UploadServicer) *UploadHandler {
 	return &UploadHandler{
 		uploadService: uploadService,
-		config:        cfg,
 	}
 }
 
@@ -69,14 +67,14 @@ func (h *UploadHandler) CompleteUpload(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// // Verify the file exists and get metadata
-	// fileInfo, err := h.uploadService.VerifyUpload(r.Context(), req.Key)
-	// if err != nil {
-	// 	http.Error(w, "Failed to verify upload", http.StatusInternalServerError)
-	// 	return
-	// }
+	err := h.uploadService.CompleteUpload(r.Context(), req.Key, req.UserID)
+	if err != nil {
+		log.Printf("Failed to complete upload: %v", err)
+		http.Error(w, "Failed to complete upload", http.StatusInternalServerError)
+		return
+	}
 
-	// Here you might save metadata to a database, send notifications, etc.
+	// TODO: use FileInfo type from models here and in service to give a better response
 	response := models.CompleteUploadResponse{
 		Success: true,
 		// FileURL:    fileInfo.URL,
@@ -104,6 +102,23 @@ func (h *UploadHandler) GetUploadStatus(w http.ResponseWriter, r *http.Request) 
 
 	w.Header().Set("Content-Type", "application/json")
 	// json.NewEncoder(w).Encode(status)
+}
+
+func (h *UploadHandler) ListFiles(w http.ResponseWriter, r *http.Request) {
+	userID := r.URL.Query().Get("user_id")
+
+	files, err := h.uploadService.ListFiles(r.Context(), userID)
+	if err != nil {
+		http.Error(w, "Could not list files", http.StatusInternalServerError)
+		log.Printf("Could not list files: %v", err)
+	}
+
+	response := models.ListFilesResponse{
+		Files: files,
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(response)
 }
 
 // Helper function to generate unique file keys

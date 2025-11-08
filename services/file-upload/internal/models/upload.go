@@ -62,6 +62,12 @@ type UploadStatus struct {
 }
 
 type FileInfo struct {
-	URL  string
-	Size int64
+	Key       string
+	UserID    string
+	Size      int64
+	CreatedAt time.Time
+}
+
+type ListFilesResponse struct {
+	Files []FileInfo `json:"files"`
 }
