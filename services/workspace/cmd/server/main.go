@@ -114,6 +114,17 @@ func main() {
 			{"GET", "/users/{user_id}/workspaces", workspaceHandler.ListUserWorkspaces},
 		})
 		log.Println("Workspace handler routes registered")
+
+		noteService := services.NewNoteService(store)
+		noteHandler := handlers.NewNoteHandler(noteService)
+		registerRoutes(mux, []Route{
+			{"POST", "/workspaces/{workspace_id}/notes", noteHandler.CreateNote},
+			{"GET", "/workspaces/{workspace_id}/notes", noteHandler.ListNotes},
+			{"GET", "/workspaces/{workspace_id}/notes/{note_id}", noteHandler.GetNote},
+			{"PATCH", "/workspaces/{workspace_id}/notes/{note_id}", noteHandler.UpdateNote},
+			{"DELETE", "/workspaces/{workspace_id}/notes/{note_id}", noteHandler.DeleteNote},
+		})
+		log.Println("Note handler routes registered")
 	}()
 
 	c := cors.New(cors.Options{
