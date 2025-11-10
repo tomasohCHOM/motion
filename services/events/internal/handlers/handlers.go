@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"strings"
@@ -50,7 +51,9 @@ func (h *Handlers) CreateEvent(w http.ResponseWriter, r *http.Request) {
 		RolesView   []string  `json:"roles_view"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
-		http.Error(w, "bad request", http.StatusBadRequest)
+		// log and return the decode error to make debugging client payload issues easier
+		log.Printf("decode payload error: %v", err)
+		http.Error(w, fmt.Sprintf("bad request: %v", err), http.StatusBadRequest)
 		return
 	}
 	if payload.Name == "" {
@@ -98,6 +101,10 @@ func (h *Handlers) ListEvents(w http.ResponseWriter, r *http.Request) {
 		log.Printf("list events: %v", err)
 		http.Error(w, "internal error", http.StatusInternalServerError)
 		return
+	}
+	// Ensure we return an empty JSON array instead of `null` when there are no events
+	if events == nil {
+		events = make([]models.Event, 0)
 	}
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(events)

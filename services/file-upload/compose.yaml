@@ -8,28 +8,10 @@ services:
     volumes:
       - minio_data:/data
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      test: [ "CMD", "curl", "-f", "http://localhost:9000/minio/health/live" ]
       interval: 30s
       timeout: 20s
       retries: 3
-
-  database:
-    image: postgres:latest
-    ports:
-      # host_port:container_port
-      - "5433:5432"
-    environment:
-      POSTGRES_USER: dev
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: dev_db
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U dev -d dev_db"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-    volumes:
-      - db-data:/var/lib/postgresql/data
-
   file-upload-service:
     build: .
     ports:
@@ -44,4 +26,3 @@ services:
 
 volumes:
   minio_data:
-  db-data:

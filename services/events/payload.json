@@ -1,0 +1,7 @@
+{
+  "name": "Team sync",
+  "description": "Weekly stand-up",
+  "start_at": "2025-11-11T10:00:00Z",
+  "end_at": "2025-11-11T11:00:00Z",
+  "roles_view": ["member","admin"]
+}

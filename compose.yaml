@@ -1,4 +1,5 @@
 include:
+  - services/database/compose.yaml
   - services/file-upload/compose.yaml
   - services/workspace/compose.yaml
   - services/events/compose.yaml
