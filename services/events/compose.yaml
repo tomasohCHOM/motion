@@ -1,0 +1,10 @@
+services:
+  events-service:
+    build: .
+    ports:
+      - "8082:8082"
+    environment:
+      DATABASE_URL: postgres://dev:password@database:5432/dev_db?sslmode=disable
+      NOTIFICATION_ENDPOINT: "" # optional: http://messaging-service:8085/notify
+    depends_on:
+      - database
