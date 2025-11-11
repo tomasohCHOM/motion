@@ -1,5 +1,6 @@
 import { useEffect, useReducer } from 'react'
 import { useStore } from '@tanstack/react-store'
+import type { Task } from '@/store/manager/task-store'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
@@ -28,7 +29,6 @@ import {
   kanbanHelpers,
   priorityLabels,
   teamMembers,
-  type Task,
 } from '@/store/manager/task-store'
 
 type TaskFormState = {
@@ -233,7 +233,7 @@ const SelectField = ({
   label: string
   value: string
   onChange: (v: string) => void
-  items: { value: string; label: React.ReactNode }[]
+  items: Array<{ value: string; label: React.ReactNode }>
 }) => (
   <div className="grid gap-3">
     <Label>{label}</Label>

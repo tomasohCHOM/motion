@@ -5,6 +5,7 @@ import (
 	"errors"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/tomasohchom/motion/services/workspace/internal/middleware"
 	"github.com/tomasohchom/motion/services/workspace/internal/services"
@@ -32,16 +33,20 @@ func (h *TaskHandler) CreateNewTask(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var req struct {
-		Title       string `json:"title"`
-		Description string `json:"description"`
-		Status      string `json:"status"`
+		Title       string    `json:"title"`
+		Description string    `json:"description"`
+		AssigneeID  string    `json:"assignee_id"`
+		Status      string    `json:"status"`
+		Priority    string    `json:"priority"`
+		DueDate     time.Time `json:"due_date"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, "invalid request body", http.StatusBadRequest)
 		return
 	}
 
-	task, err := h.s.CreateNewTask(r.Context(), workspaceId, req.Title, req.Description, req.Status)
+	task, err := h.s.CreateNewTask(r.Context(), workspaceId, req.Title,
+		req.Description, req.AssigneeID, req.Status, req.Priority, req.DueDate)
 	if err != nil {
 		log.Printf("Failed to create task: %v", err)
 		http.Error(w, "failed to create task", http.StatusInternalServerError)
@@ -103,16 +108,20 @@ func (h *TaskHandler) UpdateTask(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var req struct {
-		Title       string `json:"title,omitempty"`
-		Description string `json:"description,omitempty"`
-		Status      string `json:"status,omitempty"`
+		Title       string    `json:"title"`
+		Description string    `json:"description"`
+		AssigneeID  string    `json:"assignee_id"`
+		Status      string    `json:"status"`
+		Priority    string    `json:"priority"`
+		DueDate     time.Time `json:"due_date"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, "invalid request body", http.StatusBadRequest)
 		return
 	}
 
-	task, err := h.s.UpdateTask(r.Context(), taskId, req.Title, req.Description, req.Status)
+	task, err := h.s.UpdateTask(r.Context(), taskId, req.Title,
+		req.Description, req.AssigneeID, req.Status, req.Priority, req.DueDate)
 	if err != nil {
 		switch {
 		case errors.Is(err, services.ErrTaskNotFound):

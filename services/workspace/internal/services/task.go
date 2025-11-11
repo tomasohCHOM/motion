@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
@@ -18,10 +19,11 @@ var (
 )
 
 type TaskServicer interface {
-	CreateNewTask(ctx context.Context, workspaceID, title, description, status string) (models.Task, error)
+	CreateNewTask(ctx context.Context, workspaceID, title, description,
+		assigneeId, status, priority string, dueDate time.Time) (models.Task, error)
 	GetWorkspaceTasks(ctx context.Context, workspaceID string) ([]models.GetTasksByWorkspaceRow, error)
 	GetTask(ctx context.Context, taskID string) (models.GetTaskByIDRow, error)
-	UpdateTask(ctx context.Context, taskID, title, description, status string) (models.Task, error)
+	UpdateTask(ctx context.Context, taskID, title, description, assigneeId, status, priority string, dueDate time.Time) (models.Task, error)
 	DeleteTask(ctx context.Context, taskID string) error
 }
 
@@ -36,7 +38,8 @@ func NewTaskService(store *store.Store) *TaskService {
 	return &TaskService{s: store}
 }
 
-func (s *TaskService) CreateNewTask(ctx context.Context, workspaceID, title, description, status string) (models.Task, error) {
+func (s *TaskService) CreateNewTask(ctx context.Context, workspaceID, title,
+	description, assigneeId, status, priority string, dueDate time.Time) (models.Task, error) {
 	if workspaceID == "" || title == "" {
 		return models.Task{}, ErrInvalidTaskData
 	}
@@ -50,7 +53,10 @@ func (s *TaskService) CreateNewTask(ctx context.Context, workspaceID, title, des
 		WorkspaceID: wid,
 		Title:       title,
 		Description: pgtype.Text{String: description, Valid: description != ""},
+		AssigneeID:  pgtype.Text{String: assigneeId},
 		Status:      models.TaskStatus(status),
+		Priority:    models.NullTaskPriority{TaskPriority: models.TaskPriority(priority)},
+		DueDate:     pgtype.Timestamptz{Time: dueDate},
 	}
 
 	task, err := s.s.Queries.CreateNewTask(ctx, params)
@@ -104,7 +110,7 @@ func (s *TaskService) GetTask(ctx context.Context, taskID string) (models.GetTas
 	return task, nil
 }
 
-func (s *TaskService) UpdateTask(ctx context.Context, taskID, title, description, status string) (models.Task, error) {
+func (s *TaskService) UpdateTask(ctx context.Context, taskID, title, description, assigneeId, status, priority string, dueDate time.Time) (models.Task, error) {
 	if taskID == "" {
 		return models.Task{}, ErrInvalidTaskData
 	}
@@ -118,7 +124,10 @@ func (s *TaskService) UpdateTask(ctx context.Context, taskID, title, description
 		ID:          tid,
 		Title:       title,
 		Description: pgtype.Text{String: description, Valid: description != ""},
+		AssigneeID:  pgtype.Text{String: assigneeId},
 		Status:      models.TaskStatus(status),
+		Priority:    models.NullTaskPriority{TaskPriority: models.TaskPriority(priority)},
+		DueDate:     pgtype.Timestamptz{Time: dueDate},
 	}
 
 	task, err := s.s.Queries.UpdateTask(ctx, params)
