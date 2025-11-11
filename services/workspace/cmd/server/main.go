@@ -125,6 +125,17 @@ func main() {
 			{"DELETE", "/invites/{invite_id}", inviteHandler.DeleteInvite},
 		})
 		log.Println("Invite handler routes registered")
+
+		taskService := services.NewTaskService(store)
+		taskHandler := handlers.NewTaskHandler(taskService)
+		registerRoutes(mux, []Route{
+			{"POST", "/workspaces/{workspaceId}/tasks", taskHandler.CreateNewTask},
+			{"GET", "/workspaces/{workspaceId}/tasks", taskHandler.GetWorkspaceTasks},
+			{"GET", "/tasks/{task_id}", taskHandler.GetTask},
+			{"PATCH", "/tasks/{task_id}", taskHandler.UpdateTask},
+			{"DELETE", "/tasks/{task_id}", taskHandler.DeleteTask},
+		})
+		log.Println("Task handler routes registered")
 	}()
 
 	c := cors.New(cors.Options{

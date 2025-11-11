@@ -1,6 +1,5 @@
+import { useEffect, useReducer } from 'react'
 import { useStore } from '@tanstack/react-store'
-import { useEffect, useState } from 'react'
-import type { Task } from '@/store/manager/task-store'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
@@ -21,6 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { DateInput } from '@/components/ui/date-picker'
 import { dialogActions, dialogStore } from '@/store/manager/dialog-store'
 import {
   columnTypes,
@@ -28,8 +28,32 @@ import {
   kanbanHelpers,
   priorityLabels,
   teamMembers,
+  type Task,
 } from '@/store/manager/task-store'
-import { DateInput } from '@/components/ui/date-picker'
+
+type TaskFormState = {
+  title: string
+  description: string
+  columnId: string
+  assignee: string
+  priority: string
+  dueDate?: Date
+}
+
+type Action =
+  | { type: 'SET_FIELD'; field: keyof TaskFormState; value?: string | Date }
+  | { type: 'RESET'; payload: TaskFormState }
+
+const reducer = (state: TaskFormState, action: Action): TaskFormState => {
+  switch (action.type) {
+    case 'SET_FIELD':
+      return { ...state, [action.field]: action.value }
+    case 'RESET':
+      return { ...action.payload }
+    default:
+      return state
+  }
+}
 
 const EditTask: React.FC = () => {
   const {
@@ -39,22 +63,27 @@ const EditTask: React.FC = () => {
     columnId: currColumnId,
   } = useStore(dialogStore)
 
-  const [title, setTitle] = useState(task?.title ?? '')
-  const [description, setDescription] = useState(task?.description ?? '')
-  const [columnId, setColumnId] = useState(currColumnId ?? '')
-  const [assignee, setAssignee] = useState(task?.assignee.name ?? '')
-  const [priority, setPriority] = useState(task?.priority ?? '')
-  const [dueDate, setDueDate] = useState<Date | undefined>(
-    task?.dueDate ? new Date(task.dueDate) : undefined,
-  )
+  const [state, dispatch] = useReducer(reducer, {
+    title: task?.title ?? '',
+    description: task?.description ?? '',
+    columnId: currColumnId ?? '',
+    assignee: task?.assignee.name ?? '',
+    priority: task?.priority ?? '',
+    dueDate: task?.dueDate ? new Date(task.dueDate) : undefined,
+  })
 
   useEffect(() => {
-    setTitle(task?.title ?? '')
-    setDescription(task?.description ?? '')
-    setColumnId(currColumnId ?? '')
-    setAssignee(task?.assignee.name ?? '')
-    setPriority(task?.priority ?? '')
-    setDueDate(task?.dueDate ? new Date(task.dueDate) : undefined)
+    dispatch({
+      type: 'RESET',
+      payload: {
+        title: task?.title ?? '',
+        description: task?.description ?? '',
+        columnId: currColumnId ?? '',
+        assignee: task?.assignee.name ?? '',
+        priority: task?.priority ?? '',
+        dueDate: task?.dueDate ? new Date(task.dueDate) : undefined,
+      },
+    })
   }, [task, currColumnId])
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -62,130 +91,105 @@ const EditTask: React.FC = () => {
 
     const taskData: Task = {
       id: task?.id ?? crypto.randomUUID(),
-      title,
-      description,
-      assignee: {
-        name: assignee,
-      },
-      priority,
-      dueDate: dueDate ? dueDate.toISOString() : undefined,
+      title: state.title,
+      description: state.description,
+      assignee: { name: state.assignee },
+      priority: state.priority,
+      dueDate: state.dueDate?.toISOString(),
     }
 
     if (isAdding) {
-      kanbanActions.addTask(columnId, taskData)
+      kanbanActions.addTask(state.columnId, taskData)
     } else {
-      kanbanActions.updateTask(columnId, taskData)
+      kanbanActions.updateTask(state.columnId, taskData)
     }
+
     dialogActions.close()
   }
 
   return (
     <Dialog open={isOpen} onOpenChange={dialogActions.close}>
       <DialogContent className="sm:max-w-[30rem]">
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} className="space-y-4">
           <DialogHeader>
             <DialogTitle>
               {isAdding ? 'Add a new task' : 'Edit a task'}
             </DialogTitle>
           </DialogHeader>
-          <div className="mt-4 grid gap-4">
+
+          <TaskField
+            label="Task Title"
+            id="task-title"
+            value={state.title}
+            onChange={(v) =>
+              dispatch({ type: 'SET_FIELD', field: 'title', value: v })
+            }
+          />
+
+          <TaskField
+            label="Description"
+            id="description"
+            value={state.description}
+            onChange={(v) =>
+              dispatch({ type: 'SET_FIELD', field: 'description', value: v })
+            }
+            placeholder="Optional"
+          />
+
+          <SelectField
+            label="Status"
+            value={state.columnId}
+            onChange={(v) =>
+              dispatch({ type: 'SET_FIELD', field: 'columnId', value: v })
+            }
+            items={columnTypes.map(({ id, title }) => ({
+              value: id,
+              label: title,
+            }))}
+          />
+
+          <SelectField
+            label="Assignee"
+            value={state.assignee}
+            onChange={(v) =>
+              dispatch({ type: 'SET_FIELD', field: 'assignee', value: v })
+            }
+            items={teamMembers.map((m) => ({ value: m, label: m }))}
+          />
+
+          <div className="grid grid-cols-2 gap-4">
+            <SelectField
+              label="Priority"
+              value={state.priority}
+              onChange={(v) =>
+                dispatch({ type: 'SET_FIELD', field: 'priority', value: v })
+              }
+              items={priorityLabels.map((label) => ({
+                value: label,
+                label: (
+                  <Badge
+                    variant="outline"
+                    className={`text-xs px-2 py-0.5 ${kanbanHelpers.getPriorityColor(label)}`}
+                  >
+                    {label}
+                  </Badge>
+                ),
+              }))}
+            />
             <div className="grid gap-3">
-              <Label htmlFor="task-title">Task Title</Label>
-              <Input
-                id="task-title"
-                name="task-title"
-                placeholder="Title"
-                onChange={(e) => setTitle(e.target.value)}
-                value={title}
+              <Label>Due date</Label>
+              <DateInput
+                value={state.dueDate}
+                onChange={(date) =>
+                  dispatch({ type: 'SET_FIELD', field: 'dueDate', value: date })
+                }
               />
-            </div>
-            <div className="grid gap-3">
-              <Label htmlFor="description">Description</Label>
-              <Input
-                id="description"
-                name="description"
-                placeholder="Optional"
-                onChange={(e) => setDescription(e.target.value)}
-                value={description}
-              />
-            </div>
-            <div className="grid gap-3">
-              <Label>Column</Label>
-              <Select value={columnId} onValueChange={setColumnId}>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Indicate task status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectGroup>
-                    <SelectLabel>Kanban Column</SelectLabel>
-                    {columnTypes.map(({ id, title: columnTitle }) => {
-                      return (
-                        <SelectItem key={`item-${id}`} value={id}>
-                          {columnTitle}
-                        </SelectItem>
-                      )
-                    })}
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="grid gap-3">
-              <Label>Assignee</Label>
-              <Select value={assignee} onValueChange={setAssignee}>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Indicate task assignee" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectGroup>
-                    <SelectLabel>Assignee</SelectLabel>
-                    {teamMembers.map((member) => {
-                      return (
-                        <SelectItem key={`member-${member}`} value={member}>
-                          {member}
-                        </SelectItem>
-                      )
-                    })}
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="grid grid-cols-2 gap-4 justify-between w-full">
-              <div className="grid gap-3">
-                <Label>Priority</Label>
-                <Select value={priority} onValueChange={setPriority}>
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="(Optional) Add labels" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectGroup>
-                      <SelectLabel>Labels</SelectLabel>
-                      {priorityLabels.map((label) => {
-                        return (
-                          <SelectItem key={`priority-${label}`} value={label}>
-                            <Badge
-                              variant="outline"
-                              className={`text-xs px-2 py-0.5 ${kanbanHelpers.getPriorityColor(
-                                label,
-                              )}`}
-                            >
-                              {label}
-                            </Badge>
-                          </SelectItem>
-                        )
-                      })}
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="grid gap-3">
-                <Label>Due date</Label>
-                <DateInput value={dueDate} onChange={setDueDate} />
-              </div>
             </div>
           </div>
-          <DialogFooter className="mt-4">
-            <Button type="submit" className="cursor-pointer">
-              {isAdding ? 'Add task' : 'Edit task'}
+
+          <DialogFooter>
+            <Button type="submit">
+              {isAdding ? 'Add task' : 'Save changes'}
             </Button>
           </DialogFooter>
         </form>
@@ -195,3 +199,58 @@ const EditTask: React.FC = () => {
 }
 
 export default EditTask
+
+const TaskField = ({
+  id,
+  label,
+  value,
+  onChange,
+  placeholder,
+}: {
+  id: string
+  label: string
+  value: string
+  onChange: (v: string) => void
+  placeholder?: string
+}) => (
+  <div className="grid gap-3">
+    <Label htmlFor={id}>{label}</Label>
+    <Input
+      id={id}
+      value={value}
+      placeholder={placeholder}
+      onChange={(e) => onChange(e.target.value)}
+    />
+  </div>
+)
+
+const SelectField = ({
+  label,
+  value,
+  onChange,
+  items,
+}: {
+  label: string
+  value: string
+  onChange: (v: string) => void
+  items: { value: string; label: React.ReactNode }[]
+}) => (
+  <div className="grid gap-3">
+    <Label>{label}</Label>
+    <Select value={value} onValueChange={onChange}>
+      <SelectTrigger className="w-full">
+        <SelectValue placeholder={`Select ${label.toLowerCase()}`} />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectGroup>
+          <SelectLabel>{label}</SelectLabel>
+          {items.map(({ value, label }) => (
+            <SelectItem key={value} value={value}>
+              {label}
+            </SelectItem>
+          ))}
+        </SelectGroup>
+      </SelectContent>
+    </Select>
+  </div>
+)

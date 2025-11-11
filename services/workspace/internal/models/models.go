@@ -5,8 +5,111 @@
 package models
 
 import (
+	"database/sql/driver"
+	"fmt"
+
 	"github.com/jackc/pgx/v5/pgtype"
 )
+
+type TaskPriority string
+
+const (
+	TaskPriorityLow    TaskPriority = "Low"
+	TaskPriorityMedium TaskPriority = "Medium"
+	TaskPriorityHigh   TaskPriority = "High"
+)
+
+func (e *TaskPriority) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = TaskPriority(s)
+	case string:
+		*e = TaskPriority(s)
+	default:
+		return fmt.Errorf("unsupported scan type for TaskPriority: %T", src)
+	}
+	return nil
+}
+
+type NullTaskPriority struct {
+	TaskPriority TaskPriority `json:"task_priority"`
+	Valid        bool         `json:"valid"` // Valid is true if TaskPriority is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullTaskPriority) Scan(value interface{}) error {
+	if value == nil {
+		ns.TaskPriority, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.TaskPriority.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullTaskPriority) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.TaskPriority), nil
+}
+
+type TaskStatus string
+
+const (
+	TaskStatusToDo       TaskStatus = "To-Do"
+	TaskStatusInProgress TaskStatus = "In Progress"
+	TaskStatusReview     TaskStatus = "Review"
+	TaskStatusDone       TaskStatus = "Done"
+)
+
+func (e *TaskStatus) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = TaskStatus(s)
+	case string:
+		*e = TaskStatus(s)
+	default:
+		return fmt.Errorf("unsupported scan type for TaskStatus: %T", src)
+	}
+	return nil
+}
+
+type NullTaskStatus struct {
+	TaskStatus TaskStatus `json:"task_status"`
+	Valid      bool       `json:"valid"` // Valid is true if TaskStatus is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullTaskStatus) Scan(value interface{}) error {
+	if value == nil {
+		ns.TaskStatus, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.TaskStatus.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullTaskStatus) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.TaskStatus), nil
+}
+
+type Task struct {
+	ID          pgtype.UUID        `json:"id"`
+	WorkspaceID pgtype.UUID        `json:"workspace_id"`
+	Title       string             `json:"title"`
+	Description pgtype.Text        `json:"description"`
+	AssigneeID  pgtype.Text        `json:"assignee_id"`
+	Status      TaskStatus         `json:"status"`
+	Priority    NullTaskPriority   `json:"priority"`
+	DueDate     pgtype.Timestamptz `json:"due_date"`
+	CreatedAt   pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt   pgtype.Timestamptz `json:"updated_at"`
+}
 
 type User struct {
 	ID        string             `json:"id"`

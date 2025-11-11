@@ -36,7 +36,7 @@ export const Route = createFileRoute('/onboarding')({
       throw redirect({ to: '/dashboard' })
     } catch (err) {
       if (isRedirect(err)) throw err
-      if ((err as Error).message === 'USER_NOT_FOUND') return
+      if ((err as Error).message.includes('User not found')) return
     }
   },
   pendingComponent: () => <LoadingPage />,
