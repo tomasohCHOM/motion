@@ -13,7 +13,7 @@ services:
       timeout: 5s
       retries: 5
     volumes:
-      - db-data:/var/lib/postgresql
+      - workspace-db-data:/var/lib/postgresql
 
   workspace-service:
     build: .
@@ -27,4 +27,4 @@ services:
       - workspace-db
 
 volumes:
-  db-data:
+  workspace-db-data:
