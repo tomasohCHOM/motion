@@ -21,7 +21,7 @@ type TestSuite struct {
 	minioContainer *minio.MinioContainer
 }
 
-func (ts TestSuite) SetupSuite() {
+func (ts *TestSuite) SetupSuite() {
 	ts.ctx = context.Background()
 	pgContainer, err := postgres.Run(
 		ts.ctx,
@@ -30,11 +30,26 @@ func (ts TestSuite) SetupSuite() {
 		postgres.WithUsername("testuser"),
 		postgres.WithPassword("testpw"),
 		testcontainers.WithWaitStrategy(
-			wait.ForLog("database system is ready"),
+			wait.ForListeningPort("5432/tcp"),
+			wait.ForLog("database system is ready to accept connections"),
 		),
 	)
 	ts.NoError(err)
 
+	// conn, err := pgx.Connect(ts.ctx)
+	// ts.NoError(err)
+
 	ts.pgContainer = pgContainer
 
+	minioContainer, err := minio.Run(
+		ts.ctx,
+		"minio:latest",
+		testcontainers.WithWaitStrategy(
+			wait.ForListeningPort("9000/tcp"),
+			wait.ForLog("MinIO Object Storage Server"),
+		),
+	)
+	ts.NoError(err)
+
+	ts.minioContainer = minioContainer
 }
