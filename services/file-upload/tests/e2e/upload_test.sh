@@ -18,6 +18,7 @@ user="user123"
 base_url="http://localhost:8080"
 
 # Hit our endpoint to get a presigned upload url for minio
+echo "=== Step 1: Getting presigned URL ==="
 presigned_resp=$(xh POST "${base_url}/upload/presigned" \
   filename="$file" \
   content_type="image/jpeg" \
@@ -32,12 +33,13 @@ key=$(echo "$presigned_resp" | jq -r .key)
 echo "Generated file key: $key"
 echo
 
+echo "=== Step 2: Uploading file to MinIO ==="
 upload_resp=$(xh PUT "$upload_url" <"$file")
 echo "Upload response:"
 echo "$upload_resp"
 echo
 
-# Upload metadata to postgres db
+echo "=== Step 3: Completing upload (saving metadata) ==="
 complete_resp=$(xh POST ${base_url}/upload/complete \
   key="$key" \
   user_id="$user")
