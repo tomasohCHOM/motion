@@ -23,7 +23,7 @@ presigned_resp=$(xh POST "${base_url}/upload/presigned" \
   filename="$file" \
   content_type="image/jpeg" \
   user_id="$user" \
-  fileSize:=1048576)
+  fileSize:="$(stat -c%s "$file")")
 
 # Extract url from response
 upload_url=$(echo "$presigned_resp" | jq -r .upload_url)
