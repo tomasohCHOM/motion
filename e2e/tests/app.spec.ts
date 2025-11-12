@@ -1,44 +1,44 @@
-import { test, expect } from "../helpers/fixtures";
+import { test, expect } from '../helpers/fixtures'
 import {
   checkWorkspaceService,
   checkFileUploadService,
-} from "../helpers/api-helpers";
+} from '../helpers/api-helpers'
 
 /**
  * Example E2E tests for the Motion application
  */
 
-test.describe("Application E2E Tests", () => {
+test.describe('Application E2E Tests', () => {
   test.beforeAll(async () => {
     // Verify services are running
-    const workspaceReady = await checkWorkspaceService();
-    const fileUploadReady = await checkFileUploadService();
+    const workspaceReady = await checkWorkspaceService()
+    const fileUploadReady = await checkFileUploadService()
 
     if (!workspaceReady || !fileUploadReady) {
       throw new Error(
-        "Backend services are not ready. Please ensure services are running."
-      );
+        'Backend services are not ready. Please ensure services are running.',
+      )
     }
-  });
+  })
 
-  test("should load the landing page", async ({ page }) => {
-    await page.goto("/");
+  test('should load the landing page', async ({ page }) => {
+    await page.goto('/')
 
     // Check that the page loads
-    await expect(page).toHaveURL(/.*\/$/);
-  });
+    await expect(page).toHaveURL(/.*\/$/)
+  })
 
-  test("should navigate to sign in page", async ({ page }) => {
-    await page.goto("/");
+  test('should navigate to sign in page', async ({ page }) => {
+    await page.goto('/')
 
     // Look for sign in link/button and click it
     // Adjust selector based on your actual UI
-    const signInLink = page.getByRole("link", { name: /sign in/i });
+    const signInLink = page.getByRole('link', { name: /sign in/i })
     if (await signInLink.isVisible()) {
-      await signInLink.click();
-      await expect(page).toHaveURL(/.*\/sign-in/);
+      await signInLink.click()
+      await expect(page).toHaveURL(/.*\/sign-in/)
     }
-  });
+  })
 
   // test("should create and display workspace", async ({
   //   page,
@@ -66,4 +66,4 @@ test.describe("Application E2E Tests", () => {
   //   // Adjust based on your actual UI
   //   await expect(page.locator("body")).toBeVisible();
   // });
-});
+})

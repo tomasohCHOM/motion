@@ -30,8 +30,24 @@ The E2E test setup includes:
          │
          └──► File Upload Service (localhost:8080)
               ├──► PostgreSQL (port 5435)
-              └──► MinIO (port 9002)
+              └──► MinIO (ports 9002, 9003)
 ```
+
+## How It Works
+
+The E2E test setup uses **Docker Compose override files** to reuse the existing service definitions from the root `compose.yaml` file. This approach:
+
+- **Reuses** all service definitions from `services/workspace/compose.yaml` and `services/file-upload/compose.yaml`
+- **Overrides** only E2E-specific configurations (ports, credentials, volumes) in `e2e/compose.override.yaml`
+- **Reduces** code duplication and maintenance burden
+- **Ensures** E2E tests always use the same service definitions as development
+
+The override file (`e2e/compose.override.yaml`) only contains:
+
+- Port changes (to avoid conflicts with dev services)
+- Test credentials and environment variables
+- Anonymous volumes (instead of named volumes for easy cleanup)
+- E2E-specific services (e.g., MinIO bucket setup)
 
 ## Prerequisites
 
@@ -58,7 +74,6 @@ The E2E test setup includes:
    ```
 
    This will:
-
    - Start all backend services (workspace, file-upload, databases, MinIO)
    - Start the frontend dev server
    - Run Playwright tests
@@ -75,7 +90,6 @@ If you want more control over the test process:
    ```
 
    This starts:
-
    - Workspace service on `http://localhost:8081`
    - File upload service on `http://localhost:8080`
    - PostgreSQL databases
@@ -115,18 +129,20 @@ If you want more control over the test process:
 ### Service Management
 
 ```bash
-# Start services
+# Start services (from project root)
 npm run services:start
 
-# Stop services
+# Stop services (from project root)
 npm run services:stop
 
-# View service logs
+# View service logs (from project root)
 npm run services:logs
 
-# Check service status
-docker compose -f docker-compose.yaml ps
+# Check service status (from project root)
+docker compose -f compose.yaml -f e2e/compose.override.yaml ps
 ```
+
+**Note:** Service management commands run from the project root directory and use the root `compose.yaml` file combined with the E2E override file.
 
 ## CI/CD (GitHub Actions)
 
@@ -140,15 +156,14 @@ The E2E tests run automatically on:
 
 1. Checkout code
 2. Set up Node.js
-3. Install Docker Compose
-4. Install frontend and E2E dependencies
-5. Install Playwright browsers
-6. Start backend services using Docker Compose
-7. Wait for services to be healthy
-8. Start frontend dev server (handled by Playwright webServer)
-9. Run Playwright tests
-10. Upload test reports and videos as artifacts
-11. Cleanup services
+3. Install frontend and E2E dependencies
+4. Install Playwright browsers
+5. Start backend services using Docker Compose (root compose + E2E override)
+6. Wait for services to be healthy
+7. Start frontend dev server (handled by Playwright webServer)
+8. Run Playwright tests
+9. Upload test reports and videos as artifacts
+10. Cleanup services (including anonymous volumes with `-v` flag)
 
 ### Viewing CI Results
 
@@ -161,18 +176,22 @@ The E2E tests run automatically on:
 
 ```
 e2e/
-├── tests/              # Test files
-│   ├── app.spec.ts    # Main application tests
-│   └── example.spec.ts # Example tests
-├── helpers/            # Test utilities
-│   ├── api-helpers.ts  # API helper functions
-│   └── fixtures.ts     # Playwright fixtures
-├── scripts/            # Utility scripts
-│   ├── start-services.sh
-│   └── stop-services.sh
-├── docker-compose.yaml # Service orchestration
-└── playwright.config.ts # Playwright configuration
+├── tests/                    # Test files
+│   ├── app.spec.ts          # Main application tests
+│   └── example.spec.ts      # Example tests
+├── helpers/                  # Test utilities
+│   ├── api-helpers.ts       # API helper functions
+│   └── fixtures.ts          # Playwright fixtures
+├── scripts/                  # Utility scripts
+│   ├── start-services.sh    # Start backend services
+│   ├── stop-services.sh     # Stop backend services
+│   └── wait-for-services.sh # Wait for services to be ready
+├── compose.override.yaml    # E2E-specific compose overrides
+├── playwright.config.ts     # Playwright configuration
+└── package.json             # E2E dependencies and scripts
 ```
+
+**Note:** The E2E setup uses the root `compose.yaml` file (which includes `services/workspace/compose.yaml` and `services/file-upload/compose.yaml`) combined with `e2e/compose.override.yaml` for E2E-specific configurations.
 
 ## Writing Tests
 
@@ -181,13 +200,13 @@ e2e/
 The test fixtures provide automatic setup for common test scenarios:
 
 ```typescript
-import { test, expect } from "../helpers/fixtures";
+import { test, expect } from '../helpers/fixtures'
 
-test("should create workspace", async ({ page, userId, workspace }) => {
+test('should create workspace', async ({ page, userId, workspace }) => {
   // userId and workspace are automatically created
-  await page.goto(`/workspace/${workspace.id}`);
-  await expect(page.getByText(workspace.name)).toBeVisible();
-});
+  await page.goto(`/workspace/${workspace.id}`)
+  await expect(page.getByText(workspace.name)).toBeVisible()
+})
 ```
 
 ### API Helpers
@@ -200,15 +219,15 @@ import {
   createTestWorkspace,
   workspaceRequest,
   fileUploadRequest,
-} from "../helpers/api-helpers";
+} from '../helpers/api-helpers'
 
-test("should upload file", async ({ page }) => {
-  const userId = "test-user-123";
-  await createTestUser(userId);
+test('should upload file', async ({ page }) => {
+  const userId = 'test-user-123'
+  await createTestUser(userId)
 
   // Test file upload flow
   // ...
-});
+})
 ```
 
 ### Environment Variables
@@ -234,21 +253,42 @@ The Playwright configuration is in `playwright.config.ts`. Key settings:
 
 ### Docker Compose Configuration
 
-The `docker-compose.yaml` file defines:
+The E2E setup uses **Docker Compose override files**:
 
-- **Workspace Service**: Port 8081, connects to workspace-db
-- **File Upload Service**: Port 8080, connects to file-upload-db and MinIO
-- **Databases**: PostgreSQL instances with tmpfs for fast cleanup
-- **MinIO**: Object storage with automatic bucket creation
+- **Root Compose** (`compose.yaml`): Includes service definitions from `services/workspace/compose.yaml` and `services/file-upload/compose.yaml`
+- **E2E Override** (`e2e/compose.override.yaml`): Overrides with E2E-specific configurations
+
+**E2E Override Changes:**
+
+- **Ports**: Different ports to avoid conflicts (5434, 5435, 9002, 9003)
+- **Credentials**: Test credentials (test/testpassword)
+- **Volumes**: Anonymous volumes (cleaned up with `docker compose down -v`)
+- **Environment**: E2E-specific environment variables
+- **Services**: Additional E2E services (e.g., MinIO bucket setup)
+
+**Why Anonymous Volumes?**
+
+- Docker Compose doesn't support removing volumes in override files
+- Anonymous volumes are automatically cleaned up with `-v` flag
+- Provides good performance for E2E tests
+- Avoids conflicts with tmpfs mounts
+
+**Usage:**
+
+```bash
+docker compose -f compose.yaml -f e2e/compose.override.yaml up
+```
 
 ## Troubleshooting
 
 ### Services Won't Start
 
-1. **Check ports**: Ensure ports 3000, 8080, 8081, 5434, 5435, 9002 are available
+1. **Check ports**: Ensure ports 3000, 8080, 8081, 5434, 5435, 9002, 9003 are available
 2. **Check Docker**: Ensure Docker is running
-3. **Check logs**: Run `npm run services:logs` to see service logs
-4. **Rebuild**: Try `docker compose -f docker-compose.yaml up --build`
+3. **Check logs**: Run `npm run services:logs` to see service logs (from project root)
+4. **Rebuild**: Try `docker compose -f compose.yaml -f e2e/compose.override.yaml up --build` (from project root)
+5. **Check compose files**: Ensure root `compose.yaml` and `e2e/compose.override.yaml` exist
+6. **Verify service names**: Ensure database services are named `workspace-db` and `file-upload-db` (not `database`)
 
 ### Tests Timeout
 
@@ -265,8 +305,21 @@ The `docker-compose.yaml` file defines:
 ### Database Connection Issues
 
 1. **Check database health**: Ensure databases are healthy in Docker
-2. **Check connection strings**: Verify DATABASE_URL in docker-compose.yaml
-3. **Check migrations**: Ensure database migrations have run
+2. **Check connection strings**: Verify DATABASE_URL in `e2e/compose.override.yaml`
+3. **Check migrations**: Ensure database migrations have run (see note below)
+4. **Check service names**: Verify database service names match in compose files
+
+### Volume Issues
+
+1. **Cleanup volumes**: Always use `docker compose down -v` to clean up anonymous volumes
+2. **Volume conflicts**: If you see volume conflicts, check that override file uses anonymous volumes (not tmpfs)
+3. **Persistent data**: Anonymous volumes are cleaned up when containers are removed
+
+### Compose Override Issues
+
+1. **Service not found**: Ensure service names match between base compose and override
+2. **Port conflicts**: Check that override ports don't conflict with dev services
+3. **Volume conflicts**: Use anonymous volumes in override (not tmpfs) to avoid conflicts
 
 ## Best Practices
 
@@ -276,7 +329,8 @@ The `docker-compose.yaml` file defines:
 4. **Avoid Hard Waits**: Use Playwright's built-in waiting mechanisms
 5. **Test User Flows**: Focus on testing complete user workflows
 6. **Mock External Services**: Mock external APIs when possible
-7. **Keep Tests Fast**: Use tmpfs for databases to speed up cleanup
+7. **Keep Tests Fast**: Use anonymous volumes for databases (cleaned up with `-v` flag)
+8. **Clean Up**: Always use `docker compose down -v` to clean up anonymous volumes after tests
 
 ## Debugging
 
@@ -294,8 +348,46 @@ The `docker-compose.yaml` file defines:
 3. **Check service logs**: Review service logs in the workflow
 4. **Reproduce locally**: Try to reproduce CI failures locally
 
+## Important Notes
+
+### Database Migrations
+
+⚠️ **Database migrations are not automatically run**. You need to:
+
+1. Run migrations manually before tests, OR
+2. Add migration running to service startup, OR
+3. Use an init container in docker-compose to run migrations
+
+See `e2e/REFACTOR_STEPS.md` for more details on migration setup.
+
+### Compose Override Pattern
+
+The E2E setup uses Docker Compose's override pattern:
+
+- Base compose files define service configurations
+- E2E override file (`e2e/compose.override.yaml`) only contains differences
+- Docker Compose merges the files when running
+
+**Benefits:**
+
+- Minimal code duplication
+- Automatic updates when services change
+- Single source of truth for service definitions
+- Easy to maintain
+
+### Volume Management
+
+- **Dev**: Uses named volumes (persistent)
+- **E2E**: Uses anonymous volumes (cleaned up with `-v` flag)
+- **Cleanup**: Always use `docker compose down -v` after E2E tests
+
+See `e2e/VOLUME_OVERRIDE_SOLUTION.md` for detailed explanation of volume override issues and solutions.
+
 ## Additional Resources
 
 - [Playwright Documentation](https://playwright.dev/)
 - [Playwright Best Practices](https://playwright.dev/docs/best-practices)
 - [Docker Compose Documentation](https://docs.docker.com/compose/)
+- [Docker Compose Override Files](https://docs.docker.com/compose/extends/)
+- [E2E Refactoring Guide](e2e/REFACTOR_STEPS.md)
+- [Volume Override Solution](e2e/VOLUME_OVERRIDE_SOLUTION.md)

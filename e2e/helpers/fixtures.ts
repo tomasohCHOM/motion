@@ -2,50 +2,48 @@
  * Test fixtures and setup/teardown utilities for E2E tests
  */
 
-import { test as base } from "@playwright/test";
+import { test as base } from '@playwright/test'
 import {
   createTestUser,
   createTestWorkspace,
-  cleanupTestData,
   checkWorkspaceService,
-  checkFileUploadService,
-} from "./api-helpers";
+} from './api-helpers'
 
 type TestFixtures = {
-  userId: string;
-  workspace: { id: string; name: string };
-};
+  userId: string
+  workspace: { id: string; name: string }
+}
 
 /**
  * Extended test with fixtures for common test setup
  */
 export const test = base.extend<TestFixtures>({
   userId: async ({}, use) => {
-    const userId = `test-user-${Date.now()}`;
-    await use(userId);
+    const userId = `test-user-${Date.now()}`
+    await use(userId)
   },
 
   workspace: async ({ userId }, use) => {
     // Ensure services are ready
-    const workspaceReady = await checkWorkspaceService();
+    const workspaceReady = await checkWorkspaceService()
     if (!workspaceReady) {
-      throw new Error("Workspace service is not ready");
+      throw new Error('Workspace service is not ready')
     }
 
     // Create test user
-    await createTestUser(userId);
+    await createTestUser(userId)
 
     // Create test workspace
     const workspace = await createTestWorkspace(
       `Test Workspace ${Date.now()}`,
-      "Test workspace for E2E tests"
-    );
+      'Test workspace for E2E tests',
+    )
 
-    await use(workspace);
+    await use(workspace)
 
     // Cleanup (optional - you may want to keep test data for debugging)
     // await cleanupTestData(userId);
   },
-});
+})
 
-export { expect } from "@playwright/test";
+export { expect } from '@playwright/test'

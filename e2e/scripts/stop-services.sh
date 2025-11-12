@@ -12,7 +12,7 @@ cd "$ROOT_DIR"
 # Use root compose with E2E override
 docker compose \
   -f compose.yaml \
-  -f e2e/docker-compose.override.yaml \
+  -f e2e/compose.override.yaml \
   down -v
 
 echo "Services stopped"

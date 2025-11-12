@@ -12,7 +12,7 @@ cd "$ROOT_DIR"
 # Use root compose with E2E override
 docker compose \
   -f compose.yaml \
-  -f e2e/docker-compose.override.yaml \
+  -f e2e/compose.override.yaml \
   up -d --build
 
 # Wait for services to be healthy
@@ -32,6 +32,9 @@ while [ $elapsed -lt $timeout ]; do
 done
 
 echo "Services failed to start within $timeout seconds"
-docker compose -f docker-compose.yaml logs
+docker compose \
+  -f compose.yaml \
+  -f e2e/compose.override.yaml \
+  logs
 exit 1
 
