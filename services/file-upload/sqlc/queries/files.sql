@@ -1,9 +1,9 @@
 -- name: CreateFile :one
 INSERT INTO files (
-  id, user_id, original_name, storage_key, content_type, size_bytes, metadata
+    id, user_id, original_name, storage_key, content_type, size_bytes, metadata
 ) VALUES (
 
-  $1, $2, $3, $4, $5, $6, $7
+    $1, $2, $3, $4, $5, $6, $7
 ) RETURNING *;
 
 -- name: GetFileById :many
