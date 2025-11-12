@@ -2,8 +2,8 @@ package integration
 
 import (
 	"context"
-	"fmt"
-	"testing"
+	// "fmt"
+	// "testing"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/stretchr/testify/suite"
@@ -61,3 +61,9 @@ func (ts *TestSuite) TearDownSuite() {
 	err = ts.minioContainer.Terminate(ts.ctx)
 	ts.NoError(err)
 }
+
+func (ts *TestSuite) SetupTest() {}
+func (ts *TestSuite) TearDownTest() {}
+
+// Runs immediately after `SetupTest` and just before a test is executed
+func (ts *TestSuite) BeforeTest() {}
