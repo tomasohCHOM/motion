@@ -4,9 +4,14 @@ set -euo pipefail
 
 file=$1
 user="user123"
+base_url="http://localhost:8080"
 
 # Hit our endpoint to get a presigned upload url for minio
-resp=$(xh POST :8080/upload/presigned filename="$file" content_type='image/jpeg' user_id="$user" fileSize:=1048576)
+resp=$(xh POST "${base_url}/presigned" \
+  filename="$file" \
+  content_type="image/jpeg" \
+  user_id="$user" \
+  fileSize:=1048576)
 
 # Extract url from response
 upload_url=$(echo "$resp" | jq -r .upload_url)
@@ -23,7 +28,6 @@ echo "$upload_resp"
 echo
 
 # Upload metadata to postgres db
-echo xh POST :8080/upload/complete key="$key" user_id="$user"
 complete_resp=$(xh POST :8080/upload/complete key="$key" user_id="$user")
 echo "Complete response:"
 echo "$complete_resp"
