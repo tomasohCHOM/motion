@@ -11,5 +11,6 @@ mkShell {
     just
     xh
     sqlc
+    sqlfluff
   ];
 }
