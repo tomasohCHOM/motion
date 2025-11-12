@@ -15,7 +15,7 @@ func Load() *Config {
 	return &Config{
 		Port:        getEnv("PORT", "8081"),
 		Environment: getEnv("ENV", "development"),
-		DbEndpoint:  getEnv("DATABASE_URL", "postgres://root@database:5432"),
+		DbEndpoint:  getEnv("DATABASE_URL", "postgres://dev:password@workspace-db:5432/dev_db"),
 		ClerkKey:    getEnv("CLERK_SECRET_KEY", ""),
 	}
 }

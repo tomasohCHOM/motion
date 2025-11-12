@@ -1,5 +1,5 @@
 services:
-  database:
+  workspace-db:
     image: postgres:latest
     ports:
       - "5432:5432"
@@ -20,9 +20,11 @@ services:
     ports:
       - "8081:8081"
     environment:
-      DATABASE_URL: postgres://dev:password@database:5432/dev_db
+      DATABASE_URL: postgres://dev:password@workspace-db:5432/dev_db
     env_file:
       - .env
+    depends_on:
+      - workspace-db
 
 volumes:
   db-data:
