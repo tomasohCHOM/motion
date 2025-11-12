@@ -53,3 +53,11 @@ func (ts *TestSuite) SetupSuite() {
 
 	ts.minioContainer = minioContainer
 }
+
+func (ts *TestSuite) TearDownSuite() {
+	err := ts.pgContainer.Terminate(ts.ctx)
+	ts.NoError(err)
+
+	err = ts.minioContainer.Terminate(ts.ctx)
+	ts.NoError(err)
+}
