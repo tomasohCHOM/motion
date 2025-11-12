@@ -22,7 +22,7 @@ The E2E test setup includes:
          ▼
 ┌─────────────────┐
 │   Frontend      │
-│  (localhost:3000)│
+│ (localhost:3000)│
 └────────┬────────┘
          │
          ├──► Workspace Service (localhost:8081)
