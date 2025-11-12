@@ -3,15 +3,15 @@
 set -euo pipefail
 
 if [ $# -ne 1 ]; then
-    echo "Usage: $0 <file>" >&2
-    exit 1
+  echo "Usage: $0 <file>" >&2
+  exit 1
 fi
 
 file=$1
 
 if [ ! -f "$file" ]; then
-    echo "Error: File '$file' does not exist" >&2
-    exit 1
+  echo "Error: File '$file' does not exist" >&2
+  exit 1
 fi
 
 user="user123"
@@ -20,7 +20,7 @@ base_url="http://localhost:8080"
 # Hit our endpoint to get a presigned upload url for minio
 echo "=== Step 1: Getting presigned URL ==="
 presigned_resp=$(xh POST "${base_url}/upload/presigned" \
-  filename="$file" \
+  filename="$(basename "$file")" \
   content_type="image/jpeg" \
   user_id="$user" \
   fileSize:="$(stat -c%s "$file")")
