@@ -153,7 +153,7 @@ export async function cleanupTestData(
   try {
     // Get user workspaces and delete them
     const workspaces = await getUserWorkspaces(userId);
-    for (const workspace of workspaces) {
+    for (const _ of workspaces) {
       // Note: You may need to add a DELETE endpoint for workspaces
       // await workspaceRequest(`/workspaces/${workspace.id}`, { method: 'DELETE' });
     }

@@ -3,13 +3,17 @@ set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 E2E_DIR="$(dirname "$SCRIPT_DIR")"
+ROOT_DIR="$(dirname "$E2E_DIR")"
 
 echo "Starting E2E test services..."
 
-cd "$E2E_DIR"
+cd "$ROOT_DIR"
 
-# Start Docker Compose services
-docker compose -f docker-compose.yaml up -d --build
+# Use root compose with E2E override
+docker compose \
+  -f compose.yaml \
+  -f e2e/docker-compose.override.yaml \
+  up -d --build
 
 # Wait for services to be healthy
 echo "Waiting for services to be ready..."
