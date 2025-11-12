@@ -62,7 +62,7 @@ func (ts *TestSuite) TearDownSuite() {
 	ts.NoError(err)
 }
 
-func (ts *TestSuite) SetupTest() {}
+func (ts *TestSuite) SetupTest()    {}
 func (ts *TestSuite) TearDownTest() {}
 
 // Runs immediately after `SetupTest` and just before a test is executed
