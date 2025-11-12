@@ -15,6 +15,8 @@
     "services:logs": "cd .. && docker compose -f compose.yaml -f e2e/compose.override.yaml logs -f",
     "test:local": "npm run services:start && npm run test && npm run services:stop",
     "install:browsers": "playwright install --with-deps",
+    "lint": "eslint .",
+    "lint:fix": "eslint --fix .",
     "format": "prettier --check .",
     "format:fix": "prettier --write ."
   },
@@ -22,8 +24,12 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@eslint/js": "^9.39.1",
     "@playwright/test": "^1.56.1",
     "@types/node": "^24.10.0",
-    "prettier": "3.6.2"
+    "eslint": "^9.39.1",
+    "globals": "^16.5.0",
+    "prettier": "3.6.2",
+    "typescript-eslint": "^8.46.4"
   }
 }

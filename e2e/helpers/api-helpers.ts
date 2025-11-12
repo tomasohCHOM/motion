@@ -65,7 +65,7 @@ export async function waitForService(
         return true
       }
     } catch (error) {
-      // Service not ready yet, continue waiting
+      console.error(error)
     }
     await new Promise((resolve) => setTimeout(resolve, delay))
   }
@@ -140,23 +140,4 @@ export async function getUserWorkspaces(
   }
 
   return response.json() as Promise<Array<{ id: string; name: string }>>
-}
-
-/**
- * Clean up test data (workspaces, files, etc.)
- */
-export async function cleanupTestData(
-  userId: string = DEV_USER_ID,
-): Promise<void> {
-  try {
-    // Get user workspaces and delete them
-    const workspaces = await getUserWorkspaces(userId)
-    for (const _ of workspaces) {
-      // TODO: Add DELETE method for workspaces:
-      // await workspaceRequest(`/workspaces/${workspace.id}`, { method: 'DELETE' });
-    }
-  } catch (error) {
-    // Ignore cleanup errors
-    console.error('Cleanup error:', error)
-  }
 }

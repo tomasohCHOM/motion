@@ -18,7 +18,7 @@ type TestFixtures = {
  * Extended test with fixtures for common test setup
  */
 export const test = base.extend<TestFixtures>({
-  userId: async ({}, use) => {
+  userId: async (_, use) => {
     const userId = `test-user-${Date.now()}`
     await use(userId)
   },
