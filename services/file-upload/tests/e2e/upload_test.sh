@@ -40,7 +40,7 @@ echo "$upload_resp"
 echo
 
 echo "=== Step 3: Completing upload (saving metadata) ==="
-complete_resp=$(xh POST ${base_url}/upload/complete \
+complete_resp=$(xh POST "${base_url}/upload/complete" \
   key="$key" \
   user_id="$user")
 
