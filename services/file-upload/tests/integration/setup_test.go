@@ -2,10 +2,10 @@ package integration
 
 import (
 	"context"
-	// "fmt"
+	"fmt"
 	// "testing"
 
-	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/stretchr/testify/suite"
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/modules/minio"
@@ -16,10 +16,16 @@ import (
 type TestSuite struct {
 	suite.Suite
 	ctx            context.Context
-	db             *pgx.Conn
+	pool           *pgxpool.Pool
 	pgContainer    *postgres.PostgresContainer
 	minioContainer *minio.MinioContainer
 }
+
+/* TODO:
+ * 1. Implement SetupTest to perform DB migrations (create tables)
+ * 2. TearDownTest should tear down tables
+ * 3. Start writing tests
+ */
 
 func (ts *TestSuite) SetupSuite() {
 	ts.ctx = context.Background()
@@ -35,11 +41,17 @@ func (ts *TestSuite) SetupSuite() {
 		),
 	)
 	ts.NoError(err)
-
-	// conn, err := pgx.Connect(ts.ctx)
-	// ts.NoError(err)
-
 	ts.pgContainer = pgContainer
+
+	host, err := pgContainer.Host(ts.ctx)
+	ts.NoError(err)
+	port, err := pgContainer.MappedPort(ts.ctx, "5432")
+	ts.NoError(err)
+	dsn := fmt.Sprintf("postgres://testuser:testpw@%s:%s/testdb?sslmode=disable", host, port.Port())
+	pool, err := pgxpool.New(ts.ctx, dsn)
+	ts.NoError(err)
+	ts.NoError(pool.Ping(ts.ctx))
+	ts.pool = pool
 
 	minioContainer, err := minio.Run(
 		ts.ctx,
@@ -50,7 +62,6 @@ func (ts *TestSuite) SetupSuite() {
 		),
 	)
 	ts.NoError(err)
-
 	ts.minioContainer = minioContainer
 }
 
