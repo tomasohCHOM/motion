@@ -5,6 +5,9 @@ import (
 	"fmt"
 	// "testing"
 
+	"github.com/golang-migrate/migrate/v4"
+	_ "github.com/golang-migrate/migrate/v4/database/postgres"
+	_ "github.com/golang-migrate/migrate/v4/source/file"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/stretchr/testify/suite"
 	"github.com/testcontainers/testcontainers-go"
@@ -17,6 +20,7 @@ type TestSuite struct {
 	suite.Suite
 	ctx            context.Context
 	pool           *pgxpool.Pool
+	dsn            string
 	pgContainer    *postgres.PostgresContainer
 	minioContainer *minio.MinioContainer
 }
@@ -47,8 +51,8 @@ func (ts *TestSuite) SetupSuite() {
 	ts.NoError(err)
 	port, err := pgContainer.MappedPort(ts.ctx, "5432")
 	ts.NoError(err)
-	dsn := fmt.Sprintf("postgres://testuser:testpw@%s:%s/testdb?sslmode=disable", host, port.Port())
-	pool, err := pgxpool.New(ts.ctx, dsn)
+	ts.dsn = fmt.Sprintf("postgres://testuser:testpw@%s:%s/testdb?sslmode=disable", host, port.Port())
+	pool, err := pgxpool.New(ts.ctx, ts.dsn)
 	ts.NoError(err)
 	ts.NoError(pool.Ping(ts.ctx))
 	ts.pool = pool
@@ -73,8 +77,27 @@ func (ts *TestSuite) TearDownSuite() {
 	ts.NoError(err)
 }
 
-func (ts *TestSuite) SetupTest()    {}
-func (ts *TestSuite) TearDownTest() {}
+func (ts *TestSuite) SetupTest() {
+	m, err := migrate.New(
+		"file://../migrations",
+		ts.dsn,
+	)
+	ts.NoError(err)
+	defer m.Close()
+
+	ts.NoError(m.Up())
+}
+
+func (ts *TestSuite) TearDownTest() {
+	m, err := migrate.New(
+		"file://../migrations",
+		ts.dsn,
+	)
+	ts.NoError(err)
+	defer m.Close()
+
+	ts.NoError(m.Down())
+}
 
 // Runs immediately after `SetupTest` and just before a test is executed
 func (ts *TestSuite) BeforeTest() {}
