@@ -22,7 +22,7 @@ cleanup() {
       kill "$pid" 2>/dev/null || true
     fi
   done
-  docker compose down
+  docker compose down -v
   exit 0
 }
 
@@ -34,9 +34,9 @@ docker compose up -d
 
 echo "Starting frontend..."
 cd frontend
-npm run dev &
+npm install && npm run dev &
 PIDS+=($!)
 
 # Wait for any process to exit and then trigger cleanup
-wait -n
+wait
 exit $?

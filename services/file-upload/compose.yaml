@@ -13,7 +13,7 @@ services:
       timeout: 20s
       retries: 3
 
-  database:
+  file-upload-db:
     image: postgres:latest
     ports:
       # host_port:container_port
@@ -28,7 +28,7 @@ services:
       timeout: 5s
       retries: 5
     volumes:
-      - db-data:/var/lib/postgresql
+      - file-upload-db-data:/var/lib/postgresql
 
   file-upload-service:
     build: .
@@ -37,11 +37,11 @@ services:
     env_file:
       - .env
     environment:
-      - DATABASE_URL=postgres://dev:password@database:5432/dev_db
+      DATABASE_URL: postgres://dev:password@file-upload-db:5432/dev_db
     depends_on:
       - minio
-      - database
+      - file-upload-db
 
 volumes:
   minio_data:
-  db-data:
+  file-upload-db-data:
