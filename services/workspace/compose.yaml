@@ -8,7 +8,7 @@ services:
       POSTGRES_PASSWORD: password
       POSTGRES_DB: dev_db
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U dev -d dev_db"]
+      test: [ "CMD-SHELL", "pg_isready -U dev -d dev_db" ]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -19,14 +19,7 @@ services:
     image: migrate/migrate:latest
     volumes:
       - ./migrations:/migrations
-    command:
-      [
-        "-path",
-        "/migrations",
-        "-database",
-        "postgres://dev:password@workspace-db:5432/dev_db?sslmode=disable",
-        "up",
-      ]
+    command: [ "-path", "/migrations", "-database", "postgres://dev:password@workspace-db:5432/dev_db?sslmode=disable", "up" ]
     depends_on:
       workspace-db:
         condition: service_healthy
@@ -37,6 +30,8 @@ services:
       - "8081:8081"
     environment:
       DATABASE_URL: postgres://dev:password@workspace-db:5432/dev_db
+      PORT: 8081
+      ENV: development
     env_file:
       - .env
     depends_on:
