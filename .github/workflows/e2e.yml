@@ -49,6 +49,8 @@ jobs:
       - name: Start backend services
         working-directory: ./
         run: |
+          cp services/file-upload/.env.example services/file-upload/.env
+          cp services/workspace/.env.example services/workspace/.env
           docker compose \
             -f compose.yaml \
             -f e2e/compose.override.yaml \
