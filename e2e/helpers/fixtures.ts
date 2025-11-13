@@ -18,7 +18,9 @@ type TestFixtures = {
  * Extended test with fixtures for common test setup
  */
 export const test = base.extend<TestFixtures>({
-  userId: async (_, use) => {
+  // Playwright requires the first argument to be destructured
+  // eslint-disable-next-line no-empty-pattern
+  userId: async ({}, use) => {
     const userId = `test-user-${Date.now()}`
     await use(userId)
   },
