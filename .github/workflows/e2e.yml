@@ -35,6 +35,7 @@ jobs:
         run: npm ci
 
       - name: Run ESLint
+        working-directory: ./e2e
         run: npm run lint
 
       - name: Check formatting with Prettier
