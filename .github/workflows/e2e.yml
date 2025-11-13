@@ -1,0 +1,145 @@
+name: E2E Tests
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+  workflow_dispatch:
+
+jobs:
+  e2e:
+    name: Playwright E2E Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: "frontend/.nvmrc"
+          cache: "npm"
+          cache-dependency-path: |
+            frontend/package-lock.json
+            e2e/package-lock.json
+
+      - name: Install frontend dependencies
+        working-directory: ./frontend
+        run: npm ci
+
+      - name: Install E2E dependencies
+        working-directory: ./e2e
+        run: npm ci
+
+      - name: Run ESLint
+        working-directory: ./e2e
+        run: npm run lint
+
+      - name: Check formatting with Prettier
+        working-directory: ./e2e
+        run: npm run format
+
+      - name: Install Playwright browsers
+        working-directory: ./e2e
+        run: npx playwright install --with-deps chromium
+
+      - name: Start backend services
+        working-directory: ./
+        run: |
+          cp services/file-upload/.env.example services/file-upload/.env
+          cp services/workspace/.env.example services/workspace/.env
+          docker compose \
+            -f compose.yaml \
+            -f e2e/compose.override.yaml \
+            up -d --build
+          sleep 10  # Give services a moment to start
+          echo "Waiting for services to be ready..."
+          timeout=120
+          elapsed=0
+          while [ $elapsed -lt $timeout ]; do
+            if curl -f -s http://localhost:8081/health > /dev/null 2>&1 && \
+               curl -f -s http://localhost:8080/health > /dev/null 2>&1; then
+              echo "All services are ready!"
+              break
+            fi
+            sleep 2
+            elapsed=$((elapsed + 2))
+            echo "Waiting for services... (${elapsed}s/${timeout}s)"
+          done
+          if [ $elapsed -ge $timeout ]; then
+            echo "Services failed to start"
+            docker compose \
+              -f compose.yaml \
+              -f e2e/compose.override.yaml \
+              logs
+            exit 1
+          fi
+
+      - name: Show service status
+        working-directory: ./
+        run: |
+          docker compose \
+            -f compose.yaml \
+            -f e2e/compose.override.yaml \
+            ps
+
+      - name: Run E2E tests
+        working-directory: ./e2e
+        env:
+          CI: true
+          WORKSPACE_SERVICE_URL: http://localhost:8081
+          FILES_SERVICE_URL: http://localhost:8080
+          DEV_USER_ID: test-user-123
+          PLAYWRIGHT_BASE_URL: http://localhost:3000
+        run: npm test
+        continue-on-error: false
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: e2e/playwright-report/
+          retention-days: 30
+
+      - name: Upload test videos
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-videos
+          path: e2e/test-results/
+          retention-days: 7
+
+      - name: Show service logs on failure
+        if: failure()
+        working-directory: ./
+        run: |
+          echo "=== Workspace Service Logs ==="
+          docker compose \
+            -f compose.yaml \
+            -f e2e/compose.override.yaml \
+            logs workspace-service || true
+
+          echo "=== File Upload Service Logs ==="
+          docker compose \
+            -f compose.yaml \
+            -f e2e/compose.override.yaml \
+            logs file-upload-service || true
+
+          echo "=== MinIO Logs ==="
+          docker compose \
+            -f compose.yaml \
+            -f e2e/compose.override.yaml \
+            logs minio || true
+
+      - name: Cleanup services
+        if: always()
+        working-directory: ./
+        run: |
+          docker compose \
+            -f compose.yaml \
+            -f e2e/compose.override.yaml \
+            down -v
