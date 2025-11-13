@@ -39,6 +39,7 @@ jobs:
         run: npm run lint
 
       - name: Check formatting with Prettier
+        working-directory: ./e2e
         run: npm run format
 
       - name: Install Playwright browsers
