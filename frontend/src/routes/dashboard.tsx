@@ -11,6 +11,7 @@ import { requireAuth } from '@/auth/requireAuth'
 import { requireUser } from '@/auth/requireUser'
 import { LoadingPage } from '@/components/common/loading'
 import { Spinner } from '@/components/ui/spinner'
+import { userInvitesQueryOptions } from '@/client/invites/get-user-invites'
 
 export const Route = createFileRoute('/dashboard')({
   beforeLoad: async ({ context, location }) => {
@@ -24,23 +25,22 @@ export const Route = createFileRoute('/dashboard')({
     const workspaces = await queryClient.ensureQueryData(
       userWorkspacesQueryOptions(user.id, token),
     )
-    return { workspaces, first_name }
+    const workspaceInvites = await queryClient.ensureQueryData(
+      userInvitesQueryOptions(user.id, token),
+    )
+    return { first_name, workspaces, workspaceInvites }
   },
   pendingComponent: () => <LoadingPage />,
   component: DashboardPage,
 })
 
-type WorkspaceInvite = {
-  id: string
-  workspaceName: string
-  invitedBy: string
-  invitedAt: string
-}
-
 function DashboardPage() {
   const router = useRouter()
-  const { workspaces, first_name: firstName } = Route.useLoaderData()
-  const workspaceInvites: Array<WorkspaceInvite> = []
+  const {
+    first_name: firstName,
+    workspaces,
+    workspaceInvites,
+  } = Route.useLoaderData()
   const [redirectingCreatePage, setRedirectingCreatePage] = useState(false)
 
   const onCreateWorkspace: React.MouseEventHandler<

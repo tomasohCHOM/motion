@@ -4,6 +4,10 @@ import { Button } from '../ui/button'
 import type { WorkspaceInvite } from '@/types/workspace'
 import type React from 'react'
 import { timeAgo } from '@/utils/date'
+import {
+  useAcceptWorkspaceInvite,
+  useDeclineWorkspaceInvite,
+} from '@/client/invites/workspaceInviteAction'
 
 type Props = {
   invite: WorkspaceInvite
@@ -11,13 +15,20 @@ type Props = {
 }
 
 export const WorkspaceInviteCard: React.FC<Props> = ({ invite, index }) => {
-  // TODO: Implement these handlers once we get workspace invites working
-  const onAcceptInvite = (workspaceId: string) => {
-    console.log(workspaceId)
+  const { mutate: acceptInvite, isPending: acceptingInvite } =
+    useAcceptWorkspaceInvite()
+  const { mutate: declineInvite, isPending: decliningInvite } =
+    useDeclineWorkspaceInvite()
+
+  const onAcceptWorkspaceInvite = () => {
+    acceptInvite(invite.id)
   }
-  const onDeclineInvite = (workspaceId: string) => {
-    console.log(workspaceId)
+
+  const onDeclineWorkspaceInvite = () => {
+    declineInvite(invite.id)
   }
+
+  const isProcessingRequest = acceptingInvite || decliningInvite
 
   return (
     <div>
@@ -26,7 +37,9 @@ export const WorkspaceInviteCard: React.FC<Props> = ({ invite, index }) => {
         <div>
           <p className="mb-1">{invite.workspaceName}</p>
           <div className="flex items-center gap-2 text-sm text-slate-600">
-            <span>Invited by {invite.invitedBy}</span>
+            <span>
+              Invited by {invite.inviterFirstName} {invite.inviterLastName}
+            </span>
           </div>
           <p className="text-xs text-slate-500 mt-1">
             {timeAgo(invite.invitedAt)}
@@ -35,9 +48,10 @@ export const WorkspaceInviteCard: React.FC<Props> = ({ invite, index }) => {
         <div className="flex gap-2">
           <Button
             size="sm"
+            disabled={isProcessingRequest}
             onClick={(e) => {
               e.stopPropagation()
-              onAcceptInvite(invite.id)
+              onAcceptWorkspaceInvite()
             }}
             className="flex-1 cursor-pointer"
           >
@@ -47,9 +61,10 @@ export const WorkspaceInviteCard: React.FC<Props> = ({ invite, index }) => {
           <Button
             size="sm"
             variant="outline"
+            disabled={isProcessingRequest}
             onClick={(e) => {
               e.stopPropagation()
-              onDeclineInvite(invite.id)
+              onDeclineWorkspaceInvite()
             }}
             className="flex-1 cursor-pointer"
           >
