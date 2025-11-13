@@ -50,6 +50,47 @@ function Test-Endpoint {
 # Test Health Check
 Test-Endpoint -Method GET -Endpoint "/health" -Description "Health Check"
 
+# Ensure workspace exists; create it if not
+$workspaceLookup = Test-Endpoint -Method GET -Endpoint "/workspaces/$workspaceId" -Description "Check Workspace Exists"
+if (-not $workspaceLookup) {
+    Write-Host "Workspace $workspaceId not found. Creating a new workspace..." -ForegroundColor Yellow
+
+    # Ensure test user exists (required to be owner)
+    $userLookup = Test-Endpoint -Method GET -Endpoint "/users/$userId" -Description "Check Test User Exists"
+    if (-not $userLookup) {
+        Write-Host "Test user $userId not found. Creating user..." -ForegroundColor Yellow
+        $createUserBody = @{
+            id = $userId
+            email = "$userId@example.com"
+            first_name = "Test"
+            last_name = "User"
+            username = "$userId"
+        }
+        $userResp = Test-Endpoint -Method POST -Endpoint "/users" -Body $createUserBody -Description "Create Test User"
+        if (-not $userResp) {
+            Write-Host "Failed to create test user; aborting tests." -ForegroundColor Red
+            exit 1
+        }
+    } else {
+        Write-Host "Test user exists: $userId" -ForegroundColor Green
+    }
+    $createWorkspaceBody = @{
+        name = "Test Workspace"
+        description = "Auto-created workspace for event tests"
+        owner_id = $userId
+    }
+    $wsResp = Test-Endpoint -Method POST -Endpoint "/workspaces" -Body $createWorkspaceBody -Description "Create Workspace"
+    if ($wsResp -and $wsResp.id) {
+        $workspaceId = $wsResp.id
+        Write-Host "Using workspace id: $workspaceId" -ForegroundColor Cyan
+    } else {
+        Write-Host "Failed to create workspace; aborting tests." -ForegroundColor Red
+        exit 1
+    }
+} else {
+    Write-Host "Using existing workspace: $workspaceId" -ForegroundColor Green
+}
+
 # Test Create Event
 $createEventBody = @{
     name             = "Team Standup"
