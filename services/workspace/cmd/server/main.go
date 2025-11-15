@@ -162,9 +162,9 @@ func main() {
 			"Authorization",
 			"X-Dev-UserID",
 		},
-		AllowCredentials: false, // enable in production
-		MaxAge:           300,   // preflight cache duration in seconds
-		Debug:            true,  // disable in production
+		AllowCredentials:   false, // enable in production
+		MaxAge:             300,   // preflight cache duration in seconds
+		Debug:              true,  // disable in production
 		OptionsPassthrough: false,
 	})
 

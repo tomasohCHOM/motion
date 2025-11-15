@@ -58,7 +58,10 @@ export const noteActions = {
 
   addNote: (noteToAdd: Note) => {
     notesStore.setState((state) => {
-      const newNotes = [noteToAdd, ...state.notes.filter((n) => n.id !== noteToAdd.id)]
+      const newNotes = [
+        noteToAdd,
+        ...state.notes.filter((n) => n.id !== noteToAdd.id),
+      ]
       return buildState(newNotes)
     })
     return noteToAdd
