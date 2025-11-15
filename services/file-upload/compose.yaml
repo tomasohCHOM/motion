@@ -30,6 +30,22 @@ services:
     volumes:
       - file-upload-db-data:/var/lib/postgresql
 
+  file-upload-db-migrations:
+    image: migrate/migrate:latest
+    volumes:
+      - ./migrations:/migrations
+    command:
+      [
+        "-path",
+        "/migrations",
+        "-database",
+        "postgres://dev:password@file-upload-db:5432/dev_db?sslmode=disable",
+        "up",
+      ]
+    depends_on:
+      file-upload-db:
+        condition: service_healthy
+
   file-upload-service:
     build: .
     ports:
@@ -41,6 +57,7 @@ services:
     depends_on:
       - minio
       - file-upload-db
+      - file-upload-db-migrations
 
 volumes:
   minio_data:
