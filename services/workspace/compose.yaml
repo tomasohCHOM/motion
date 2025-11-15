@@ -15,6 +15,22 @@ services:
     volumes:
       - workspace-db-data:/var/lib/postgresql
 
+  workspace-db-migrations:
+    image: migrate/migrate:latest
+    volumes:
+      - ./migrations:/migrations
+    command:
+      [
+        "-path",
+        "/migrations",
+        "-database",
+        "postgres://dev:password@workspace-db:5432/dev_db?sslmode=disable",
+        "up",
+      ]
+    depends_on:
+      workspace-db:
+        condition: service_healthy
+
   workspace-service:
     build: .
     ports:
@@ -25,6 +41,7 @@ services:
       - .env
     depends_on:
       - workspace-db
+      - workspace-db-migrations
 
 volumes:
   workspace-db-data:
