@@ -139,12 +139,33 @@ func main() {
 	}()
 
 	c := cors.New(cors.Options{
-		AllowedOrigins:   []string{"*"}, // modify for production
-		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
-		AllowedHeaders:   []string{"Content-Type", "Authorization", "X-Dev-UserID"},
+		AllowedOrigins: []string{
+			"http://localhost:3000",
+			"http://127.0.0.1:3000",
+			"http://localhost:5173",
+			"http://127.0.0.1:5173",
+		}, // modify for production
+		AllowOriginRequestFunc: func(_ *http.Request, origin string) bool {
+			return true // allow any origin in dev; tighten for prod
+		},
+		AllowedMethods: []string{
+			"GET",
+			"POST",
+			"PUT",
+			"PATCH",
+			"DELETE",
+			"OPTIONS",
+		},
+		AllowedHeaders: []string{
+			"*",
+			"Content-Type",
+			"Authorization",
+			"X-Dev-UserID",
+		},
 		AllowCredentials: false, // enable in production
 		MaxAge:           300,   // preflight cache duration in seconds
 		Debug:            true,  // disable in production
+		OptionsPassthrough: false,
 	})
 
 	handler := c.Handler(mux)
