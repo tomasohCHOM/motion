@@ -1,4 +1,4 @@
-# Gemini Agent: File Upload Service
+# File Upload Service
 
 This document provides context for the File Upload microservice, a component of the broader application.
 
@@ -16,6 +16,7 @@ Its core functionality is to generate secure, short-lived "presigned URLs". This
     - MinIO (for local development)
 - **Containerization**: Docker and Docker Compose
 - **Key Go Libraries**:
+    - `net/http`: Web/routing library
     - `github.com/aws/aws-sdk-go-v2`: For interacting with AWS S3.
     - `github.com/minio/minio-go/v7`: For interacting with MinIO.
     - `github.com/rs/cors`: For Cross-Origin Resource Sharing (CORS) middleware.
@@ -82,4 +83,4 @@ The service is designed to be deployed to AWS ECS Fargate, with an Application L
 
 - `just build`: Build the Go binary.
 - `docker build -t file-upload:latest .`: Build the Docker image.
-- `./client.sh <file>`: A mock client script to test the upload flow.
+- `./tests/e2e/upload_test.sh <file>`: A mock client script to test the upload flow.

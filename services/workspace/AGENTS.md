@@ -1,4 +1,4 @@
-# Gemini Agent: Workspace Service
+# Workspace Service
 
 This document provides context for the Workspace microservice, a core component of the application.
 
@@ -9,12 +9,12 @@ The Workspace service is a Go-based microservice responsible for managing the ce
 ## Tech Stack
 
 - **Language**: Go
-- **Database**: PostgreSQL (inferred from the SQL syntax)
+- **Database**: PostgreSQL
 - **Containerization**: Docker and Docker Compose
 - **Key Go Libraries**:
     - `sqlc`: For generating type-safe Go code from SQL queries.
-    - A web framework (e.g., `gin`, `chi`, or `net/http`).
-    - A PostgreSQL driver (e.g., `pgx`).
+    - `net/http`: Web framework/routing library.
+    - `pgx`: PostgreSQL driver
 
 ## Project Structure
 
@@ -51,23 +51,17 @@ services/workspace/
 ## How to Run the Service
 
 1.  **Prerequisites**: Go, Docker, Docker Compose.
-2.  **Start the service and database**:
+2.  **Start the service and database** (migrations applied automatically):
     ```bash
     docker compose up -d
     ```
-3.  The service will likely be available on a port defined in the `compose.yaml` file (e.g., 8081).
+3.  The service is available on port 8081
 
 ## How to Test the Service
 
 - **Run unit tests**:
   ```bash
-  # (Assuming a 'test' command is defined in the justfile, similar to the file-upload-service)
   just test
-  ```
-- **Run database migrations**:
-  ```bash
-  # (Assuming a 'migrate-up' command is available)
-  just migrate-up
   ```
 
 ## Deployment

@@ -1,4 +1,4 @@
-# Gemini Agent: Frontend
+# Frontend
 
 This document provides context for the frontend application.
 
@@ -11,7 +11,7 @@ The frontend is a single-page application (SPA) that provides the user interface
 - **Framework**: React 19
 - **Language**: TypeScript
 - **Build Tool**: Vite
-- **Styling**: Tailwind CSS with Radix UI components
+- **Styling**: Tailwind CSS with Shadcn and Radix UI components
 - **Routing**: TanStack Router
 - **Data Fetching/State Management**: TanStack Query
 - **Authentication**: Clerk
@@ -70,6 +70,14 @@ frontend/
   ```bash
   npm run format
   ```
+
+# shadcn instructions
+
+Use the latest version of Shadcn to install new components, like this command to add a button component:
+
+```bash
+pnpx shadcn@latest add button
+```
 
 ## Deployment
 
