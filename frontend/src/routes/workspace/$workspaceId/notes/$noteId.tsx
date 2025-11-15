@@ -139,12 +139,10 @@ function NoteEditorPage() {
         })
         if (cancelled) return
         noteActions.upsertNote(updated)
-        queryClient.setQueryData<Array<Note>>(
-          notesQueryKey,
-          (current = []) =>
-            current.map((existing) =>
-              existing.id === updated.id ? updated : existing,
-            ),
+        queryClient.setQueryData<Array<Note>>(notesQueryKey, (current = []) =>
+          current.map((existing) =>
+            existing.id === updated.id ? updated : existing,
+          ),
         )
         queryClient.setQueryData<Note>(noteQueryKey, updated)
         setSaveStatus('Saved')

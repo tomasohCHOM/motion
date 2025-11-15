@@ -270,7 +270,7 @@ function NotesListPage() {
     () => ['workspace', workspaceId, 'notes'] as const,
     [workspaceId],
   )
-  const currentUserId = user?.id ?? ''
+  const currentUserId = user.id
   const createNoteMutation = useCreateNoteMutation()
   const deleteNoteMutation = useDeleteNoteMutation()
   const updateNoteMutation = useUpdateNoteMutation()
@@ -376,16 +376,6 @@ function NotesListPage() {
       return direction === 'desc' ? -comparison : comparison
     })
   }, [notes, searchTerm, sortBy])
-
-  if (!user) {
-    return (
-      <div className="p-6">
-        <p className="text-sm text-muted-foreground">
-          Unable to load workspace context. Please refresh and try again.
-        </p>
-      </div>
-    )
-  }
 
   if (notesQuery.isLoading && !hasCachedNotes) {
     return (
