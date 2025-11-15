@@ -19,10 +19,7 @@ services:
     image: migrate/migrate:latest
     volumes:
       - ./migrations:/migrations
-    command: [ "-path", "/migrations", "-database", "postgres://dev:password@workspace-db:5432/dev_db?sslmode=disable", "up" ]
-    depends_on:
-      workspace-db:
-        condition: service_healthy
+      - ./migrate.sh:/migrate.sh
 
   workspace-service:
     build: .
