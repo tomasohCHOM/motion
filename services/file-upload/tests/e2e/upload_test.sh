@@ -19,11 +19,13 @@ base_url="http://localhost:8080"
 
 # Hit our endpoint to get a presigned upload url for minio
 echo "=== Step 1: Getting presigned URL ==="
-presigned_resp=$(xh POST "${base_url}/upload/presigned" \
-  filename="$(basename "$file")" \
-  content_type="image/jpeg" \
-  user_id="$user" \
-  fileSize:="$(stat -c%s "$file")")
+presigned_resp=$(
+  xh POST "${base_url}/upload/presigned" \
+    filename="$(basename "$file")" \
+    content_type="image/jpeg" \
+    user_id="$user" \
+    fileSize:="$(stat -c%s "$file")"
+)
 
 # Extract url from response
 upload_url=$(echo "$presigned_resp" | jq -r .upload_url)
@@ -34,15 +36,21 @@ echo "Generated file key: $key"
 echo
 
 echo "=== Step 2: Uploading file to MinIO ==="
-upload_resp=$(xh PUT "$upload_url" <"$file")
+upload_resp=$(
+  xh PUT "$upload_url" \
+    Content-Type:"text/plain" \
+    @"$(basename "$file")"
+)
 echo "Upload response:"
 echo "$upload_resp"
 echo
 
 echo "=== Step 3: Completing upload (saving metadata) ==="
-complete_resp=$(xh POST "${base_url}/upload/complete" \
-  key="$key" \
-  user_id="$user")
+complete_resp=$(
+  xh POST "${base_url}/upload/complete" \
+    key="$key" \
+    user_id="$user"
+)
 
 printf "Complete response:\n %s" "$complete_resp"
 echo
