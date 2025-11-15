@@ -27,10 +27,6 @@ services:
     volumes:
       - ./migrations:/migrations
       - ./migrate.sh:/migrate.sh
-    entrypoint: [ "/bin/bash", "/migrate.sh" ]
-    depends_on:
-      workspace-db:
-        condition: service_healthy
 
   workspace-service:
     build: .
