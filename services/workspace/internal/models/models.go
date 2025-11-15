@@ -14,9 +14,9 @@ import (
 type TaskPriority string
 
 const (
-	TaskPriorityLow    TaskPriority = "Low"
-	TaskPriorityMedium TaskPriority = "Medium"
-	TaskPriorityHigh   TaskPriority = "High"
+	TaskPriorityLow    TaskPriority = "low"
+	TaskPriorityMedium TaskPriority = "medium"
+	TaskPriorityHigh   TaskPriority = "high"
 )
 
 func (e *TaskPriority) Scan(src interface{}) error {
@@ -105,7 +105,7 @@ type Task struct {
 	Description pgtype.Text        `json:"description"`
 	AssigneeID  pgtype.Text        `json:"assignee_id"`
 	Status      TaskStatus         `json:"status"`
-	Priority    NullTaskPriority   `json:"priority"`
+	Priority    TaskPriority       `json:"priority"`
 	DueDate     pgtype.Timestamptz `json:"due_date"`
 	CreatedAt   pgtype.Timestamptz `json:"created_at"`
 	UpdatedAt   pgtype.Timestamptz `json:"updated_at"`

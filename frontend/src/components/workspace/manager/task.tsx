@@ -1,5 +1,6 @@
 import React from 'react'
 import { Calendar, MoreHorizontal } from 'lucide-react'
+import { useParams } from '@tanstack/react-router'
 import type { Task } from '@/store/manager/task-store'
 import { getMemberInitials } from '@/utils/initals'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -13,6 +14,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { kanbanActions, kanbanHelpers } from '@/store/manager/task-store'
 import { dialogActions } from '@/store/manager/dialog-store'
+import { useDeleteTask } from '@/client/tasks/deleteTask'
 
 type Props = {
   columnId: string
@@ -20,6 +22,28 @@ type Props = {
 }
 
 export const TaskCard: React.FC<Props> = ({ columnId, task }) => {
+  const { workspaceId } = useParams({
+    from: '/workspace/$workspaceId/manager/',
+  })
+  const deleteTaskMutation = useDeleteTask()
+
+  const handleDelete = async () => {
+    // Optimistic update
+    const previousState = kanbanActions.deleteTaskOptimistic(columnId, task.id)
+
+    // API call
+    try {
+      await deleteTaskMutation.mutateAsync({
+        taskId: task.id,
+        workspaceId,
+      })
+    } catch (error) {
+      // Rollback on error
+      kanbanActions.rollback(previousState)
+      console.error('Failed to delete task:', error)
+    }
+  }
+
   return (
     <Card className="min-h-[180px] mb-3 z-50 flex flex-col justify-between cursor-grab hover:shadow-md transition-shadow bg-card border-border">
       <CardHeader>
@@ -40,9 +64,10 @@ export const TaskCard: React.FC<Props> = ({ columnId, task }) => {
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   variant="destructive"
-                  onClick={() => kanbanActions.deleteTask(columnId, task.id)}
+                  onClick={handleDelete}
+                  disabled={deleteTaskMutation.isPending}
                 >
-                  Delete task
+                  {deleteTaskMutation.isPending ? 'Deleting...' : 'Delete task'}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

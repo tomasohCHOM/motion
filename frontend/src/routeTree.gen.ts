@@ -17,11 +17,11 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as WorkspaceCreateRouteImport } from './routes/workspace/create'
 import { Route as WorkspaceWorkspaceIdRouteRouteImport } from './routes/workspace/$workspaceId/route'
 import { Route as WorkspaceWorkspaceIdIndexRouteImport } from './routes/workspace/$workspaceId/index'
-import { Route as WorkspaceWorkspaceIdManagerRouteImport } from './routes/workspace/$workspaceId/manager'
 import { Route as WorkspaceWorkspaceIdTeamIndexRouteImport } from './routes/workspace/$workspaceId/team/index'
 import { Route as WorkspaceWorkspaceIdSettingsIndexRouteImport } from './routes/workspace/$workspaceId/settings/index'
 import { Route as WorkspaceWorkspaceIdPlannerIndexRouteImport } from './routes/workspace/$workspaceId/planner/index'
 import { Route as WorkspaceWorkspaceIdNotesIndexRouteImport } from './routes/workspace/$workspaceId/notes/index'
+import { Route as WorkspaceWorkspaceIdManagerIndexRouteImport } from './routes/workspace/$workspaceId/manager/index'
 import { Route as WorkspaceWorkspaceIdFilesIndexRouteImport } from './routes/workspace/$workspaceId/files/index'
 import { Route as WorkspaceWorkspaceIdNotesNoteIdRouteImport } from './routes/workspace/$workspaceId/notes/$noteId'
 
@@ -67,12 +67,6 @@ const WorkspaceWorkspaceIdIndexRoute =
     path: '/',
     getParentRoute: () => WorkspaceWorkspaceIdRouteRoute,
   } as any)
-const WorkspaceWorkspaceIdManagerRoute =
-  WorkspaceWorkspaceIdManagerRouteImport.update({
-    id: '/manager',
-    path: '/manager',
-    getParentRoute: () => WorkspaceWorkspaceIdRouteRoute,
-  } as any)
 const WorkspaceWorkspaceIdTeamIndexRoute =
   WorkspaceWorkspaceIdTeamIndexRouteImport.update({
     id: '/team/',
@@ -97,6 +91,12 @@ const WorkspaceWorkspaceIdNotesIndexRoute =
     path: '/notes/',
     getParentRoute: () => WorkspaceWorkspaceIdRouteRoute,
   } as any)
+const WorkspaceWorkspaceIdManagerIndexRoute =
+  WorkspaceWorkspaceIdManagerIndexRouteImport.update({
+    id: '/manager/',
+    path: '/manager/',
+    getParentRoute: () => WorkspaceWorkspaceIdRouteRoute,
+  } as any)
 const WorkspaceWorkspaceIdFilesIndexRoute =
   WorkspaceWorkspaceIdFilesIndexRouteImport.update({
     id: '/files/',
@@ -118,10 +118,10 @@ export interface FileRoutesByFullPath {
   '/sign-up': typeof SignUpRoute
   '/workspace/$workspaceId': typeof WorkspaceWorkspaceIdRouteRouteWithChildren
   '/workspace/create': typeof WorkspaceCreateRoute
-  '/workspace/$workspaceId/manager': typeof WorkspaceWorkspaceIdManagerRoute
   '/workspace/$workspaceId/': typeof WorkspaceWorkspaceIdIndexRoute
   '/workspace/$workspaceId/notes/$noteId': typeof WorkspaceWorkspaceIdNotesNoteIdRoute
   '/workspace/$workspaceId/files': typeof WorkspaceWorkspaceIdFilesIndexRoute
+  '/workspace/$workspaceId/manager': typeof WorkspaceWorkspaceIdManagerIndexRoute
   '/workspace/$workspaceId/notes': typeof WorkspaceWorkspaceIdNotesIndexRoute
   '/workspace/$workspaceId/planner': typeof WorkspaceWorkspaceIdPlannerIndexRoute
   '/workspace/$workspaceId/settings': typeof WorkspaceWorkspaceIdSettingsIndexRoute
@@ -134,10 +134,10 @@ export interface FileRoutesByTo {
   '/sign-in': typeof SignInRoute
   '/sign-up': typeof SignUpRoute
   '/workspace/create': typeof WorkspaceCreateRoute
-  '/workspace/$workspaceId/manager': typeof WorkspaceWorkspaceIdManagerRoute
   '/workspace/$workspaceId': typeof WorkspaceWorkspaceIdIndexRoute
   '/workspace/$workspaceId/notes/$noteId': typeof WorkspaceWorkspaceIdNotesNoteIdRoute
   '/workspace/$workspaceId/files': typeof WorkspaceWorkspaceIdFilesIndexRoute
+  '/workspace/$workspaceId/manager': typeof WorkspaceWorkspaceIdManagerIndexRoute
   '/workspace/$workspaceId/notes': typeof WorkspaceWorkspaceIdNotesIndexRoute
   '/workspace/$workspaceId/planner': typeof WorkspaceWorkspaceIdPlannerIndexRoute
   '/workspace/$workspaceId/settings': typeof WorkspaceWorkspaceIdSettingsIndexRoute
@@ -152,10 +152,10 @@ export interface FileRoutesById {
   '/sign-up': typeof SignUpRoute
   '/workspace/$workspaceId': typeof WorkspaceWorkspaceIdRouteRouteWithChildren
   '/workspace/create': typeof WorkspaceCreateRoute
-  '/workspace/$workspaceId/manager': typeof WorkspaceWorkspaceIdManagerRoute
   '/workspace/$workspaceId/': typeof WorkspaceWorkspaceIdIndexRoute
   '/workspace/$workspaceId/notes/$noteId': typeof WorkspaceWorkspaceIdNotesNoteIdRoute
   '/workspace/$workspaceId/files/': typeof WorkspaceWorkspaceIdFilesIndexRoute
+  '/workspace/$workspaceId/manager/': typeof WorkspaceWorkspaceIdManagerIndexRoute
   '/workspace/$workspaceId/notes/': typeof WorkspaceWorkspaceIdNotesIndexRoute
   '/workspace/$workspaceId/planner/': typeof WorkspaceWorkspaceIdPlannerIndexRoute
   '/workspace/$workspaceId/settings/': typeof WorkspaceWorkspaceIdSettingsIndexRoute
@@ -171,10 +171,10 @@ export interface FileRouteTypes {
     | '/sign-up'
     | '/workspace/$workspaceId'
     | '/workspace/create'
-    | '/workspace/$workspaceId/manager'
     | '/workspace/$workspaceId/'
     | '/workspace/$workspaceId/notes/$noteId'
     | '/workspace/$workspaceId/files'
+    | '/workspace/$workspaceId/manager'
     | '/workspace/$workspaceId/notes'
     | '/workspace/$workspaceId/planner'
     | '/workspace/$workspaceId/settings'
@@ -187,10 +187,10 @@ export interface FileRouteTypes {
     | '/sign-in'
     | '/sign-up'
     | '/workspace/create'
-    | '/workspace/$workspaceId/manager'
     | '/workspace/$workspaceId'
     | '/workspace/$workspaceId/notes/$noteId'
     | '/workspace/$workspaceId/files'
+    | '/workspace/$workspaceId/manager'
     | '/workspace/$workspaceId/notes'
     | '/workspace/$workspaceId/planner'
     | '/workspace/$workspaceId/settings'
@@ -204,10 +204,10 @@ export interface FileRouteTypes {
     | '/sign-up'
     | '/workspace/$workspaceId'
     | '/workspace/create'
-    | '/workspace/$workspaceId/manager'
     | '/workspace/$workspaceId/'
     | '/workspace/$workspaceId/notes/$noteId'
     | '/workspace/$workspaceId/files/'
+    | '/workspace/$workspaceId/manager/'
     | '/workspace/$workspaceId/notes/'
     | '/workspace/$workspaceId/planner/'
     | '/workspace/$workspaceId/settings/'
@@ -282,13 +282,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof WorkspaceWorkspaceIdIndexRouteImport
       parentRoute: typeof WorkspaceWorkspaceIdRouteRoute
     }
-    '/workspace/$workspaceId/manager': {
-      id: '/workspace/$workspaceId/manager'
-      path: '/manager'
-      fullPath: '/workspace/$workspaceId/manager'
-      preLoaderRoute: typeof WorkspaceWorkspaceIdManagerRouteImport
-      parentRoute: typeof WorkspaceWorkspaceIdRouteRoute
-    }
     '/workspace/$workspaceId/team/': {
       id: '/workspace/$workspaceId/team/'
       path: '/team'
@@ -317,6 +310,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof WorkspaceWorkspaceIdNotesIndexRouteImport
       parentRoute: typeof WorkspaceWorkspaceIdRouteRoute
     }
+    '/workspace/$workspaceId/manager/': {
+      id: '/workspace/$workspaceId/manager/'
+      path: '/manager'
+      fullPath: '/workspace/$workspaceId/manager'
+      preLoaderRoute: typeof WorkspaceWorkspaceIdManagerIndexRouteImport
+      parentRoute: typeof WorkspaceWorkspaceIdRouteRoute
+    }
     '/workspace/$workspaceId/files/': {
       id: '/workspace/$workspaceId/files/'
       path: '/files'
@@ -335,10 +335,10 @@ declare module '@tanstack/react-router' {
 }
 
 interface WorkspaceWorkspaceIdRouteRouteChildren {
-  WorkspaceWorkspaceIdManagerRoute: typeof WorkspaceWorkspaceIdManagerRoute
   WorkspaceWorkspaceIdIndexRoute: typeof WorkspaceWorkspaceIdIndexRoute
   WorkspaceWorkspaceIdNotesNoteIdRoute: typeof WorkspaceWorkspaceIdNotesNoteIdRoute
   WorkspaceWorkspaceIdFilesIndexRoute: typeof WorkspaceWorkspaceIdFilesIndexRoute
+  WorkspaceWorkspaceIdManagerIndexRoute: typeof WorkspaceWorkspaceIdManagerIndexRoute
   WorkspaceWorkspaceIdNotesIndexRoute: typeof WorkspaceWorkspaceIdNotesIndexRoute
   WorkspaceWorkspaceIdPlannerIndexRoute: typeof WorkspaceWorkspaceIdPlannerIndexRoute
   WorkspaceWorkspaceIdSettingsIndexRoute: typeof WorkspaceWorkspaceIdSettingsIndexRoute
@@ -347,10 +347,11 @@ interface WorkspaceWorkspaceIdRouteRouteChildren {
 
 const WorkspaceWorkspaceIdRouteRouteChildren: WorkspaceWorkspaceIdRouteRouteChildren =
   {
-    WorkspaceWorkspaceIdManagerRoute: WorkspaceWorkspaceIdManagerRoute,
     WorkspaceWorkspaceIdIndexRoute: WorkspaceWorkspaceIdIndexRoute,
     WorkspaceWorkspaceIdNotesNoteIdRoute: WorkspaceWorkspaceIdNotesNoteIdRoute,
     WorkspaceWorkspaceIdFilesIndexRoute: WorkspaceWorkspaceIdFilesIndexRoute,
+    WorkspaceWorkspaceIdManagerIndexRoute:
+      WorkspaceWorkspaceIdManagerIndexRoute,
     WorkspaceWorkspaceIdNotesIndexRoute: WorkspaceWorkspaceIdNotesIndexRoute,
     WorkspaceWorkspaceIdPlannerIndexRoute:
       WorkspaceWorkspaceIdPlannerIndexRoute,

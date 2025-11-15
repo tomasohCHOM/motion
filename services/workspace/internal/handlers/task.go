@@ -26,7 +26,7 @@ func (h *TaskHandler) CreateNewTask(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	workspaceId := r.PathValue("workspace_id")
+	workspaceId := r.PathValue("workspaceId")
 	if workspaceId == "" {
 		http.Error(w, "missing workspace id", http.StatusBadRequest)
 		return
@@ -59,7 +59,7 @@ func (h *TaskHandler) CreateNewTask(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *TaskHandler) GetWorkspaceTasks(w http.ResponseWriter, r *http.Request) {
-	workspaceId := r.PathValue("workspace_id")
+	workspaceId := r.PathValue("workspaceId")
 	if workspaceId == "" {
 		http.Error(w, "missing workspace id", http.StatusBadRequest)
 		return

@@ -38,7 +38,7 @@ type CreateNewTaskParams struct {
 	Description pgtype.Text        `json:"description"`
 	AssigneeID  pgtype.Text        `json:"assignee_id"`
 	Status      TaskStatus         `json:"status"`
-	Priority    NullTaskPriority   `json:"priority"`
+	Priority    TaskPriority       `json:"priority"`
 	DueDate     pgtype.Timestamptz `json:"due_date"`
 }
 
@@ -106,7 +106,7 @@ type GetTaskByIDRow struct {
 	Title             string             `json:"title"`
 	Description       pgtype.Text        `json:"description"`
 	Status            TaskStatus         `json:"status"`
-	Priority          NullTaskPriority   `json:"priority"`
+	Priority          TaskPriority       `json:"priority"`
 	DueDate           pgtype.Timestamptz `json:"due_date"`
 	CreatedAt         pgtype.Timestamptz `json:"created_at"`
 	UpdatedAt         pgtype.Timestamptz `json:"updated_at"`
@@ -169,7 +169,7 @@ type GetTasksByWorkspaceRow struct {
 	Title             string             `json:"title"`
 	Description       pgtype.Text        `json:"description"`
 	Status            TaskStatus         `json:"status"`
-	Priority          NullTaskPriority   `json:"priority"`
+	Priority          TaskPriority       `json:"priority"`
 	DueDate           pgtype.Timestamptz `json:"due_date"`
 	CreatedAt         pgtype.Timestamptz `json:"created_at"`
 	UpdatedAt         pgtype.Timestamptz `json:"updated_at"`
@@ -234,7 +234,7 @@ type UpdateTaskParams struct {
 	Description pgtype.Text        `json:"description"`
 	AssigneeID  pgtype.Text        `json:"assignee_id"`
 	Status      TaskStatus         `json:"status"`
-	Priority    NullTaskPriority   `json:"priority"`
+	Priority    TaskPriority       `json:"priority"`
 	DueDate     pgtype.Timestamptz `json:"due_date"`
 }
 

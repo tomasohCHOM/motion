@@ -1,5 +1,6 @@
-import { useEffect, useReducer } from 'react'
+import { useEffect, useReducer, useState } from 'react'
 import { useStore } from '@tanstack/react-store'
+import { useParams } from '@tanstack/react-router'
 import type { Task } from '@/store/manager/task-store'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -30,6 +31,9 @@ import {
   priorityLabels,
   teamMembers,
 } from '@/store/manager/task-store'
+import { useCreateTask } from '@/client/tasks/createTask'
+import { useUpdateTask } from '@/client/tasks/updateTask'
+import { columnIdToStatus } from '@/utils/taskTransform'
 
 type TaskFormState = {
   title: string
@@ -56,12 +60,18 @@ const reducer = (state: TaskFormState, action: Action): TaskFormState => {
 }
 
 const EditTask: React.FC = () => {
+  const { workspaceId } = useParams({
+    from: '/workspace/$workspaceId/manager/',
+  })
   const {
     isOpen,
     isAdding,
     task,
     columnId: currColumnId,
   } = useStore(dialogStore)
+  const createTaskMutation = useCreateTask()
+  const updateTaskMutation = useUpdateTask()
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const [state, dispatch] = useReducer(reducer, {
     title: task?.title ?? '',
@@ -86,8 +96,9 @@ const EditTask: React.FC = () => {
     })
   }, [task, currColumnId])
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    setIsSubmitting(true)
 
     const taskData: Task = {
       id: task?.id ?? crypto.randomUUID(),
@@ -98,13 +109,67 @@ const EditTask: React.FC = () => {
       dueDate: state.dueDate?.toISOString(),
     }
 
-    if (isAdding) {
-      kanbanActions.addTask(state.columnId, taskData)
-    } else {
-      kanbanActions.updateTask(state.columnId, taskData)
-    }
+    try {
+      if (isAdding) {
+        // Optimistic update
+        const previousState = kanbanActions.addTaskOptimistic(
+          state.columnId,
+          taskData,
+        )
 
-    dialogActions.close()
+        // API call
+        try {
+          await createTaskMutation.mutateAsync({
+            workspaceId,
+            taskData: {
+              title: state.title,
+              description: state.description || undefined,
+              assignee_id: undefined, // TODO: Map assignee name to ID
+              status: columnIdToStatus(state.columnId),
+              priority: state.priority,
+              due_date: state.dueDate?.toISOString(),
+            },
+          })
+        } catch (error) {
+          // Rollback on error
+          kanbanActions.rollback(previousState)
+          throw error
+        }
+      } else {
+        // Optimistic update
+        const previousState = kanbanActions.updateTaskOptimistic(
+          state.columnId,
+          taskData,
+        )
+
+        // API call
+        try {
+          await updateTaskMutation.mutateAsync({
+            taskId: task!.id,
+            workspaceId,
+            taskData: {
+              title: state.title,
+              description: state.description || undefined,
+              assignee_id: undefined, // TODO: Map assignee name to ID
+              status: columnIdToStatus(state.columnId),
+              priority: state.priority,
+              due_date: state.dueDate?.toISOString(),
+            },
+          })
+        } catch (error) {
+          // Rollback on error
+          kanbanActions.rollback(previousState)
+          throw error
+        }
+      }
+
+      dialogActions.close()
+    } catch (error) {
+      console.error('Failed to save task:', error)
+      // Error is handled by mutation's onError
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -188,8 +253,12 @@ const EditTask: React.FC = () => {
           </div>
 
           <DialogFooter>
-            <Button type="submit">
-              {isAdding ? 'Add task' : 'Save changes'}
+            <Button type="submit" disabled={isSubmitting}>
+              {isSubmitting
+                ? 'Saving...'
+                : isAdding
+                  ? 'Add task'
+                  : 'Save changes'}
             </Button>
           </DialogFooter>
         </form>
@@ -244,9 +313,9 @@ const SelectField = ({
       <SelectContent>
         <SelectGroup>
           <SelectLabel>{label}</SelectLabel>
-          {items.map(({ value, label }) => (
-            <SelectItem key={value} value={value}>
-              {label}
+          {items.map(({ value: v, label: l }) => (
+            <SelectItem key={v} value={v}>
+              {l}
             </SelectItem>
           ))}
         </SelectGroup>

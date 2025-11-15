@@ -55,8 +55,8 @@ func (s *TaskService) CreateNewTask(ctx context.Context, workspaceID, title,
 		Description: pgtype.Text{String: description, Valid: description != ""},
 		AssigneeID:  pgtype.Text{String: assigneeId},
 		Status:      models.TaskStatus(status),
-		Priority:    models.NullTaskPriority{TaskPriority: models.TaskPriority(priority)},
-		DueDate:     pgtype.Timestamptz{Time: dueDate},
+		Priority:    models.TaskPriority(priority),
+		DueDate:     pgtype.Timestamptz{Time: dueDate, Valid: true},
 	}
 
 	task, err := s.s.Queries.CreateNewTask(ctx, params)
@@ -126,8 +126,8 @@ func (s *TaskService) UpdateTask(ctx context.Context, taskID, title, description
 		Description: pgtype.Text{String: description, Valid: description != ""},
 		AssigneeID:  pgtype.Text{String: assigneeId},
 		Status:      models.TaskStatus(status),
-		Priority:    models.NullTaskPriority{TaskPriority: models.TaskPriority(priority)},
-		DueDate:     pgtype.Timestamptz{Time: dueDate},
+		Priority:    models.TaskPriority(priority),
+		DueDate:     pgtype.Timestamptz{Time: dueDate, Valid: true},
 	}
 
 	task, err := s.s.Queries.UpdateTask(ctx, params)

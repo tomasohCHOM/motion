@@ -1,5 +1,5 @@
 CREATE TYPE task_status AS ENUM ('To-Do', 'In Progress', 'Review', 'Done');
-CREATE TYPE task_priority AS ENUM ('Low', 'Medium', 'High');
+CREATE TYPE task_priority AS ENUM ('low', 'medium', 'high');
 
 CREATE TABLE tasks (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -8,7 +8,7 @@ CREATE TABLE tasks (
     description TEXT,
     assignee_id TEXT REFERENCES users(id) ON DELETE SET NULL,
     status task_status NOT NULL DEFAULT 'To-Do',
-    priority task_priority DEFAULT 'Medium',
+    priority task_priority NOT NULL DEFAULT 'medium',
     due_date TIMESTAMPTZ,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
