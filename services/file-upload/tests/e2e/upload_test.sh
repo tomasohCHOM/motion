@@ -14,6 +14,8 @@ if [ ! -f "$file" ]; then
   exit 1
 fi
 
+content_type=$(file --mime-type -b "$file")
+
 user="user123"
 base_url="http://localhost:8080"
 
@@ -22,7 +24,7 @@ echo "=== Step 1: Getting presigned URL ==="
 presigned_resp=$(
   xh POST "${base_url}/upload/presigned" \
     filename="$(basename "$file")" \
-    content_type="image/jpeg" \
+    content_type="$content_type" \
     user_id="$user" \
     fileSize:="$(stat -c%s "$file")"
 )
@@ -38,7 +40,7 @@ echo
 echo "=== Step 2: Uploading file to MinIO ==="
 upload_resp=$(
   xh PUT "$upload_url" \
-    Content-Type:"text/plain" \
+    Content-Type:"$content_type" \
     <"$file"
 )
 echo "Upload response:"
