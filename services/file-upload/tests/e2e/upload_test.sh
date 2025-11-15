@@ -39,7 +39,7 @@ echo "=== Step 2: Uploading file to MinIO ==="
 upload_resp=$(
   xh PUT "$upload_url" \
     Content-Type:"text/plain" \
-    @"$file"
+    <"$file"
 )
 echo "Upload response:"
 echo "$upload_resp"
