@@ -34,9 +34,7 @@ export function useClerkAuth(): AuthState {
     // In E2E mode, check localStorage for test-specific userId (for parallel test execution)
     // If not found, fall back to VITE_DEV_USER_ID
     const testUserId =
-      typeof window !== 'undefined'
-        ? localStorage.getItem('e2e-user-id')
-        : null
+      typeof window !== 'undefined' ? localStorage.getItem('e2e-user-id') : null
     const devUserId =
       testUserId || import.meta.env.VITE_DEV_USER_ID || 'test-user-e2e'
     return {
