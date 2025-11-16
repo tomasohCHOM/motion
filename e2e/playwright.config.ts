@@ -70,6 +70,7 @@ export default defineConfig({
         process.env.FILES_SERVICE_URL || 'http://localhost:8080',
       VITE_ENV: 'development',
       VITE_DEV_USER_ID: process.env.DEV_USER_ID || 'test-user-123',
+      VITE_E2E_MODE: 'true', // Enable E2E mode to bypass Clerk
     },
   },
 })

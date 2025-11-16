@@ -96,6 +96,10 @@ export async function createTestUser(
     method: 'POST',
     body: JSON.stringify({
       id: userId,
+      email: `${userId}@test.com`,
+      first_name: 'Test',
+      last_name: 'User',
+      username: userId.replace(/-/g, ''),
     }),
   })
 
@@ -111,12 +115,14 @@ export async function createTestUser(
 export async function createTestWorkspace(
   name: string,
   description?: string,
+  ownerId: string = DEV_USER_ID,
 ): Promise<{ id: string; name: string }> {
   const response = await workspaceRequest('/workspaces', {
     method: 'POST',
     body: JSON.stringify({
       name,
       description: description || `Test workspace: ${name}`,
+      owner_id: ownerId,
     }),
   })
 
