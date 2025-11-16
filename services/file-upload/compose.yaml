@@ -14,7 +14,7 @@ services:
       retries: 3
 
   file-upload-db:
-    image: postgres:latest
+    image: postgres:18.0
     ports:
       # host_port:container_port
       - "5433:5432"
