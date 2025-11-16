@@ -20,12 +20,13 @@ type TestFixtures = {
  */
 export const test = base.extend<TestFixtures>({
   // Playwright requires the first argument to be destructured
-  // eslint-disable-next-line no-empty-pattern
+  // eslint-disable-next-line no-empty-pattern, @typescript-eslint/no-unused-vars
   userId: async ({}, use, testInfo) => {
-    // Use worker-specific user ID to avoid race conditions in parallel execution
-    // Each worker gets a unique ID: test-user-123-w0, test-user-123-w1, etc.
+    // Use unique user ID per test attempt
+    // Uses timestamp to guarantee uniqueness across tests and retries
     const baseUserId = process.env.DEV_USER_ID || 'test-user-123'
-    const userId = `${baseUserId}-w${testInfo.parallelIndex}`
+    const timestamp = Date.now()
+    const userId = `${baseUserId}-${timestamp}`
     await use(userId)
   },
 

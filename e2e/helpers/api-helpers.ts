@@ -103,9 +103,11 @@ export async function createTestUser(
     }),
   })
 
-  if (!response.ok && response.status !== 409) {
-    // 409 means user already exists, which is fine
-    throw new Error(`Failed to create user: ${response.statusText}`)
+  if (!response.ok) {
+    const errorText = await response.text()
+    throw new Error(
+      `Failed to create user: ${response.statusText} - ${errorText}`,
+    )
   }
 }
 

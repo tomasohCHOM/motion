@@ -18,7 +18,14 @@ export async function apiFetchWithToken<T>(
     if (!token) throw new Error('No auth token provided')
     headers['Authorization'] = `Bearer ${token}`
   } else {
-    const devUserId = import.meta.env.VITE_DEV_USER_ID || 'user_dev_default'
+    // In E2E mode, use dynamic userId from localStorage if available
+    const isE2EMode = import.meta.env.VITE_E2E_MODE === 'true'
+    const e2eUserId =
+      typeof window !== 'undefined' && isE2EMode
+        ? localStorage.getItem('e2e-user-id')
+        : null
+    const devUserId =
+      e2eUserId || import.meta.env.VITE_DEV_USER_ID || 'user_dev_default'
     headers['X-Dev-UserID'] = devUserId
   }
 
