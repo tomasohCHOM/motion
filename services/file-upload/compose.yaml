@@ -13,7 +13,7 @@ services:
       timeout: 20s
       retries: 3
 
-  database:
+  file-upload-db:
     image: postgres:18.0
     ports:
       # host_port:container_port
