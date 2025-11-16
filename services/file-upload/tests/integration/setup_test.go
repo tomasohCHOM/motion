@@ -59,7 +59,7 @@ func (ts *TestSuite) SetupSuite() {
 
 	minioContainer, err := minio.Run(
 		ts.ctx,
-		"minio:latest",
+		"minio/minio:latest",
 		testcontainers.WithWaitStrategy(
 			wait.ForListeningPort("9000/tcp"),
 			wait.ForLog("MinIO Object Storage Server"),
@@ -79,7 +79,7 @@ func (ts *TestSuite) TearDownSuite() {
 
 func (ts *TestSuite) SetupTest() {
 	m, err := migrate.New(
-		"file://../migrations",
+		"file://../../migrations",
 		ts.dsn,
 	)
 	ts.NoError(err)
@@ -90,7 +90,7 @@ func (ts *TestSuite) SetupTest() {
 
 func (ts *TestSuite) TearDownTest() {
 	m, err := migrate.New(
-		"file://../migrations",
+		"file://../../migrations",
 		ts.dsn,
 	)
 	ts.NoError(err)
