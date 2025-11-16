@@ -78,6 +78,41 @@ jobs:
             exit 1
           fi
 
+          # Wait for database migrations to complete
+          echo "Waiting for database migrations to complete..."
+          sleep 5
+
+          # Check if migration containers exited successfully
+          echo "Checking workspace migrations..."
+          workspace_migration_status=$(docker compose \
+            -f compose.yaml \
+            -f e2e/compose.override.yaml \
+            ps -a workspace-db-migrations --format json | jq -r '.[0].State' || echo "unknown")
+
+          echo "Checking file-upload migrations..."
+          file_migration_status=$(docker compose \
+            -f compose.yaml \
+            -f e2e/compose.override.yaml \
+            ps -a file-upload-db-migrations --format json | jq -r '.[0].State' || echo "unknown")
+
+          echo "Workspace migration status: $workspace_migration_status"
+          echo "File upload migration status: $file_migration_status"
+
+          # Show migration logs for debugging
+          echo "=== Workspace Migration Logs ==="
+          docker compose \
+            -f compose.yaml \
+            -f e2e/compose.override.yaml \
+            logs workspace-db-migrations || true
+
+          echo "=== File Upload Migration Logs ==="
+          docker compose \
+            -f compose.yaml \
+            -f e2e/compose.override.yaml \
+            logs file-upload-db-migrations || true
+
+          echo "Database migrations completed!"
+
       - name: Show service status
         working-directory: ./
         run: |
