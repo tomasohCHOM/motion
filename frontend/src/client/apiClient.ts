@@ -26,13 +26,21 @@ export async function apiFetchWithToken<T>(
     ...init,
     headers,
   })
+  const bodyText = await res.text()
 
   if (!res.ok) {
-    const msg = await res.text()
-    throw new Error(`Request failed: ${res.status} - ${msg}`)
+    throw new Error(`Request failed: ${res.status} - ${bodyText}`)
   }
 
-  return res.json() as Promise<T>
+  if (!bodyText) {
+    return undefined as T
+  }
+
+  try {
+    return JSON.parse(bodyText) as T
+  } catch {
+    return bodyText as T
+  }
 }
 
 export function useApiClient() {

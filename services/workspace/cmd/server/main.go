@@ -115,6 +115,17 @@ func main() {
 		})
 		log.Println("Workspace handler routes registered")
 
+		noteService := services.NewNoteService(store)
+		noteHandler := handlers.NewNoteHandler(noteService)
+		registerRoutes(mux, []Route{
+			{"POST", "/workspaces/{workspace_id}/notes", noteHandler.CreateNote},
+			{"GET", "/workspaces/{workspace_id}/notes", noteHandler.ListNotes},
+			{"GET", "/workspaces/{workspace_id}/notes/{note_id}", noteHandler.GetNote},
+			{"PATCH", "/workspaces/{workspace_id}/notes/{note_id}", noteHandler.UpdateNote},
+			{"DELETE", "/workspaces/{workspace_id}/notes/{note_id}", noteHandler.DeleteNote},
+		})
+		log.Println("Note handler routes registered")
+
 		inviteSerive := services.NewInviteService(store)
 		inviteHandler := handlers.NewInviteHandler(inviteSerive)
 		registerRoutes(mux, []Route{
@@ -128,12 +139,33 @@ func main() {
 	}()
 
 	c := cors.New(cors.Options{
-		AllowedOrigins:   []string{"*"}, // modify for production
-		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
-		AllowedHeaders:   []string{"Content-Type", "Authorization", "X-Dev-UserID"},
-		AllowCredentials: false, // enable in production
-		MaxAge:           300,   // preflight cache duration in seconds
-		Debug:            true,  // disable in production
+		AllowedOrigins: []string{
+			"http://localhost:3000",
+			"http://127.0.0.1:3000",
+			"http://localhost:5173",
+			"http://127.0.0.1:5173",
+		}, // modify for production
+		AllowOriginRequestFunc: func(_ *http.Request, origin string) bool {
+			return true // allow any origin in dev; tighten for prod
+		},
+		AllowedMethods: []string{
+			"GET",
+			"POST",
+			"PUT",
+			"PATCH",
+			"DELETE",
+			"OPTIONS",
+		},
+		AllowedHeaders: []string{
+			"*",
+			"Content-Type",
+			"Authorization",
+			"X-Dev-UserID",
+		},
+		AllowCredentials:   false, // enable in production
+		MaxAge:             300,   // preflight cache duration in seconds
+		Debug:              true,  // disable in production
+		OptionsPassthrough: false,
 	})
 
 	handler := c.Handler(mux)
