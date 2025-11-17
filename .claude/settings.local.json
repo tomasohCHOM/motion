@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(gh run view:*)",
+      "Bash(gh pr view:*)",
+      "Bash(gh run list:*)",
+      "Bash(act:*)",
+      "Bash(docker --version:*)",
+      "Bash(tee:*)",
+      "Bash(npx prettier:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

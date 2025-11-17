@@ -14,11 +14,12 @@ const DEV_USER_ID = process.env.DEV_USER_ID || 'test-user-123'
 export async function workspaceRequest(
   endpoint: string,
   options: RequestInit = {},
+  userId?: string,
 ): Promise<Response> {
   const url = `${WORKSPACE_SERVICE_URL}${endpoint}`
   const headers = {
     'Content-Type': 'application/json',
-    'X-Dev-UserID': DEV_USER_ID,
+    'X-Dev-UserID': userId || DEV_USER_ID,
     ...options.headers,
   }
 
@@ -34,11 +35,12 @@ export async function workspaceRequest(
 export async function fileUploadRequest(
   endpoint: string,
   options: RequestInit = {},
+  userId?: string,
 ): Promise<Response> {
   const url = `${FILES_SERVICE_URL}${endpoint}`
   const headers = {
     'Content-Type': 'application/json',
-    'X-Dev-UserID': DEV_USER_ID,
+    'X-Dev-UserID': userId || DEV_USER_ID,
     ...options.headers,
   }
 
@@ -92,16 +94,20 @@ export async function checkFileUploadService(): Promise<boolean> {
 export async function createTestUser(
   userId: string = DEV_USER_ID,
 ): Promise<void> {
-  const response = await workspaceRequest('/users', {
-    method: 'POST',
-    body: JSON.stringify({
-      id: userId,
-      email: `${userId}@test.com`,
-      first_name: 'Test',
-      last_name: 'User',
-      username: userId.replace(/-/g, ''),
-    }),
-  })
+  const response = await workspaceRequest(
+    '/users',
+    {
+      method: 'POST',
+      body: JSON.stringify({
+        id: userId,
+        email: `${userId}@test.com`,
+        first_name: 'Test',
+        last_name: 'User',
+        username: userId.replace(/-/g, ''),
+      }),
+    },
+    userId, // Pass userId as the third parameter
+  )
 
   if (!response.ok) {
     const errorText = await response.text()
@@ -119,14 +125,18 @@ export async function createTestWorkspace(
   description?: string,
   ownerId: string = DEV_USER_ID,
 ): Promise<{ id: string; name: string }> {
-  const response = await workspaceRequest('/workspaces', {
-    method: 'POST',
-    body: JSON.stringify({
-      name,
-      description: description || `Test workspace: ${name}`,
-      owner_id: ownerId,
-    }),
-  })
+  const response = await workspaceRequest(
+    '/workspaces',
+    {
+      method: 'POST',
+      body: JSON.stringify({
+        name,
+        description: description || `Test workspace: ${name}`,
+        owner_id: ownerId,
+      }),
+    },
+    ownerId, // Pass ownerId as the userId parameter
+  )
 
   if (!response.ok) {
     throw new Error(`Failed to create workspace: ${response.statusText}`)
@@ -141,7 +151,11 @@ export async function createTestWorkspace(
 export async function getUserWorkspaces(
   userId: string = DEV_USER_ID,
 ): Promise<Array<{ id: string; name: string }>> {
-  const response = await workspaceRequest(`/users/${userId}/workspaces`)
+  const response = await workspaceRequest(
+    `/users/${userId}/workspaces`,
+    {},
+    userId, // Pass userId for auth header
+  )
 
   if (!response.ok) {
     throw new Error(`Failed to get user workspaces: ${response.statusText}`)
