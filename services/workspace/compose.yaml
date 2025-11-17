@@ -8,7 +8,7 @@ services:
       POSTGRES_PASSWORD: password
       POSTGRES_DB: dev_db
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U dev -d dev_db" ]
+      test: ["CMD-SHELL", "pg_isready -U dev -d dev_db"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -16,18 +16,20 @@ services:
       - workspace-db-data:/var/lib/postgresql
 
   workspace-db-migrations:
-    image: postgres:latest
-    entrypoint: /bin/bash
-    command: /migrate.sh
-    environment:
-      POSTGRES_USER: dev
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: dev_db
-      DB_HOST: workspace-db
-      DB_PORT: 5432
+    image: migrate/migrate:latest
     volumes:
       - ./migrations:/migrations
-      - ./migrate.sh:/migrate.sh
+    command:
+      [
+        "-path",
+        "/migrations",
+        "-database",
+        "postgres://dev:password@workspace-db:5432/dev_db?sslmode=disable",
+        "up",
+      ]
+    depends_on:
+      workspace-db:
+        condition: service_healthy
 
   workspace-service:
     build: .
@@ -35,17 +37,11 @@ services:
       - "8081:8081"
     environment:
       DATABASE_URL: postgres://dev:password@workspace-db:5432/dev_db
-      PORT: 8081
-      ENV: development
-    env_file: .env
+    env_file:
+      - .env
     depends_on:
-      workspace-db-migrations:
-        condition: service_completed_successfully
-    healthcheck:
-      test: [ "CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8081/health" ]
-      interval: 5s
-      timeout: 5s
-      retries: 5
+      - workspace-db
+      - workspace-db-migrations
 
 volumes:
   workspace-db-data:
