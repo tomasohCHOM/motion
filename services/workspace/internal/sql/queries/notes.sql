@@ -25,16 +25,17 @@ RETURNING
 
 -- name: GetWorkspaceNote :one
 SELECT
-        id,
-        workspace_id,
-        author_id,
-        title,
-        content,
-        tags,
-        created_at,
-        updated_at
+    id,
+    workspace_id,
+    author_id,
+    title,
+    content,
+    tags,
+    created_at,
+    updated_at
 FROM notes
-WHERE workspace_id = $1
+WHERE
+    workspace_id = $1
     AND id = $2;
 
 -- name: ListWorkspaceNotes :many
@@ -58,17 +59,18 @@ SET
     content = $4,
     tags = $5,
     updated_at = now()
-WHERE workspace_id = $1
+WHERE
+    workspace_id = $1
     AND id = $2
 RETURNING
-        id,
-        workspace_id,
-        author_id,
-        title,
-        content,
-        tags,
-        created_at,
-        updated_at;
+    id,
+    workspace_id,
+    author_id,
+    title,
+    content,
+    tags,
+    created_at,
+    updated_at;
 
 -- name: DeleteNote :exec
 DELETE FROM notes
