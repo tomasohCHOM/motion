@@ -15,7 +15,7 @@ services:
     volumes:
       - workspace-db-data:/var/lib/postgresql
 
-  workspace-migrations:
+  workspace-db-migrations:
     image: postgres:latest
     entrypoint: /bin/bash
     command: /migrate.sh
@@ -39,7 +39,7 @@ services:
       ENV: development
     env_file: .env
     depends_on:
-      workspace-migrations:
+      workspace-db-migrations:
         condition: service_completed_successfully
     healthcheck:
       test: [ "CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8081/health" ]
