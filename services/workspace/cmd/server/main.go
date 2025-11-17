@@ -136,6 +136,18 @@ func main() {
 			{"DELETE", "/invites/{invite_id}", inviteHandler.DeleteInvite},
 		})
 		log.Println("Invite handler routes registered")
+
+		eventService := services.NewEventService(store)
+		eventHandler := handlers.NewEventHandler(eventService)
+		registerRoutes(mux, []Route{
+			{"POST", "/workspaces/{workspace_id}/events", eventHandler.CreateEvent},
+			{"GET", "/workspaces/{workspace_id}/events", eventHandler.ListWorkspaceEvents},
+			{"GET", "/workspaces/{workspace_id}/events/{event_id}", eventHandler.GetEvent},
+			{"PUT", "/workspaces/{workspace_id}/events/{event_id}", eventHandler.UpdateEvent},
+			{"DELETE", "/workspaces/{workspace_id}/events/{event_id}", eventHandler.DeleteEvent},
+			{"GET", "/events/color", eventHandler.GetEventColor},
+		})
+		log.Println("Event handler routes registered")
 	}()
 
 	c := cors.New(cors.Options{
