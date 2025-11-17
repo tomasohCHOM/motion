@@ -17,13 +17,6 @@ export type AuthState = {
 }
 
 export function ClerkWrapper({ children }: { children: React.ReactNode }) {
-  // In E2E mode, skip ClerkProvider entirely since we're bypassing Clerk auth
-  const isE2EMode = import.meta.env.VITE_E2E_MODE === 'true'
-
-  if (isE2EMode) {
-    return <>{children}</>
-  }
-
   return (
     <ClerkProvider publishableKey={import.meta.env.VITE_CLERK_PUBLISHABLE_KEY}>
       {children}
@@ -32,14 +25,11 @@ export function ClerkWrapper({ children }: { children: React.ReactNode }) {
 }
 
 export function useClerkAuth(): AuthState {
+  const { isSignedIn, isLoaded, getToken } = useAuth()
+  const { user } = useUser()
+
   // E2E mode: bypass Clerk and use dev user
   const isE2EMode = import.meta.env.VITE_E2E_MODE === 'true'
-
-  // Only call Clerk hooks when NOT in E2E mode
-  // This prevents errors when ClerkProvider is not rendered
-  const clerkAuth = !isE2EMode ? useAuth() : null
-  const clerkUser = !isE2EMode ? useUser() : null
-
   if (isE2EMode) {
     // In E2E mode, check localStorage for test-specific userId (for parallel test execution)
     // If not found, fall back to VITE_DEV_USER_ID
@@ -60,9 +50,6 @@ export function useClerkAuth(): AuthState {
       logout: async () => {},
     }
   }
-
-  const { isSignedIn, isLoaded, getToken } = clerkAuth!
-  const { user } = clerkUser!
 
   return {
     isAuthenticated: Boolean(isSignedIn),

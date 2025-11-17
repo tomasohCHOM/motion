@@ -7,7 +7,6 @@ import {
   createTestUser,
   createTestWorkspace,
   checkWorkspaceService,
-  workspaceRequest,
 } from './api-helpers'
 
 type TestFixtures = {
@@ -39,33 +38,14 @@ export const test = base.extend<TestFixtures>({
     }
 
     // Create test user
-    console.log('Creating test user:', userId)
     await createTestUser(userId)
 
-    // VERIFY: Check user was actually created
-    console.log('Verifying user creation...')
-    const verifyResponse = await workspaceRequest(
-      `/users/${userId}`,
-      {},
-      userId,
-    )
-    if (!verifyResponse.ok) {
-      const errorText = await verifyResponse.text()
-      throw new Error(
-        `User creation failed - verification returned ${verifyResponse.status}: ${errorText}`,
-      )
-    }
-    const userData = await verifyResponse.json()
-    console.log('✓ User verified in database:', userData)
-
     // Create test workspace
-    console.log('Creating test workspace for user:', userId)
     const workspace = await createTestWorkspace(
       `Test Workspace ${Date.now()}`,
       'Test workspace for E2E tests',
       userId, // Pass userId as ownerId
     )
-    console.log('✓ Workspace created:', workspace)
 
     await use(workspace)
 
