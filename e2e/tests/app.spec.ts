@@ -1,3 +1,4 @@
+import { setupClerkTestingToken } from '@clerk/testing/playwright'
 import { test, expect } from '../helpers/fixtures'
 import {
   checkWorkspaceService,
@@ -22,6 +23,7 @@ test.describe('Application E2E Tests', () => {
   })
 
   test('should load the landing page', async ({ page }) => {
+    await setupClerkTestingToken({ page })
     await page.goto('/')
 
     // Check that the page loads
@@ -29,6 +31,7 @@ test.describe('Application E2E Tests', () => {
   })
 
   test('should navigate to sign in page', async ({ page }) => {
+    await setupClerkTestingToken({ page })
     await page.goto('/')
 
     // Look for sign in link/button and click it
@@ -46,8 +49,10 @@ test.describe('Application E2E Tests', () => {
     userId,
     workspace,
   }) => {
+    // Setup Clerk testing token to bypass bot detection
+    await setupClerkTestingToken({ page })
+
     // Navigate to dashboard
-    // E2E mode (VITE_E2E_MODE=true) bypasses Clerk authentication automatically
     await page.goto('/dashboard')
 
     // Check that workspace appears in the list
@@ -72,6 +77,8 @@ test.describe('Application E2E Tests', () => {
     page,
     workspace,
   }) => {
+    await setupClerkTestingToken({ page })
+
     // Navigate to workspace planner
     await page.goto(`/workspace/${workspace.id}/planner`)
     await expect(page).toHaveURL(/.*\/workspace\/.*\/planner/)
@@ -94,6 +101,8 @@ test.describe('Application E2E Tests', () => {
   })
 
   test('should create and view a note', async ({ page, workspace }) => {
+    await setupClerkTestingToken({ page })
+
     // Navigate to notes section
     await page.goto(`/workspace/${workspace.id}/notes`)
 

@@ -53,16 +53,6 @@ export const test = base.extend<TestFixtures>({
     // await cleanupTestData(userId);
   },
 
-  // Override page fixture to inject userId into localStorage for E2E mode
-  page: async ({ page, userId }, use) => {
-    // Set userId in localStorage before any navigation
-    // This allows the frontend E2E mode to use the correct worker-specific userId
-    await page.addInitScript((id) => {
-      localStorage.setItem('e2e-user-id', id)
-    }, userId)
-
-    await use(page)
-  },
 })
 
 export { expect } from '@playwright/test'

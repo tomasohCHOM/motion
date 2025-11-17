@@ -28,29 +28,6 @@ export function useClerkAuth(): AuthState {
   const { isSignedIn, isLoaded, getToken } = useAuth()
   const { user } = useUser()
 
-  // E2E mode: bypass Clerk and use dev user
-  const isE2EMode = import.meta.env.VITE_E2E_MODE === 'true'
-  if (isE2EMode) {
-    // In E2E mode, check localStorage for test-specific userId (for parallel test execution)
-    // If not found, fall back to VITE_DEV_USER_ID
-    const testUserId =
-      typeof window !== 'undefined' ? localStorage.getItem('e2e-user-id') : null
-    const devUserId =
-      testUserId || import.meta.env.VITE_DEV_USER_ID || 'test-user-e2e'
-    return {
-      isAuthenticated: true,
-      user: {
-        id: devUserId,
-        username: devUserId,
-        email: `${devUserId}@test.com`,
-      },
-      isLoading: false,
-      getToken: async () => 'mock-token-e2e',
-      login: () => {},
-      logout: async () => {},
-    }
-  }
-
   return {
     isAuthenticated: Boolean(isSignedIn),
     user: user
