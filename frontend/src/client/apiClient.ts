@@ -18,6 +18,7 @@ export async function apiFetchWithToken<T>(
     if (!token) throw new Error('No auth token provided')
     headers['Authorization'] = `Bearer ${token}`
   } else {
+    // Development mode: use dev user ID header
     const devUserId = import.meta.env.VITE_DEV_USER_ID || 'user_dev_default'
     headers['X-Dev-UserID'] = devUserId
   }

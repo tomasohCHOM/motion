@@ -2,7 +2,7 @@
  * Test fixtures and setup/teardown utilities for E2E tests
  */
 
-import { test as base } from '@playwright/test'
+import { test as base, Page } from '@playwright/test'
 import {
   createTestUser,
   createTestWorkspace,
@@ -12,6 +12,7 @@ import {
 type TestFixtures = {
   userId: string
   workspace: { id: string; name: string }
+  page: Page
 }
 
 /**
@@ -19,9 +20,13 @@ type TestFixtures = {
  */
 export const test = base.extend<TestFixtures>({
   // Playwright requires the first argument to be destructured
-  // eslint-disable-next-line no-empty-pattern
-  userId: async ({}, use) => {
-    const userId = `test-user-${Date.now()}`
+  // eslint-disable-next-line no-empty-pattern, @typescript-eslint/no-unused-vars
+  userId: async ({}, use, testInfo) => {
+    // Use unique user ID per test attempt
+    // Uses timestamp to guarantee uniqueness across tests and retries
+    const baseUserId = process.env.DEV_USER_ID || 'test-user-123'
+    const timestamp = Date.now()
+    const userId = `${baseUserId}-${timestamp}`
     await use(userId)
   },
 
@@ -39,6 +44,7 @@ export const test = base.extend<TestFixtures>({
     const workspace = await createTestWorkspace(
       `Test Workspace ${Date.now()}`,
       'Test workspace for E2E tests',
+      userId, // Pass userId as ownerId
     )
 
     await use(workspace)
@@ -46,6 +52,7 @@ export const test = base.extend<TestFixtures>({
     // Cleanup (optional - you may want to keep test data for debugging)
     // await cleanupTestData(userId);
   },
+
 })
 
 export { expect } from '@playwright/test'

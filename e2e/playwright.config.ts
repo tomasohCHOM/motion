@@ -5,6 +5,8 @@ import { defineConfig, devices } from '@playwright/test'
  */
 export default defineConfig({
   testDir: './tests',
+  /* Global setup file for Clerk testing */
+  globalSetup: './global.setup.ts',
   /* Run tests in files in parallel */
   fullyParallel: true,
   /* Fail the build on CI if you accidentally left test.only in the source code. */
@@ -70,6 +72,8 @@ export default defineConfig({
         process.env.FILES_SERVICE_URL || 'http://localhost:8080',
       VITE_ENV: 'development',
       VITE_DEV_USER_ID: process.env.DEV_USER_ID || 'test-user-123',
+      // Pass Clerk publishable key to frontend (Vite expects VITE_ prefix)
+      VITE_CLERK_PUBLISHABLE_KEY: process.env.CLERK_PUBLISHABLE_KEY || '',
     },
   },
 })

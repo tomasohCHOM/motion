@@ -179,6 +179,9 @@ jobs:
           FILES_SERVICE_URL: http://localhost:8080
           DEV_USER_ID: test-user-123
           PLAYWRIGHT_BASE_URL: http://localhost:3000
+          # Clerk testing package expects these env vars
+          CLERK_PUBLISHABLE_KEY: ${{ secrets.CLERK_PUBLISHABLE_KEY }}
+          CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
         run: npm test
         continue-on-error: false
 

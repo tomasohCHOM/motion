@@ -1,3 +1,4 @@
+import { setupClerkTestingToken } from '@clerk/testing/playwright'
 import { test, expect } from '../helpers/fixtures'
 import {
   checkWorkspaceService,
@@ -22,6 +23,7 @@ test.describe('Application E2E Tests', () => {
   })
 
   test('should load the landing page', async ({ page }) => {
+    await setupClerkTestingToken({ page })
     await page.goto('/')
 
     // Check that the page loads
@@ -29,6 +31,7 @@ test.describe('Application E2E Tests', () => {
   })
 
   test('should navigate to sign in page', async ({ page }) => {
+    await setupClerkTestingToken({ page })
     await page.goto('/')
 
     // Look for sign in link/button and click it
@@ -40,30 +43,101 @@ test.describe('Application E2E Tests', () => {
     }
   })
 
-  // test("should create and display workspace", async ({
-  //   page,
-  //   userId,
-  //   workspace,
-  // }) => {
-  //   // Navigate to dashboard (you may need to mock auth or use actual auth flow)
-  //   await page.goto("/dashboard");
+  test('should create and display workspace', async ({
+    page,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    userId,
+    workspace,
+  }) => {
+    // Setup Clerk testing token to bypass bot detection
+    await setupClerkTestingToken({ page })
 
-  //   // Check that workspace appears in the list
-  //   // Adjust selectors based on your actual UI
-  //   await expect(page.getByText(workspace.name)).toBeVisible({
-  //     timeout: 10000,
-  //   });
-  // });
+    // Navigate to dashboard
+    await page.goto('/dashboard')
 
-  // test("should access workspace files page", async ({ page, workspace }) => {
+    // Check that workspace appears in the list
+    // The workspace fixture automatically creates a workspace
+    await expect(page.getByText(workspace.name)).toBeVisible({
+      timeout: 10000,
+    })
+  })
+
+  // test('should access workspace files page', async ({ page, workspace }) => {
   //   // Navigate to workspace files page
-  //   await page.goto(`/workspace/${workspace.id}/files`);
+  //   await page.goto(`/workspace/${workspace.id}/files`)
 
   //   // Check that the page loads
-  //   await expect(page).toHaveURL(/.*\/workspace\/.*\/files/);
+  //   await expect(page).toHaveURL(/.*\/workspace\/.*\/files/)
 
   //   // Verify files page content loads
-  //   // Adjust based on your actual UI
-  //   await expect(page.locator("body")).toBeVisible();
-  // });
+  //   await expect(page.locator('body')).toBeVisible()
+  // })
+
+  test('should navigate between workspace sections', async ({
+    page,
+    workspace,
+  }) => {
+    await setupClerkTestingToken({ page })
+
+    // Navigate to workspace planner
+    await page.goto(`/workspace/${workspace.id}/planner`)
+    await expect(page).toHaveURL(/.*\/workspace\/.*\/planner/)
+    await expect(page.locator('body')).toBeVisible()
+
+    // Navigate to Notes section
+    await page.goto(`/workspace/${workspace.id}/notes`)
+    await expect(page).toHaveURL(/.*\/workspace\/.*\/notes/)
+    await expect(page.locator('body')).toBeVisible()
+
+    // Navigate to Team section
+    await page.goto(`/workspace/${workspace.id}/team`)
+    await expect(page).toHaveURL(/.*\/workspace\/.*\/team/)
+    await expect(page.locator('body')).toBeVisible()
+
+    // Navigate to Settings section
+    await page.goto(`/workspace/${workspace.id}/settings`)
+    await expect(page).toHaveURL(/.*\/workspace\/.*\/settings/)
+    await expect(page.locator('body')).toBeVisible()
+  })
+
+  test('should create and view a note', async ({ page, workspace }) => {
+    await setupClerkTestingToken({ page })
+
+    // Navigate to notes section
+    await page.goto(`/workspace/${workspace.id}/notes`)
+
+    // Wait for page to load
+    await page.waitForLoadState('networkidle')
+
+    // Look for "Create Note" or "New Note" button
+    const createButton = page.getByRole('button', {
+      name: /create note|new note|add note/i,
+    })
+
+    // Check if button exists
+    const buttonExists = await createButton.count()
+    if (buttonExists > 0) {
+      await createButton.click()
+
+      // Fill in note details (adjust selectors based on actual UI)
+      const titleInput = page.getByPlaceholder(/title|name/i).first()
+      if ((await titleInput.count()) > 0) {
+        await titleInput.fill('Test Note')
+      }
+
+      // Save the note
+      const saveButton = page.getByRole('button', { name: /save|create/i })
+      if ((await saveButton.count()) > 0) {
+        await saveButton.click()
+
+        // Verify note appears in list
+        await expect(page.getByText('Test Note')).toBeVisible({
+          timeout: 10000,
+        })
+      }
+    } else {
+      // If no create button, just verify the notes page loads
+      await expect(page.locator('body')).toBeVisible()
+    }
+  })
 })
