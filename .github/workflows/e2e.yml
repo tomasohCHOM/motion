@@ -124,6 +124,28 @@ jobs:
           echo "Workspace migration status: $workspace_migration_status"
           echo "File upload migration status: $file_migration_status"
 
+          # Check that both migration containers exited successfully
+          if [[ "$workspace_migration_status" != "exited" ]] || [[ "$file_migration_status" != "exited" ]]; then
+            echo "ERROR: One or both migration containers did not exit successfully (status not 'exited')."
+            exit 1
+          fi
+
+          workspace_migration_exit_code=$(docker compose \
+            -f compose.yaml \
+            -f e2e/compose.override.yaml \
+            ps -a workspace-db-migrations --format json | jq -r '.[0].ExitCode' || echo "unknown")
+          file_migration_exit_code=$(docker compose \
+            -f compose.yaml \
+            -f e2e/compose.override.yaml \
+            ps -a file-upload-db-migrations --format json | jq -r '.[0].ExitCode' || echo "unknown")
+
+          echo "Workspace migration exit code: $workspace_migration_exit_code"
+          echo "File upload migration exit code: $file_migration_exit_code"
+
+          if [[ "$workspace_migration_exit_code" != "0" ]] || [[ "$file_migration_exit_code" != "0" ]]; then
+            echo "ERROR: One or both migration containers exited with a non-zero exit code."
+            exit 1
+          fi
           # Show migration logs for debugging
           echo "=== Workspace Migration Logs ==="
           docker compose \
