@@ -78,6 +78,91 @@ jobs:
             exit 1
           fi
 
+          # Wait for database migrations to complete
+          echo "Waiting for database migrations to complete..."
+          MIGRATION_TIMEOUT=60
+          MIGRATION_INTERVAL=2
+          migration_elapsed=0
+          while [ $migration_elapsed -lt $MIGRATION_TIMEOUT ]; do
+            workspace_migration_state=$(docker compose \
+              -f compose.yaml \
+              -f e2e/compose.override.yaml \
+              ps -a workspace-db-migrations --format json | jq -r 'if type == "array" then .[0] else . end | .State' || echo "unknown")
+            file_migration_state=$(docker compose \
+              -f compose.yaml \
+              -f e2e/compose.override.yaml \
+              ps -a file-upload-db-migrations --format json | jq -r 'if type == "array" then .[0] else . end | .State' || echo "unknown")
+            if [ "$workspace_migration_state" = "exited" ] && [ "$file_migration_state" = "exited" ]; then
+              echo "Database migrations have completed."
+              break
+            fi
+            sleep $MIGRATION_INTERVAL
+            migration_elapsed=$((migration_elapsed + MIGRATION_INTERVAL))
+            echo "Waiting for migrations... (${migration_elapsed}s/${MIGRATION_TIMEOUT}s)"
+          done
+          if [ $migration_elapsed -ge $MIGRATION_TIMEOUT ]; then
+            echo "Database migrations did not complete in time."
+            docker compose \
+              -f compose.yaml \
+              -f e2e/compose.override.yaml \
+              logs workspace-db-migrations file-upload-db-migrations
+            exit 1
+          fi
+
+          # Check if migration containers exited successfully
+          echo "Checking workspace migrations..."
+          workspace_migration_status=$(docker compose \
+            -f compose.yaml \
+            -f e2e/compose.override.yaml \
+            ps -a workspace-db-migrations --format json | jq -r 'if type == "array" then .[0] else . end | .State' || echo "unknown")
+
+          echo "Checking file-upload migrations..."
+          file_migration_status=$(docker compose \
+            -f compose.yaml \
+            -f e2e/compose.override.yaml \
+            ps -a file-upload-db-migrations --format json | jq -r 'if type == "array" then .[0] else . end | .State' || echo "unknown")
+
+          echo "Workspace migration status: $workspace_migration_status"
+          echo "File upload migration status: $file_migration_status"
+
+          # Check that both migration containers exited successfully
+          if [[ "$workspace_migration_status" != "exited" ]] || [[ "$file_migration_status" != "exited" ]]; then
+            echo "ERROR: One or both migration containers did not exit successfully (status not 'exited')."
+            exit 1
+          fi
+
+          workspace_migration_exit_code=$(docker compose \
+            -f compose.yaml \
+            -f e2e/compose.override.yaml \
+            ps -a workspace-db-migrations --format json | jq -r 'if type == "array" then .[0] else . end | .ExitCode' || echo "unknown")
+          file_migration_exit_code=$(docker compose \
+            -f compose.yaml \
+            -f e2e/compose.override.yaml \
+            ps -a file-upload-db-migrations --format json | jq -r 'if type == "array" then .[0] else . end | .ExitCode' || echo "unknown")
+
+          echo "Workspace migration exit code: $workspace_migration_exit_code"
+          echo "File upload migration exit code: $file_migration_exit_code"
+
+          if [[ "$workspace_migration_exit_code" != "0" ]] || [[ "$file_migration_exit_code" != "0" ]]; then
+            echo "ERROR: One or both migration containers exited with a non-zero exit code."
+            exit 1
+          fi
+
+          # Show migration logs for debugging
+          echo "=== Workspace Migration Logs ==="
+          docker compose \
+            -f compose.yaml \
+            -f e2e/compose.override.yaml \
+            logs workspace-db-migrations || true
+
+          echo "=== File Upload Migration Logs ==="
+          docker compose \
+            -f compose.yaml \
+            -f e2e/compose.override.yaml \
+            logs file-upload-db-migrations || true
+
+          echo "Database migrations completed!"
+
       - name: Show service status
         working-directory: ./
         run: |

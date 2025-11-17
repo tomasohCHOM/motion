@@ -64,6 +64,36 @@ services:
       timeout: 5s
       retries: 5
 
+  # Override workspace migrations for E2E
+  workspace-db-migrations:
+    command:
+      [
+        '-path',
+        '/migrations',
+        '-database',
+        'postgres://test:testpassword@workspace-db:5432/test_db?sslmode=disable',
+        'up',
+      ]
+    depends_on:
+      workspace-db:
+        condition: service_healthy
+    restart: 'no'
+
+  # Override file-upload migrations for E2E
+  file-upload-db-migrations:
+    command:
+      [
+        '-path',
+        '/migrations',
+        '-database',
+        'postgres://test:testpassword@file-upload-db:5432/test_db?sslmode=disable',
+        'up',
+      ]
+    depends_on:
+      file-upload-db:
+        condition: service_healthy
+    restart: 'no'
+
   # Override workspace service for E2E
   workspace-service:
     environment:
