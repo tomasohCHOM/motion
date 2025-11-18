@@ -29,7 +29,7 @@ export const WorkspaceNavbar: React.FC<Props> = ({
           {workspaceUsers.map((user) => (
             <Avatar key={user.id} className="h-8 w-8">
               <AvatarFallback className="text-xs">
-                {getMemberInitials(user.firstName + ' ' + user.lastName)}
+                {getMemberInitials(user.fullName)}
               </AvatarFallback>
             </Avatar>
           ))}

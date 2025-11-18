@@ -4,15 +4,15 @@ export type TaskResponse = {
   title: string
   description: string | null
   status: string
-  priority: string | null
+  priority: string
   due_date: string | null
   created_at: string
   updated_at: string
-  assignee_id: string | null
-  assignee_first_name: string | null
-  assignee_last_name: string | null
-  assignee_username: string | null
-  assignee_email: string | null
+  assignee_id: string
+  assignee_first_name: string
+  assignee_last_name: string
+  assignee_username: string
+  assignee_email: string
 }
 
 export type WorkspaceTasksResponse = Array<TaskResponse>
@@ -23,16 +23,17 @@ export type WorkspaceTask = {
   title: string
   description: string | null
   status: string
-  priority: string | null
+  priority: string
   dueDate: string | null
   createdAt: string
   lastUpdated: string
   assignee: {
-    id: string | null
-    firstName: string | null
-    lastName: string | null
-    username: string | null
-    email: string | null
+    id: string
+    fullName: string
+    firstName: string
+    lastName: string
+    username: string
+    email: string
   }
 }
 

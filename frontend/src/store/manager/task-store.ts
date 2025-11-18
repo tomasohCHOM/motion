@@ -1,28 +1,16 @@
 import { arrayMove } from '@dnd-kit/sortable'
 import { Store } from '@tanstack/store'
-import { mockManagerTestData } from '@/static/workspace/manager'
-
-export type Task = {
-  id: string
-  title: string
-  description?: string
-  assignee: {
-    name: string
-    avatar?: string
-  }
-  priority: string
-  dueDate?: string
-}
+import type { WorkspaceTask } from '@/types/task'
 
 export type Column = {
   id: string
   title: string
-  tasks: Array<Task>
+  tasks: Array<WorkspaceTask>
 }
 
 export type KanbanState = {
   columns: Array<Column>
-  activeTask: Task | null
+  activeTask: WorkspaceTask | null
 }
 
 export const columnTypes = [
@@ -42,7 +30,7 @@ export const teamMembers = [
 ]
 
 export const kanbanStore = new Store<KanbanState>({
-  columns: mockManagerTestData,
+  columns: [],
   activeTask: null,
 })
 
@@ -51,7 +39,7 @@ export const kanbanActions = {
     kanbanStore.setState((prev) => ({ ...prev, columns }))
   },
 
-  addTask: (columnId: string, task: Task) => {
+  addTask: (columnId: string, task: WorkspaceTask) => {
     kanbanStore.setState((prev) => {
       const columns = prev.columns.map((column) =>
         column.id === columnId
@@ -65,7 +53,7 @@ export const kanbanActions = {
   /**
    * Optimistic update: adds task and returns previous state for rollback
    */
-  addTaskOptimistic: (columnId: string, task: Task): KanbanState => {
+  addTaskOptimistic: (columnId: string, task: WorkspaceTask): KanbanState => {
     const prevState = kanbanStore.state
     kanbanStore.setState((prev) => {
       const columns = prev.columns.map((column) =>
@@ -111,7 +99,7 @@ export const kanbanActions = {
     return prevState
   },
 
-  updateTask: (columnId: string, updatedTask: Task) => {
+  updateTask: (columnId: string, updatedTask: WorkspaceTask) => {
     kanbanStore.setState((prev) => {
       const fromColumnIndex = prev.columns.findIndex((col) =>
         col.tasks.some((t) => t.id === updatedTask.id),
@@ -151,7 +139,10 @@ export const kanbanActions = {
   /**
    * Optimistic update: updates task and returns previous state for rollback
    */
-  updateTaskOptimistic: (columnId: string, updatedTask: Task): KanbanState => {
+  updateTaskOptimistic: (
+    columnId: string,
+    updatedTask: WorkspaceTask,
+  ): KanbanState => {
     const prevState = kanbanStore.state
     kanbanStore.setState((prev) => {
       const fromColumnIndex = prev.columns.findIndex((col) =>
@@ -197,7 +188,7 @@ export const kanbanActions = {
     kanbanStore.setState(previousState)
   },
 
-  setActiveTask: (task: Task | null) => {
+  setActiveTask: (task: WorkspaceTask | null) => {
     kanbanStore.setState((prev) => ({ ...prev, activeTask: task }))
   },
 
@@ -272,7 +263,7 @@ export const kanbanActions = {
 }
 
 export const kanbanHelpers = {
-  findTaskById: (state: KanbanState, taskId: string): Task | null => {
+  findTaskById: (state: KanbanState, taskId: string): WorkspaceTask | null => {
     for (const column of state.columns) {
       const found = column.tasks.find((task) => task.id === taskId)
       if (found) return found

@@ -11,6 +11,7 @@ export type UserResponse = {
 export type User = {
   id: string
   email: string
+  fullName: string
   firstName: string
   lastName: string
   username: string

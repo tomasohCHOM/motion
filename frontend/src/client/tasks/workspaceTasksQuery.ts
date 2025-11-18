@@ -38,6 +38,7 @@ export function workspaceTasksQueryOptions(
         lastUpdated: task.updated_at,
         assignee: {
           id: task.assignee_id,
+          fullName: task.assignee_first_name + ' ' + task.assignee_last_name,
           firstName: task.assignee_first_name,
           lastName: task.assignee_last_name,
           username: task.assignee_username,
@@ -72,6 +73,7 @@ export function useWorkspaceTasksQuery(workspaceId: string) {
         lastUpdated: task.updated_at,
         assignee: {
           id: task.assignee_id,
+          fullName: task.assignee_first_name + ' ' + task.assignee_last_name,
           firstName: task.assignee_first_name,
           lastName: task.assignee_last_name,
           username: task.assignee_username,

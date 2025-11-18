@@ -1,5 +1,5 @@
 import type { WorkspaceTask } from '@/types/task'
-import type { Column, Task } from '@/store/manager/task-store'
+import type { Column } from '@/store/manager/task-store'
 
 /**
  * Maps backend status to frontend column ID
@@ -36,36 +36,10 @@ export function normalizePriority(priority: string | null): string {
 }
 
 /**
- * Converts backend WorkspaceTask to frontend Task format
- */
-export function transformBackendTaskToFrontend(
-  backendTask: WorkspaceTask,
-): Task {
-  return {
-    id: backendTask.id,
-    title: backendTask.title,
-    description: backendTask.description || undefined,
-    assignee: {
-      name:
-        backendTask.assignee.firstName && backendTask.assignee.lastName
-          ? `${backendTask.assignee.firstName} ${backendTask.assignee.lastName}`
-          : backendTask.assignee.username ||
-            backendTask.assignee.email ||
-            'Unassigned',
-      avatar: backendTask.assignee.id
-        ? `/avatars/${backendTask.assignee.id}.png`
-        : undefined,
-    },
-    priority: normalizePriority(backendTask.priority),
-    dueDate: backendTask.dueDate || undefined,
-  }
-}
-
-/**
  * Converts array of backend tasks to frontend columns structure
  */
-export function transformBackendTasksToColumns(
-  backendTasks: Array<WorkspaceTask>,
+export function transformTasksToColumns(
+  tasks: Array<WorkspaceTask>,
 ): Array<Column> {
   const columnTypes = [
     { id: 'to-do', title: 'To Do' },
@@ -85,11 +59,11 @@ export function transformBackendTasksToColumns(
   }
 
   // Group tasks by status/column
-  for (const backendTask of backendTasks) {
-    const columnId = statusToColumnId(backendTask.status)
+  for (const task of tasks) {
+    const columnId = statusToColumnId(task.status)
     const column = columnsMap.get(columnId)
     if (column) {
-      column.tasks.push(transformBackendTaskToFrontend(backendTask))
+      column.tasks.push(task)
     }
   }
 

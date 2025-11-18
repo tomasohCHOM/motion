@@ -1,11 +1,11 @@
+import type { WorkspaceTask } from '@/types/task'
 import { Store } from '@tanstack/react-store'
-import type { Task } from './task-store'
 
 type DialogState = {
   isOpen: boolean
   isAdding: boolean
   columnId?: string
-  task?: Task
+  task?: WorkspaceTask
 }
 
 export const dialogStore = new Store<DialogState>({
@@ -24,7 +24,7 @@ export const dialogActions = {
       task: undefined,
     }))
   },
-  openEdit: (columnId: string, task: Task) => {
+  openEdit: (columnId: string, task: WorkspaceTask) => {
     dialogStore.setState(() => ({
       isOpen: true,
       isAdding: false,

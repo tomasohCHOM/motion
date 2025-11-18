@@ -1,7 +1,6 @@
 import { useEffect, useReducer, useState } from 'react'
 import { useStore } from '@tanstack/react-store'
 import { useParams } from '@tanstack/react-router'
-import type { Task } from '@/store/manager/task-store'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
@@ -29,17 +28,18 @@ import {
   kanbanActions,
   kanbanHelpers,
   priorityLabels,
-  teamMembers,
 } from '@/store/manager/task-store'
 import { useCreateTask } from '@/client/tasks/createTask'
 import { useUpdateTask } from '@/client/tasks/updateTask'
 import { columnIdToStatus } from '@/utils/taskTransform'
+import type { WorkspaceUser } from '@/types/user'
+import type { WorkspaceTask } from '@/types/task'
 
 type TaskFormState = {
   title: string
   description: string
   columnId: string
-  assignee: string
+  assigneeId: string
   priority: string
   dueDate?: Date
 }
@@ -59,7 +59,11 @@ const reducer = (state: TaskFormState, action: Action): TaskFormState => {
   }
 }
 
-const EditTask: React.FC = () => {
+type Props = {
+  workspaceUsers: Array<WorkspaceUser>
+}
+
+const EditTask: React.FC<Props> = ({ workspaceUsers }) => {
   const { workspaceId } = useParams({
     from: '/workspace/$workspaceId/manager/',
   })
@@ -77,7 +81,7 @@ const EditTask: React.FC = () => {
     title: task?.title ?? '',
     description: task?.description ?? '',
     columnId: currColumnId ?? '',
-    assignee: task?.assignee.name ?? '',
+    assigneeId: task?.assignee.id ?? '',
     priority: task?.priority ?? '',
     dueDate: task?.dueDate ? new Date(task.dueDate) : undefined,
   })
@@ -89,7 +93,7 @@ const EditTask: React.FC = () => {
         title: task?.title ?? '',
         description: task?.description ?? '',
         columnId: currColumnId ?? '',
-        assignee: task?.assignee.name ?? '',
+        assigneeId: task?.assignee.id ?? '',
         priority: task?.priority ?? '',
         dueDate: task?.dueDate ? new Date(task.dueDate) : undefined,
       },
@@ -100,13 +104,21 @@ const EditTask: React.FC = () => {
     e.preventDefault()
     setIsSubmitting(true)
 
-    const taskData: Task = {
-      id: task?.id ?? crypto.randomUUID(),
+    const selectedAssignee = workspaceUsers.find(
+      (u) => u.id === state.assigneeId,
+    )!
+
+    const taskData: WorkspaceTask = {
+      id: task?.id ?? '',
+      workspaceId,
       title: state.title,
       description: state.description,
-      assignee: { name: state.assignee },
+      status: state.columnId,
       priority: state.priority,
-      dueDate: state.dueDate?.toISOString(),
+      dueDate: state.dueDate?.toISOString() ?? null,
+      createdAt: task?.createdAt ?? '',
+      lastUpdated: new Date(Date.now()).toISOString(),
+      assignee: selectedAssignee,
     }
 
     try {
@@ -124,7 +136,7 @@ const EditTask: React.FC = () => {
             taskData: {
               title: state.title,
               description: state.description || undefined,
-              assignee_id: undefined, // TODO: Map assignee name to ID
+              assignee_id: state.assigneeId,
               status: columnIdToStatus(state.columnId),
               priority: state.priority,
               due_date: state.dueDate?.toISOString(),
@@ -150,7 +162,7 @@ const EditTask: React.FC = () => {
             taskData: {
               title: state.title,
               description: state.description || undefined,
-              assignee_id: undefined, // TODO: Map assignee name to ID
+              assignee_id: state.assigneeId,
               status: columnIdToStatus(state.columnId),
               priority: state.priority,
               due_date: state.dueDate?.toISOString(),
@@ -215,11 +227,14 @@ const EditTask: React.FC = () => {
 
           <SelectField
             label="Assignee"
-            value={state.assignee}
+            value={state.assigneeId}
             onChange={(v) =>
-              dispatch({ type: 'SET_FIELD', field: 'assignee', value: v })
+              dispatch({ type: 'SET_FIELD', field: 'assigneeId', value: v })
             }
-            items={teamMembers.map((m) => ({ value: m, label: m }))}
+            items={workspaceUsers.map((m) => ({
+              value: m.id,
+              label: m.fullName,
+            }))}
           />
 
           <div className="grid grid-cols-2 gap-4">

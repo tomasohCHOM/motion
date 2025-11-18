@@ -1,11 +1,10 @@
 import React from 'react'
 import { Calendar, MoreHorizontal } from 'lucide-react'
 import { useParams } from '@tanstack/react-router'
-import type { Task } from '@/store/manager/task-store'
 import { getMemberInitials } from '@/utils/initals'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,10 +14,11 @@ import {
 import { kanbanActions, kanbanHelpers } from '@/store/manager/task-store'
 import { dialogActions } from '@/store/manager/dialog-store'
 import { useDeleteTask } from '@/client/tasks/deleteTask'
+import type { WorkspaceTask } from '@/types/task'
 
 type Props = {
   columnId: string
-  task: Task
+  task: WorkspaceTask
 }
 
 export const TaskCard: React.FC<Props> = ({ columnId, task }) => {
@@ -81,9 +81,8 @@ export const TaskCard: React.FC<Props> = ({ columnId, task }) => {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Avatar className="h-6 w-6">
-              <AvatarImage src={task.assignee.avatar} />
               <AvatarFallback className="text-xs">
-                {getMemberInitials(task.assignee.name)}
+                {getMemberInitials(task.assignee.fullName)}
               </AvatarFallback>
             </Avatar>
             <Badge
