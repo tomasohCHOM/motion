@@ -40,8 +40,8 @@ SELECT
     $3 AS access_type
 FROM users AS u
 WHERE
-    u.email = $4
-    OR u.username = $4
+    u.email = sqlc.arg('identifier')
+    OR u.username = sqlc.arg('identifier')
 RETURNING
     id,
     workspace_id,

@@ -12,7 +12,14 @@ import (
 const createUser = `-- name: CreateUser :one
 INSERT INTO users (id, email, first_name, last_name, username)
 VALUES ($1, $2, $3, $4, $5)
-RETURNING id, email, first_name, last_name, username, created_at, updated_at
+RETURNING
+    id,
+    email,
+    first_name,
+    last_name,
+    username,
+    created_at,
+    updated_at
 `
 
 type CreateUserParams struct {
@@ -45,7 +52,8 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 }
 
 const deleteUser = `-- name: DeleteUser :exec
-DELETE FROM users WHERE id = $1
+DELETE FROM users
+WHERE id = $1
 `
 
 func (q *Queries) DeleteUser(ctx context.Context, id string) error {
@@ -54,7 +62,16 @@ func (q *Queries) DeleteUser(ctx context.Context, id string) error {
 }
 
 const getUserByEmail = `-- name: GetUserByEmail :one
-SELECT id, email, first_name, last_name, username, created_at, updated_at FROM users WHERE email = $1
+SELECT
+    id,
+    email,
+    first_name,
+    last_name,
+    username,
+    created_at,
+    updated_at
+FROM users
+WHERE email = $1
 `
 
 func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error) {
@@ -73,7 +90,16 @@ func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error
 }
 
 const getUserByID = `-- name: GetUserByID :one
-SELECT id, email, first_name, last_name, username, created_at, updated_at FROM users WHERE id = $1
+SELECT
+    id,
+    email,
+    first_name,
+    last_name,
+    username,
+    created_at,
+    updated_at
+FROM users
+WHERE id = $1
 `
 
 func (q *Queries) GetUserByID(ctx context.Context, id string) (User, error) {
@@ -92,7 +118,16 @@ func (q *Queries) GetUserByID(ctx context.Context, id string) (User, error) {
 }
 
 const getUserByUsername = `-- name: GetUserByUsername :one
-SELECT id, email, first_name, last_name, username, created_at, updated_at FROM users WHERE username = $1
+SELECT
+    id,
+    email,
+    first_name,
+    last_name,
+    username,
+    created_at,
+    updated_at
+FROM users
+WHERE username = $1
 `
 
 func (q *Queries) GetUserByUsername(ctx context.Context, username string) (User, error) {
@@ -111,7 +146,16 @@ func (q *Queries) GetUserByUsername(ctx context.Context, username string) (User,
 }
 
 const listUsers = `-- name: ListUsers :many
-SELECT id, email, first_name, last_name, username, created_at, updated_at FROM users ORDER BY created_at DESC
+SELECT
+    id,
+    email,
+    first_name,
+    last_name,
+    username,
+    created_at,
+    updated_at
+FROM users
+ORDER BY created_at DESC
 `
 
 func (q *Queries) ListUsers(ctx context.Context) ([]User, error) {
@@ -145,12 +189,19 @@ func (q *Queries) ListUsers(ctx context.Context) ([]User, error) {
 const updateUser = `-- name: UpdateUser :one
 UPDATE users
 SET
-  first_name = COALESCE($2, first_name),
-  last_name = COALESCE($3, last_name),
-  username = COALESCE($4, username),
-  updated_at = NOW()
+    first_name = COALESCE($2, first_name),
+    last_name = COALESCE($3, last_name),
+    username = COALESCE($4, username),
+    updated_at = NOW()
 WHERE id = $1
-RETURNING id, email, first_name, last_name, username, created_at, updated_at
+RETURNING
+    id,
+    email,
+    first_name,
+    last_name,
+    username,
+    created_at,
+    updated_at
 `
 
 type UpdateUserParams struct {
@@ -184,11 +235,12 @@ const upsertUser = `-- name: UpsertUser :exec
 INSERT INTO users (id, email, first_name, last_name, username)
 VALUES ($1, $2, $3, $4, $5)
 ON CONFLICT (id) DO UPDATE
-SET email = EXCLUDED.email,
-    first_name = EXCLUDED.first_name,
-    last_name = EXCLUDED.last_name,
-    username = EXCLUDED.user_name,
-    updated_at = NOW()
+    SET
+        email = excluded.email,
+        first_name = excluded.first_name,
+        last_name = excluded.last_name,
+        username = excluded.username,
+        updated_at = NOW()
 `
 
 type UpsertUserParams struct {

@@ -20,7 +20,16 @@ WHERE
     id = $1
     AND status = 'pending'
     AND expires_at > NOW()
-RETURNING id, workspace_id, invited_by, invitee_id, invitee_email, access_type, status, created_at, expires_at
+RETURNING
+    id,
+    workspace_id,
+    invited_by,
+    invitee_id,
+    invitee_email,
+    access_type,
+    status,
+    created_at,
+    expires_at
 `
 
 type AcceptWorkspaceInviteParams struct {
@@ -52,14 +61,24 @@ INSERT INTO workspace_invites (
     invitee_id,
     invitee_email,
     access_type
-) VALUES (
-    $1,  -- workspace_id
-    $2,  -- invited_by (user_id)
-    $3,  -- invitee_id
-    $4,  -- invitee_email
-    COALESCE($5, 'member')  -- access_type
 )
-RETURNING id, workspace_id, invited_by, invitee_id, invitee_email, access_type, status, created_at, expires_at
+VALUES (
+    $1, -- workspace_id
+    $2, -- invited_by (user_id)
+    $3, -- invitee_id
+    $4, -- invitee_email
+    COALESCE($5, 'member') -- access_type
+)
+RETURNING
+    id,
+    workspace_id,
+    invited_by,
+    invitee_id,
+    invitee_email,
+    access_type,
+    status,
+    created_at,
+    expires_at
 `
 
 type CreateWorkspaceInviteParams struct {
@@ -102,14 +121,25 @@ INSERT INTO workspace_invites (
     access_type
 )
 SELECT
-    $1,          -- workspace_id
-    $2,          -- invited_by
-    u.id,        -- invitee_id from lookoup
-    u.email,     -- invitee_email from lookup
-    $3           -- access_type
-FROM users u
-WHERE u.email = $4 OR u.username = $4
-RETURNING id, workspace_id, invited_by, invitee_id, invitee_email, access_type, status, created_at, expires_at
+    $1 AS workspace_id,
+    $2 AS invited_by,
+    u.id AS invitee_id,
+    u.email AS invitee_email,
+    $3 AS access_type
+FROM users AS u
+WHERE
+    u.email = $4
+    OR u.username = $4
+RETURNING
+    id,
+    workspace_id,
+    invited_by,
+    invitee_id,
+    invitee_email,
+    access_type,
+    status,
+    created_at,
+    expires_at
 `
 
 type CreateWorkspaceInviteByIdentifierParams struct {
@@ -152,7 +182,18 @@ func (q *Queries) DeleteWorkspaceInvite(ctx context.Context, id pgtype.UUID) err
 }
 
 const getInviteById = `-- name: GetInviteById :one
-SELECT id, workspace_id, invited_by, invitee_id, invitee_email, access_type, status, created_at, expires_at FROM workspace_invites WHERE id = $1
+SELECT
+    id,
+    workspace_id,
+    invited_by,
+    invitee_id,
+    invitee_email,
+    access_type,
+    status,
+    created_at,
+    expires_at
+FROM workspace_invites
+WHERE id = $1
 `
 
 func (q *Queries) GetInviteById(ctx context.Context, id pgtype.UUID) (WorkspaceInvite, error) {
@@ -184,9 +225,9 @@ SELECT
     wi.status,
     wi.created_at,
     wi.expires_at
-FROM workspace_invites wi
-JOIN workspaces w ON wi.workspace_id = w.id
-JOIN users u ON wi.invited_by = u.id
+FROM workspace_invites AS wi
+INNER JOIN workspaces AS w ON wi.workspace_id = w.id
+INNER JOIN users AS u ON wi.invited_by = u.id
 WHERE
     wi.invitee_id = $1
     AND wi.status = 'pending'
