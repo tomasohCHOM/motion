@@ -34,26 +34,14 @@ export const kanbanStore = new Store<KanbanState>({
   activeTask: null,
 })
 
+// NOTE: add, delete, and updating tasks will return the prevState for
+// optimistic updates purposes.
 export const kanbanActions = {
   setColumns: (columns: Array<Column>) => {
     kanbanStore.setState((prev) => ({ ...prev, columns }))
   },
 
   addTask: (columnId: string, task: WorkspaceTask) => {
-    kanbanStore.setState((prev) => {
-      const columns = prev.columns.map((column) =>
-        column.id === columnId
-          ? { ...column, tasks: [...column.tasks, task] }
-          : column,
-      )
-      return { ...prev, columns }
-    })
-  },
-
-  /**
-   * Optimistic update: adds task and returns previous state for rollback
-   */
-  addTaskOptimistic: (columnId: string, task: WorkspaceTask): KanbanState => {
     const prevState = kanbanStore.state
     kanbanStore.setState((prev) => {
       const columns = prev.columns.map((column) =>
@@ -67,23 +55,6 @@ export const kanbanActions = {
   },
 
   deleteTask: (columnId: string, taskId: string) => {
-    kanbanStore.setState((prev) => {
-      const columns = prev.columns.map((column) =>
-        column.id === columnId
-          ? {
-              ...column,
-              tasks: column.tasks.filter((task) => task.id !== taskId),
-            }
-          : column,
-      )
-      return { ...prev, columns }
-    })
-  },
-
-  /**
-   * Optimistic update: deletes task and returns previous state for rollback
-   */
-  deleteTaskOptimistic: (columnId: string, taskId: string): KanbanState => {
     const prevState = kanbanStore.state
     kanbanStore.setState((prev) => {
       const columns = prev.columns.map((column) =>
@@ -100,49 +71,6 @@ export const kanbanActions = {
   },
 
   updateTask: (columnId: string, updatedTask: WorkspaceTask) => {
-    kanbanStore.setState((prev) => {
-      const fromColumnIndex = prev.columns.findIndex((col) =>
-        col.tasks.some((t) => t.id === updatedTask.id),
-      )
-      if (fromColumnIndex === -1) return prev
-      const fromColumn = prev.columns[fromColumnIndex]
-
-      // If moving within the same column, update in place
-      if (prev.columns[fromColumnIndex].id === columnId) {
-        const newColumns = [...prev.columns]
-        newColumns[fromColumnIndex] = {
-          ...fromColumn,
-          tasks: fromColumn.tasks.map((t) =>
-            t.id === updatedTask.id ? { ...t, ...updatedTask } : t,
-          ),
-        }
-        return { ...prev, columns: newColumns }
-      }
-
-      const toColumnIndex = prev.columns.findIndex((col) => col.id === columnId)
-      if (toColumnIndex === -1) return prev
-
-      const newColumns = [...prev.columns]
-      newColumns[fromColumnIndex] = {
-        ...fromColumn,
-        tasks: fromColumn.tasks.filter((t) => t.id !== updatedTask.id),
-      }
-      newColumns[toColumnIndex] = {
-        ...newColumns[toColumnIndex],
-        tasks: [...newColumns[toColumnIndex].tasks, updatedTask],
-      }
-
-      return { ...prev, columns: newColumns }
-    })
-  },
-
-  /**
-   * Optimistic update: updates task and returns previous state for rollback
-   */
-  updateTaskOptimistic: (
-    columnId: string,
-    updatedTask: WorkspaceTask,
-  ): KanbanState => {
     const prevState = kanbanStore.state
     kanbanStore.setState((prev) => {
       const fromColumnIndex = prev.columns.findIndex((col) =>
@@ -197,6 +125,7 @@ export const kanbanActions = {
     fromColumnId: string,
     toColumnId: string,
   ) => {
+    const prevState = kanbanStore.state
     kanbanStore.setState((prev) => {
       const fromColumnIndex = prev.columns.findIndex(
         (col) => col.id === fromColumnId,
@@ -234,6 +163,7 @@ export const kanbanActions = {
         columns: newColumns,
       }
     })
+    return prevState
   },
 
   reorderTasksInColumn: (

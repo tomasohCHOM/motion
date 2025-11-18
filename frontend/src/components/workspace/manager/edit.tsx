@@ -123,13 +123,8 @@ const EditTask: React.FC<Props> = ({ workspaceUsers }) => {
 
     try {
       if (isAdding) {
-        // Optimistic update
-        const previousState = kanbanActions.addTaskOptimistic(
-          state.columnId,
-          taskData,
-        )
+        const previousState = kanbanActions.addTask(state.columnId, taskData)
 
-        // API call
         try {
           await createTaskMutation.mutateAsync({
             workspaceId,
@@ -143,18 +138,12 @@ const EditTask: React.FC<Props> = ({ workspaceUsers }) => {
             },
           })
         } catch (error) {
-          // Rollback on error
           kanbanActions.rollback(previousState)
           throw error
         }
       } else {
-        // Optimistic update
-        const previousState = kanbanActions.updateTaskOptimistic(
-          state.columnId,
-          taskData,
-        )
+        const previousState = kanbanActions.updateTask(state.columnId, taskData)
 
-        // API call
         try {
           await updateTaskMutation.mutateAsync({
             taskId: task!.id,
@@ -169,7 +158,6 @@ const EditTask: React.FC<Props> = ({ workspaceUsers }) => {
             },
           })
         } catch (error) {
-          // Rollback on error
           kanbanActions.rollback(previousState)
           throw error
         }

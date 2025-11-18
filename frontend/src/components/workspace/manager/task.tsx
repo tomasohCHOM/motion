@@ -29,7 +29,7 @@ export const TaskCard: React.FC<Props> = ({ columnId, task }) => {
 
   const handleDelete = async () => {
     // Optimistic update
-    const previousState = kanbanActions.deleteTaskOptimistic(columnId, task.id)
+    const previousState = kanbanActions.deleteTask(columnId, task.id)
 
     // API call
     try {
