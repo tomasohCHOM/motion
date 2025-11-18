@@ -1,5 +1,5 @@
-import type { WorkspaceTask } from '@/types/task'
 import { Store } from '@tanstack/react-store'
+import type { WorkspaceTask } from '@/types/task'
 
 type DialogState = {
   isOpen: boolean

@@ -1,6 +1,8 @@
 import { useEffect, useReducer, useState } from 'react'
 import { useStore } from '@tanstack/react-store'
 import { useParams } from '@tanstack/react-router'
+import type { WorkspaceUser } from '@/types/user'
+import type { WorkspaceTask } from '@/types/task'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
@@ -32,8 +34,6 @@ import {
 import { useCreateTask } from '@/client/tasks/createTask'
 import { useUpdateTask } from '@/client/tasks/updateTask'
 import { columnIdToStatus } from '@/utils/taskTransform'
-import type { WorkspaceUser } from '@/types/user'
-import type { WorkspaceTask } from '@/types/task'
 
 type TaskFormState = {
   title: string

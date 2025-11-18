@@ -1,6 +1,7 @@
 import React from 'react'
 import { Calendar, MoreHorizontal } from 'lucide-react'
 import { useParams } from '@tanstack/react-router'
+import type { WorkspaceTask } from '@/types/task'
 import { getMemberInitials } from '@/utils/initals'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -14,7 +15,6 @@ import {
 import { kanbanActions, kanbanHelpers } from '@/store/manager/task-store'
 import { dialogActions } from '@/store/manager/dialog-store'
 import { useDeleteTask } from '@/client/tasks/deleteTask'
-import type { WorkspaceTask } from '@/types/task'
 
 type Props = {
   columnId: string
