@@ -24,5 +24,11 @@ test:
 generate:
   go generate ./...
 
+sql-fix:
+  sqlfluff fix . --dialect postgres
+
+sql-lint:
+  sqlfluff lint . --dialect postgres
+
 clean:
   rm -rf {{bindir}}

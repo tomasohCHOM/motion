@@ -1,13 +1,5 @@
 import { Store } from '@tanstack/store'
-
-export interface Note {
-  id: string
-  title: string
-  content: string
-  tags: Array<string>
-  updatedAt: number
-  createdAt: number
-}
+import type { Note } from '@/types/note'
 
 // Define the state structure
 interface NotesState {
@@ -15,10 +7,17 @@ interface NotesState {
   allTags: Array<string>
 }
 
-// Create the store instance
-export const notesStore = new Store<NotesState>({
+const initialState: NotesState = {
   notes: [],
   allTags: [],
+}
+
+// Create the store instance
+export const notesStore = new Store<NotesState>(initialState)
+
+const buildState = (notes: Array<Note>): NotesState => ({
+  notes,
+  allTags: getUpdatedTags(notes),
 })
 
 // Helper function to get updated tags
@@ -32,38 +31,60 @@ const getUpdatedTags = (notes: Array<Note>): Array<string> => {
 
 // Define actions to manipulate the store
 export const noteActions = {
-  addNote: (noteToAdd?: Note) => {
-    const now = Date.now()
-    const newNote = noteToAdd || {
-      id: crypto.randomUUID(),
-      title: 'Untitled',
-      content: '',
-      tags: [],
-      createdAt: now,
-      updatedAt: now,
-    }
+  reset: () => {
+    notesStore.setState(initialState)
+  },
+
+  setNotes: (notes: Array<Note>) => {
+    notesStore.setState(() => buildState(notes))
+  },
+
+  upsertNote: (note: Note) => {
     notesStore.setState((state) => {
-      const newNotes = [newNote, ...state.notes]
-      return {
-        notes: newNotes,
-        allTags: getUpdatedTags(newNotes),
+      const existingIndex = state.notes.findIndex((n) => n.id === note.id)
+      let newNotes: Array<Note>
+
+      if (existingIndex === -1) {
+        newNotes = [note, ...state.notes]
+      } else {
+        newNotes = state.notes.map((n, index) =>
+          index === existingIndex ? { ...n, ...note } : n,
+        )
       }
+
+      return buildState(newNotes)
     })
-    return newNote
+  },
+
+  addNote: (noteToAdd: Note) => {
+    notesStore.setState((state) => {
+      const newNotes = [
+        noteToAdd,
+        ...state.notes.filter((n) => n.id !== noteToAdd.id),
+      ]
+      return buildState(newNotes)
+    })
+    return noteToAdd
   },
 
   // Update a note by its ID
-  updateNote: (noteId: string, updates: Partial<Note>) => {
+  updateNote: (
+    noteId: string,
+    updates: Partial<Note>,
+    options: { touchUpdatedAt?: boolean } = { touchUpdatedAt: true },
+  ) => {
     notesStore.setState((state) => {
-      const newNotes = state.notes.map((note) =>
-        note.id === noteId
-          ? { ...note, ...updates, updatedAt: Date.now() }
-          : note,
-      )
-      return {
-        notes: newNotes,
-        allTags: getUpdatedTags(newNotes),
-      }
+      const newNotes = state.notes.map((note) => {
+        if (note.id !== noteId) return note
+
+        return {
+          ...note,
+          ...updates,
+          updatedAt:
+            options.touchUpdatedAt === false ? note.updatedAt : Date.now(),
+        }
+      })
+      return buildState(newNotes)
     })
   },
 
@@ -71,10 +92,7 @@ export const noteActions = {
   deleteNote: (noteId: string) => {
     notesStore.setState((state) => {
       const newNotes = state.notes.filter((note) => note.id !== noteId)
-      return {
-        notes: newNotes,
-        allTags: getUpdatedTags(newNotes),
-      }
+      return buildState(newNotes)
     })
   },
 }

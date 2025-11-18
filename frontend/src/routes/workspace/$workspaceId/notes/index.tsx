@@ -1,5 +1,6 @@
 import { createFileRoute, useRouter } from '@tanstack/react-router'
 import { useStore } from '@tanstack/react-store'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   ArrowDownUp,
   MoreVertical,
@@ -10,7 +11,8 @@ import {
   TrashIcon,
 } from 'lucide-react'
 import * as React from 'react'
-import type { Note } from '@/store/notes-store'
+import { Route as WorkspaceRoute } from '../route'
+import type { Note } from '@/types/note'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -42,31 +44,55 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { Input } from '@/components/ui/input'
 import { MultiSelectCombobox } from '@/components/ui/multi-select-combobox'
+import { Spinner } from '@/components/ui/spinner'
+import { fetchWorkspaceNotes } from '@/client/notes/get-notes-query'
+import { useCreateNoteMutation } from '@/client/notes/create-note-mutation'
+import { useDeleteNoteMutation } from '@/client/notes/delete-note-mutation'
+import { useUpdateNoteMutation } from '@/client/notes/update-note-mutation'
 import { noteActions, notesStore } from '@/store/notes-store'
 
 interface NoteCardProps {
   note: Note
   workspaceId: string
+  onDelete: (noteId: string) => Promise<void>
+  onUpdateTags: (noteId: string, tags: Array<string>) => Promise<void>
 }
 
-function NoteCard({ note, workspaceId }: NoteCardProps) {
+const NoteCard = React.memo(function NoteCard({
+  note,
+  workspaceId,
+  onDelete,
+  onUpdateTags,
+}: NoteCardProps) {
   const router = useRouter()
   const { allTags } = useStore(notesStore)
   const [isTagDialogOpen, setIsTagDialogOpen] = React.useState(false)
   const [currentTags, setCurrentTags] = React.useState<Array<string>>([])
+  const [isDeleting, setIsDeleting] = React.useState(false)
+  const [isSavingTags, setIsSavingTags] = React.useState(false)
+  const [, startTransition] = React.useTransition()
 
   const handleDropdownInteraction = (e: React.MouseEvent) => e.stopPropagation()
 
   const navigateToEditor = () => {
-    router.navigate({
-      to: '/workspace/$workspaceId/notes/$noteId',
-      params: { workspaceId, noteId: note.id },
+    startTransition(() => {
+      router.navigate({
+        to: '/workspace/$workspaceId/notes/$noteId',
+        params: { workspaceId, noteId: note.id },
+      })
     })
   }
 
   // Deletes the note
-  const handleDelete = () => {
-    noteActions.deleteNote(note.id)
+  const handleDelete = async () => {
+    try {
+      setIsDeleting(true)
+      await onDelete(note.id)
+    } catch (err) {
+      console.error('Failed to delete note', err)
+    } finally {
+      setIsDeleting(false)
+    }
   }
 
   // Opens the tag dialog
@@ -76,9 +102,16 @@ function NoteCard({ note, workspaceId }: NoteCardProps) {
   }
 
   // Saves the updated tags
-  const handleTagSave = () => {
-    noteActions.updateNote(note.id, { tags: currentTags })
-    setIsTagDialogOpen(false)
+  const handleTagSave = async () => {
+    try {
+      setIsSavingTags(true)
+      await onUpdateTags(note.id, currentTags)
+      setIsTagDialogOpen(false)
+    } catch (err) {
+      console.error('Failed to update tags', err)
+    } finally {
+      setIsSavingTags(false)
+    }
   }
 
   // Uses formatDate to display the either updated or created date
@@ -187,7 +220,9 @@ function NoteCard({ note, workspaceId }: NoteCardProps) {
               >
                 Cancel
               </Button>
-              <Button onClick={handleTagSave}>Save Tags</Button>
+              <Button onClick={handleTagSave} disabled={isSavingTags}>
+                {isSavingTags ? 'Saving…' : 'Save Tags'}
+              </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -205,15 +240,18 @@ function NoteCard({ note, workspaceId }: NoteCardProps) {
             <AlertDialogAction
               className="bg-red-600 hover:bg-red-700 text-white"
               onClick={handleDelete}
+              disabled={isDeleting}
             >
-              <TrashIcon className="mr-2 h-4 w-4" /> Continue
+              <TrashIcon className="mr-2 h-4 w-4" />
+              {isDeleting ? 'Deleting…' : 'Continue'}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </>
     </AlertDialog>
   )
-}
+})
+NoteCard.displayName = 'NoteCard'
 
 //  Main Page Component
 export const Route = createFileRoute('/workspace/$workspaceId/notes/')({
@@ -223,30 +261,97 @@ export const Route = createFileRoute('/workspace/$workspaceId/notes/')({
 function NotesListPage() {
   const router = useRouter()
   const { workspaceId } = Route.useParams()
+  const { auth, user } = WorkspaceRoute.useRouteContext()
   const { notes } = useStore(notesStore)
   const [searchTerm, setSearchTerm] = React.useState('')
   const [sortBy, setSortBy] = React.useState('updatedAt-desc')
+  const queryClient = useQueryClient()
+  const notesQueryKey = React.useMemo(
+    () => ['workspace', workspaceId, 'notes'] as const,
+    [workspaceId],
+  )
+  const currentUserId = user.id
+  const createNoteMutation = useCreateNoteMutation()
+  const deleteNoteMutation = useDeleteNoteMutation()
+  const updateNoteMutation = useUpdateNoteMutation()
+  const hasCachedNotes = notes.length > 0
 
-  const handleCreateNewNote = () => {
-    const now = Date.now()
-    const newNote: Note = {
-      id: crypto.randomUUID(),
-      title: 'Untitled',
-      content: '',
-      tags: [],
-      createdAt: now,
-      updatedAt: now,
+  const notesQuery = useQuery({
+    queryKey: notesQueryKey,
+    queryFn: async () => {
+      const token = await auth.getToken({
+        skipCache: false,
+        template: 'backend',
+      })
+      return fetchWorkspaceNotes(workspaceId, token ?? null)
+    },
+    staleTime: 30_000,
+    refetchOnWindowFocus: false,
+  })
+
+  React.useEffect(() => {
+    if (notesQuery.data) {
+      noteActions.setNotes(notesQuery.data)
     }
-    // Immediately navigate, passing the new note data in the state.
-    // This prevents the list page from re-rendering and causing a flicker.
-    router.navigate({
-      to: '/workspace/$workspaceId/notes/$noteId',
-      params: { workspaceId, noteId: newNote.id },
-      state: { initialNoteData: newNote, isNew: true } as any,
-    })
-  }
+  }, [notesQuery.data])
 
-  // Use useMemo to  filter and sort notes
+  const handleCreateNewNote = React.useCallback(() => {
+    if (!currentUserId) return
+    createNoteMutation
+      .mutateAsync({
+        workspaceId,
+        authorId: currentUserId,
+      })
+      .then((newNote) => {
+        noteActions.upsertNote(newNote)
+        queryClient.setQueryData<Array<Note>>(notesQueryKey, (current = []) => [
+          newNote,
+          ...current.filter((note) => note.id !== newNote.id),
+        ])
+        router.navigate({
+          to: '/workspace/$workspaceId/notes/$noteId',
+          params: { workspaceId, noteId: newNote.id },
+          state: { initialNoteData: newNote, isNew: true } as any,
+        })
+      })
+      .catch((err) => {
+        console.error('Failed to create note', err)
+      })
+  }, [
+    createNoteMutation,
+    currentUserId,
+    notesQueryKey,
+    queryClient,
+    router,
+    workspaceId,
+  ])
+
+  const handleDeleteNote = React.useCallback(
+    async (noteId: string) => {
+      await deleteNoteMutation.mutateAsync({ workspaceId, noteId })
+      noteActions.deleteNote(noteId)
+      queryClient.setQueryData<Array<Note>>(notesQueryKey, (current = []) =>
+        current.filter((note) => note.id !== noteId),
+      )
+    },
+    [deleteNoteMutation, notesQueryKey, queryClient, workspaceId],
+  )
+
+  const handleUpdateTags = React.useCallback(
+    async (noteId: string, tags: Array<string>) => {
+      const updated = await updateNoteMutation.mutateAsync({
+        workspaceId,
+        noteId,
+        tags,
+      })
+      noteActions.upsertNote(updated)
+      queryClient.setQueryData<Array<Note>>(notesQueryKey, (current = []) =>
+        current.map((note) => (note.id === updated.id ? updated : note)),
+      )
+    },
+    [notesQueryKey, queryClient, updateNoteMutation, workspaceId],
+  )
+
   const displayedNotes = React.useMemo(() => {
     const filtered = notes.filter((note) =>
       note.title.toLowerCase().includes(searchTerm.toLowerCase()),
@@ -272,6 +377,24 @@ function NotesListPage() {
     })
   }, [notes, searchTerm, sortBy])
 
+  if (notesQuery.isLoading && !hasCachedNotes) {
+    return (
+      <div className="p-8 flex justify-center">
+        <Spinner className="h-6 w-6 text-muted-foreground" />
+      </div>
+    )
+  }
+
+  if (notesQuery.isError) {
+    return (
+      <div className="p-8">
+        <p className="text-destructive">
+          Failed to load notes. Please try again.
+        </p>
+      </div>
+    )
+  }
+
   return (
     <>
       {/* Header */}
@@ -283,9 +406,12 @@ function NotesListPage() {
               Browse and manage your documents.
             </p>
           </div>
-          <Button onClick={handleCreateNewNote}>
+          <Button
+            onClick={handleCreateNewNote}
+            disabled={createNoteMutation.isPending || !currentUserId}
+          >
             <PlusIcon className="mr-2 h-4 w-4" />
-            New Note
+            {createNoteMutation.isPending ? 'Creating…' : 'New Note'}
           </Button>
         </div>
 
@@ -330,7 +456,13 @@ function NotesListPage() {
         {displayedNotes.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {displayedNotes.map((note) => (
-              <NoteCard key={note.id} note={note} workspaceId={workspaceId} />
+              <NoteCard
+                key={note.id}
+                note={note}
+                workspaceId={workspaceId}
+                onDelete={handleDeleteNote}
+                onUpdateTags={handleUpdateTags}
+              />
             ))}
           </div>
         ) : (

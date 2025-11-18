@@ -13,8 +13,8 @@ services:
       timeout: 20s
       retries: 3
 
-  database:
-    image: postgres:latest
+  file-upload-db:
+    image: postgres:18.0
     ports:
       # host_port:container_port
       - "5433:5432"
@@ -28,7 +28,23 @@ services:
       timeout: 5s
       retries: 5
     volumes:
-      - db-data:/var/lib/postgresql
+      - file-upload-db-data:/var/lib/postgresql
+
+  file-upload-db-migrations:
+    image: migrate/migrate:latest
+    volumes:
+      - ./migrations:/migrations
+    command:
+      [
+        "-path",
+        "/migrations",
+        "-database",
+        "postgres://dev:password@file-upload-db:5432/dev_db?sslmode=disable",
+        "up",
+      ]
+    depends_on:
+      file-upload-db:
+        condition: service_healthy
 
   file-upload-service:
     build: .
@@ -37,11 +53,12 @@ services:
     env_file:
       - .env
     environment:
-      - DATABASE_URL=postgres://dev:password@database:5432/dev_db
+      DATABASE_URL: postgres://dev:password@file-upload-db:5432/dev_db
     depends_on:
       - minio
-      - database
+      - file-upload-db
+      - file-upload-db-migrations
 
 volumes:
   minio_data:
-  db-data:
+  file-upload-db-data:

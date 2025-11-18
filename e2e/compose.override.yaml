@@ -1,0 +1,154 @@
+# E2E Test Override for Docker Compose
+# Usage:
+#   docker compose -f compose.yaml -f e2e/compose.override.yaml up
+#
+# Reuses all service definitions from the root compose files and only overrides
+# what's needed for E2E testing.
+
+services:
+  # Override workspace database for E2E
+  workspace-db:
+    ports:
+      - '5434:5432' # Different port to avoid conflicts with dev
+    environment:
+      POSTGRES_USER: test
+      POSTGRES_PASSWORD: testpassword
+      POSTGRES_DB: test_db
+    # Override: use anonymous volume instead of named volume
+    # Anonymous volumes are cleaned up with 'docker compose down -v'
+    # Note: Docker Compose doesn't support removing volumes in overrides,
+    # so we replace the named volume with an anonymous volume
+    volumes:
+      - /var/lib/postgresql
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U test -d test_db']
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # Override file-upload database for E2E
+  file-upload-db:
+    ports:
+      - '5435:5432' # Different port to avoid conflicts with dev
+    environment:
+      POSTGRES_USER: test
+      POSTGRES_PASSWORD: testpassword
+      POSTGRES_DB: test_db
+    # Override: use anonymous volume instead of named volume
+    # Anonymous volumes are cleaned up with 'docker compose down -v'
+    volumes:
+      - /var/lib/postgresql
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U test -d test_db']
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # Override MinIO for E2E
+  minio:
+    ports:
+      - '9002:9000' # Different ports to avoid conflicts with dev
+      - '9003:9001'
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    # Override: use anonymous volume instead of named volume
+    # Anonymous volumes are cleaned up with 'docker compose down -v'
+    # Note: Docker Compose doesn't support removing volumes in overrides,
+    # and tmpfs conflicts with volumes, so we use anonymous volumes
+    volumes:
+      - /data
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:9000/minio/health/live']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Override workspace migrations for E2E
+  workspace-db-migrations:
+    command:
+      [
+        '-path',
+        '/migrations',
+        '-database',
+        'postgres://test:testpassword@workspace-db:5432/test_db?sslmode=disable',
+        'up',
+      ]
+    depends_on:
+      workspace-db:
+        condition: service_healthy
+    restart: 'no'
+
+  # Override file-upload migrations for E2E
+  file-upload-db-migrations:
+    command:
+      [
+        '-path',
+        '/migrations',
+        '-database',
+        'postgres://test:testpassword@file-upload-db:5432/test_db?sslmode=disable',
+        'up',
+      ]
+    depends_on:
+      file-upload-db:
+        condition: service_healthy
+    restart: 'no'
+
+  # Override workspace service for E2E
+  workspace-service:
+    environment:
+      PORT: '8081'
+      ENV: 'development'
+      DATABASE_URL: 'postgres://test:testpassword@workspace-db:5432/test_db'
+      CLERK_SECRET_KEY: '' # No Clerk key needed for E2E
+    # Remove env_file to use explicit environment variables
+    env_file: []
+    depends_on:
+      workspace-db:
+        condition: service_healthy
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:8081/health']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Override file-upload service for E2E
+  file-upload-service:
+    environment:
+      PORT: '8080'
+      ENV: 'development'
+      DATABASE_URL: 'postgres://test:testpassword@file-upload-db:5432/test_db'
+      STORAGE_PROVIDER: 'minio'
+      STORAGE_BUCKET: 'test-uploads'
+      AWS_REGION: 'us-east-1'
+      MINIO_ENDPOINT: 'minio:9000'
+      MINIO_ROOT_USER: 'minioadmin'
+      MINIO_ROOT_PASSWORD: 'minioadmin'
+      MINIO_USE_SSL: 'false'
+      CORS_ALLOWED_ORIGINS: 'http://localhost:3000'
+    # Remove env_file to use explicit environment variables
+    env_file: []
+    depends_on:
+      file-upload-db:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:8080/health']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # E2E-specific service: MinIO bucket setup
+  minio-setup:
+    image: minio/mc:latest
+    depends_on:
+      minio:
+        condition: service_healthy
+    entrypoint: /bin/sh
+    command: -c "
+      mc alias set local http://minio:9000 minioadmin minioadmin &&
+      mc mb local/test-uploads || true &&
+      mc anonymous set download local/test-uploads || true &&
+      echo 'MinIO bucket initialized'"
+    restart: 'no'

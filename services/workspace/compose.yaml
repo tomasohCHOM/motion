@@ -1,5 +1,5 @@
 services:
-  database:
+  workspace-db:
     image: postgres:latest
     ports:
       - "5432:5432"
@@ -13,16 +13,35 @@ services:
       timeout: 5s
       retries: 5
     volumes:
-      - db-data:/var/lib/postgresql
+      - workspace-db-data:/var/lib/postgresql
+
+  workspace-db-migrations:
+    image: migrate/migrate:latest
+    volumes:
+      - ./migrations:/migrations
+    command:
+      [
+        "-path",
+        "/migrations",
+        "-database",
+        "postgres://dev:password@workspace-db:5432/dev_db?sslmode=disable",
+        "up",
+      ]
+    depends_on:
+      workspace-db:
+        condition: service_healthy
 
   workspace-service:
     build: .
     ports:
       - "8081:8081"
     environment:
-      DATABASE_URL: postgres://dev:password@database:5432/dev_db
+      DATABASE_URL: postgres://dev:password@workspace-db:5432/dev_db
     env_file:
       - .env
+    depends_on:
+      - workspace-db
+      - workspace-db-migrations
 
 volumes:
-  db-data:
+  workspace-db-data:
