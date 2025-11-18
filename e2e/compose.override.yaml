@@ -66,6 +66,8 @@ services:
 
   # Override workspace migrations for E2E
   workspace-db-migrations:
+    volumes:
+      - ./services/workspace/migrations:/migrations
     command:
       [
         '-path',
@@ -81,6 +83,8 @@ services:
 
   # Override file-upload migrations for E2E
   file-upload-db-migrations:
+    volumes:
+      - ./services/file-upload/migrations:/migrations
     command:
       [
         '-path',

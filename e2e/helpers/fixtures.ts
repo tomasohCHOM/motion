@@ -52,7 +52,6 @@ export const test = base.extend<TestFixtures>({
     // Cleanup (optional - you may want to keep test data for debugging)
     // await cleanupTestData(userId);
   },
-
 })
 
 export { expect } from '@playwright/test'
