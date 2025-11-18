@@ -27,9 +27,9 @@ export const WorkspaceNavbar: React.FC<Props> = ({
       <div className="flex items-center gap-8">
         <div className="flex items-center gap-2">
           {workspaceUsers.map((user) => (
-            <Avatar className="h-8 w-8">
+            <Avatar key={user.id} className="h-8 w-8">
               <AvatarFallback className="text-xs">
-                {getMemberInitials(user.firstName + ' ' + user.lastName)}
+                {getMemberInitials(user.fullName)}
               </AvatarFallback>
             </Avatar>
           ))}

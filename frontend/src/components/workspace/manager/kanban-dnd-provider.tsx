@@ -14,6 +14,7 @@ import {
 } from '@dnd-kit/sortable'
 import { useStore } from '@tanstack/react-store'
 import React from 'react'
+import { useLoaderData } from '@tanstack/react-router'
 import { TaskCard } from './task'
 import type { DragEndEvent, DragOverEvent, DragStartEvent } from '@dnd-kit/core'
 import {
@@ -21,13 +22,17 @@ import {
   kanbanHelpers,
   kanbanStore,
 } from '@/store/manager/task-store'
+import { columnIdToStatus } from '@/utils/taskTransform'
+import { useUpdateTask } from '@/client/tasks/updateTask'
 
 type Props = {
   children: React.ReactNode
 }
 
 export const KanbanDndProvider: React.FC<Props> = ({ children }) => {
+  const { workspace } = useLoaderData({ from: '/workspace/$workspaceId' })
   const kanbanState = useStore(kanbanStore)
+  const updateTaskMutation = useUpdateTask()
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -87,37 +92,58 @@ export const KanbanDndProvider: React.FC<Props> = ({ children }) => {
    * User lets go off the task, dragging ends. Organizes `tasks` array of the
    * targeted column with correct index of elements.
    */
-  const handleDragEnd = (event: DragEndEvent) => {
+  const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event
-    kanbanActions.setActiveTask(null)
-
-    if (!over) return
+    if (!kanbanState.activeTask || !over) return
 
     const activeId = active.id as string
     const overId = over.id as string
 
-    if (activeId === overId) return
+    const originColumnId = kanbanState.activeTask.status
 
-    // Find the columns containing the active and over items
-    const activeColumn = kanbanState.columns.find((col) =>
-      col.tasks.some((task) => task.id === activeId),
-    )
+    // Find the column containing the over items
     const overColumn = kanbanState.columns.find(
       (col) =>
         col.tasks.some((task) => task.id === overId) || col.id === overId,
     )
+    if (!overColumn) return
 
-    if (!activeColumn || !overColumn) return
-
-    // If same column, reorder within column
-    if (activeColumn.id === overColumn.id) {
-      const tasks = activeColumn.tasks
+    // If same column, reorder within column and stop there
+    if (originColumnId === overColumn.id) {
+      const tasks = overColumn.tasks
       const oldIndex = tasks.findIndex((task) => task.id === activeId)
       const newIndex = tasks.findIndex((task) => task.id === overId)
 
       if (oldIndex !== -1 && newIndex !== -1) {
-        kanbanActions.reorderTasksInColumn(activeColumn.id, oldIndex, newIndex)
+        kanbanActions.reorderTasksInColumn(overColumn.id, oldIndex, newIndex)
       }
+      return
+    }
+
+    const activeTask = kanbanState.activeTask
+    kanbanActions.setActiveTask(null)
+
+    const previousState = kanbanActions.moveTaskBetweenColumns(
+      activeTask.id,
+      originColumnId,
+      overColumn.id,
+    )
+
+    try {
+      await updateTaskMutation.mutateAsync({
+        taskId: activeTask.id,
+        workspaceId: workspace.id,
+        taskData: {
+          title: activeTask.title,
+          description: activeTask.description ?? undefined,
+          assignee_id: activeTask.assignee.id,
+          status: columnIdToStatus(overColumn.id),
+          priority: activeTask.priority,
+          due_date: activeTask.dueDate ?? undefined,
+        },
+      })
+    } catch (err) {
+      kanbanActions.rollback(previousState)
     }
   }
 

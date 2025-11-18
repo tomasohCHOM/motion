@@ -16,7 +16,7 @@ export async function requireUser(queryClient: QueryClient, auth: AuthState) {
     )
     return data
   } catch (err) {
-    if ((err as Error).message === 'USER_NOT_FOUND') {
+    if ((err as Error).message.includes('User not found')) {
       throw redirect({
         to: '/onboarding',
         search: { redirect: '/onboarding' },

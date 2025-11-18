@@ -20,6 +20,7 @@ async function fetchWorkspaceById(workspaceId: string, token: string | null) {
   const workspaceUsers: Array<WorkspaceUser> = data.users.map((user) => ({
     id: user.id,
     email: user.email,
+    fullName: user.first_name + ' ' + user.last_name,
     firstName: user.first_name,
     lastName: user.last_name,
     username: user.username,

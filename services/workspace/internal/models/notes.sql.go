@@ -12,9 +12,29 @@ import (
 )
 
 const createNote = `-- name: CreateNote :one
-INSERT INTO notes (workspace_id, author_id, title, content, tags)
-VALUES ($1, $2, $3, $4, $5)
-RETURNING id, workspace_id, author_id, title, content, tags, created_at, updated_at
+INSERT INTO notes (
+    workspace_id,
+    author_id,
+    title,
+    content,
+    tags
+)
+VALUES (
+    $1,
+    $2,
+    $3,
+    $4,
+    $5
+)
+RETURNING
+    id,
+    workspace_id,
+    author_id,
+    title,
+    content,
+    tags,
+    created_at,
+    updated_at
 `
 
 type CreateNoteParams struct {
@@ -63,8 +83,19 @@ func (q *Queries) DeleteNote(ctx context.Context, arg DeleteNoteParams) error {
 }
 
 const getWorkspaceNote = `-- name: GetWorkspaceNote :one
-SELECT id, workspace_id, author_id, title, content, tags, created_at, updated_at FROM notes
-WHERE workspace_id = $1 AND id = $2
+SELECT
+    id,
+    workspace_id,
+    author_id,
+    title,
+    content,
+    tags,
+    created_at,
+    updated_at
+FROM notes
+WHERE
+    workspace_id = $1
+    AND id = $2
 `
 
 type GetWorkspaceNoteParams struct {
@@ -89,7 +120,16 @@ func (q *Queries) GetWorkspaceNote(ctx context.Context, arg GetWorkspaceNotePara
 }
 
 const listWorkspaceNotes = `-- name: ListWorkspaceNotes :many
-SELECT id, workspace_id, author_id, title, content, tags, created_at, updated_at FROM notes
+SELECT
+    id,
+    workspace_id,
+    author_id,
+    title,
+    content,
+    tags,
+    created_at,
+    updated_at
+FROM notes
 WHERE workspace_id = $1
 ORDER BY updated_at DESC
 `
@@ -126,12 +166,22 @@ func (q *Queries) ListWorkspaceNotes(ctx context.Context, workspaceID pgtype.UUI
 const updateNote = `-- name: UpdateNote :one
 UPDATE notes
 SET
-  title = $3,
-  content = $4,
-  tags = $5,
-  updated_at = NOW()
-WHERE workspace_id = $1 AND id = $2
-RETURNING id, workspace_id, author_id, title, content, tags, created_at, updated_at
+    title = $3,
+    content = $4,
+    tags = $5,
+    updated_at = now()
+WHERE
+    workspace_id = $1
+    AND id = $2
+RETURNING
+    id,
+    workspace_id,
+    author_id,
+    title,
+    content,
+    tags,
+    created_at,
+    updated_at
 `
 
 type UpdateNoteParams struct {

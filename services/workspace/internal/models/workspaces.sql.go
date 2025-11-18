@@ -14,7 +14,12 @@ import (
 const createWorkspace = `-- name: CreateWorkspace :one
 INSERT INTO workspaces (name, description)
 VALUES ($1, $2)
-RETURNING id, name, description, created_at, updated_at
+RETURNING
+    id,
+    name,
+    description,
+    created_at,
+    updated_at
 `
 
 type CreateWorkspaceParams struct {
@@ -36,7 +41,8 @@ func (q *Queries) CreateWorkspace(ctx context.Context, arg CreateWorkspaceParams
 }
 
 const deleteWorkspace = `-- name: DeleteWorkspace :exec
-DELETE FROM workspaces WHERE id = $1
+DELETE FROM workspaces
+WHERE id = $1
 `
 
 func (q *Queries) DeleteWorkspace(ctx context.Context, id pgtype.UUID) error {
@@ -45,7 +51,14 @@ func (q *Queries) DeleteWorkspace(ctx context.Context, id pgtype.UUID) error {
 }
 
 const getWorkspaceById = `-- name: GetWorkspaceById :one
-SELECT id, name, description, created_at, updated_at FROM workspaces WHERE id = $1
+SELECT
+    id,
+    name,
+    description,
+    created_at,
+    updated_at
+FROM workspaces
+WHERE id = $1
 `
 
 func (q *Queries) GetWorkspaceById(ctx context.Context, id pgtype.UUID) (Workspace, error) {
@@ -64,11 +77,16 @@ func (q *Queries) GetWorkspaceById(ctx context.Context, id pgtype.UUID) (Workspa
 const updateWorkspaceInfo = `-- name: UpdateWorkspaceInfo :one
 UPDATE workspaces
 SET
-  name = COALESCE($2, name),
-  description = COALESCE($3, description),
-  updated_at = NOW()
+    name = COALESCE($2, name),
+    description = COALESCE($3, description),
+    updated_at = NOW()
 WHERE id = $1
-RETURNING id, name, description, created_at, updated_at
+RETURNING
+    id,
+    name,
+    description,
+    created_at,
+    updated_at
 `
 
 type UpdateWorkspaceInfoParams struct {

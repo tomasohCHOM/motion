@@ -137,6 +137,17 @@ func main() {
 		})
 		log.Println("Invite handler routes registered")
 
+		taskService := services.NewTaskService(store)
+		taskHandler := handlers.NewTaskHandler(taskService)
+		registerRoutes(mux, []Route{
+			{"POST", "/workspaces/{workspaceId}/tasks", taskHandler.CreateNewTask},
+			{"GET", "/workspaces/{workspaceId}/tasks", taskHandler.GetWorkspaceTasks},
+			{"GET", "/tasks/{task_id}", taskHandler.GetTask},
+			{"PATCH", "/tasks/{task_id}", taskHandler.UpdateTask},
+			{"DELETE", "/tasks/{task_id}", taskHandler.DeleteTask},
+		})
+		log.Println("Task handler routes registered")
+
 		eventService := services.NewEventService(store)
 		eventHandler := handlers.NewEventHandler(eventService)
 		registerRoutes(mux, []Route{

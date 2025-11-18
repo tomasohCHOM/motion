@@ -1,28 +1,16 @@
 import { arrayMove } from '@dnd-kit/sortable'
 import { Store } from '@tanstack/store'
-import { mockManagerTestData } from '@/static/workspace/manager'
-
-export type Task = {
-  id: string
-  title: string
-  description?: string
-  assignee: {
-    name: string
-    avatar?: string
-  }
-  priority: string
-  dueDate?: string
-}
+import type { WorkspaceTask } from '@/types/task'
 
 export type Column = {
   id: string
   title: string
-  tasks: Array<Task>
+  tasks: Array<WorkspaceTask>
 }
 
-type KanbanState = {
+export type KanbanState = {
   columns: Array<Column>
-  activeTask: Task | null
+  activeTask: WorkspaceTask | null
 }
 
 export const columnTypes = [
@@ -42,12 +30,19 @@ export const teamMembers = [
 ]
 
 export const kanbanStore = new Store<KanbanState>({
-  columns: mockManagerTestData,
+  columns: [],
   activeTask: null,
 })
 
+// NOTE: add, delete, and updating tasks will return the prevState for
+// optimistic updates purposes.
 export const kanbanActions = {
-  addTask: (columnId: string, task: Task) => {
+  setColumns: (columns: Array<Column>) => {
+    kanbanStore.setState((prev) => ({ ...prev, columns }))
+  },
+
+  addTask: (columnId: string, task: WorkspaceTask) => {
+    const prevState = kanbanStore.state
     kanbanStore.setState((prev) => {
       const columns = prev.columns.map((column) =>
         column.id === columnId
@@ -56,9 +51,11 @@ export const kanbanActions = {
       )
       return { ...prev, columns }
     })
+    return prevState
   },
 
   deleteTask: (columnId: string, taskId: string) => {
+    const prevState = kanbanStore.state
     kanbanStore.setState((prev) => {
       const columns = prev.columns.map((column) =>
         column.id === columnId
@@ -70,9 +67,11 @@ export const kanbanActions = {
       )
       return { ...prev, columns }
     })
+    return prevState
   },
 
-  updateTask: (columnId: string, updatedTask: Task) => {
+  updateTask: (columnId: string, updatedTask: WorkspaceTask) => {
+    const prevState = kanbanStore.state
     kanbanStore.setState((prev) => {
       const fromColumnIndex = prev.columns.findIndex((col) =>
         col.tasks.some((t) => t.id === updatedTask.id),
@@ -107,9 +106,17 @@ export const kanbanActions = {
 
       return { ...prev, columns: newColumns }
     })
+    return prevState
   },
 
-  setActiveTask: (task: Task | null) => {
+  /**
+   * Rollback to previous state
+   */
+  rollback: (previousState: KanbanState) => {
+    kanbanStore.setState(previousState)
+  },
+
+  setActiveTask: (task: WorkspaceTask | null) => {
     kanbanStore.setState((prev) => ({ ...prev, activeTask: task }))
   },
 
@@ -118,6 +125,7 @@ export const kanbanActions = {
     fromColumnId: string,
     toColumnId: string,
   ) => {
+    const prevState = kanbanStore.state
     kanbanStore.setState((prev) => {
       const fromColumnIndex = prev.columns.findIndex(
         (col) => col.id === fromColumnId,
@@ -155,6 +163,7 @@ export const kanbanActions = {
         columns: newColumns,
       }
     })
+    return prevState
   },
 
   reorderTasksInColumn: (
@@ -184,7 +193,7 @@ export const kanbanActions = {
 }
 
 export const kanbanHelpers = {
-  findTaskById: (state: KanbanState, taskId: string): Task | null => {
+  findTaskById: (state: KanbanState, taskId: string): WorkspaceTask | null => {
     for (const column of state.columns) {
       const found = column.tasks.find((task) => task.id === taskId)
       if (found) return found
