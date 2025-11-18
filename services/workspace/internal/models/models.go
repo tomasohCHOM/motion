@@ -107,6 +107,7 @@ type Task struct {
 	Status      TaskStatus         `json:"status"`
 	Priority    TaskPriority       `json:"priority"`
 	DueDate     pgtype.Timestamptz `json:"due_date"`
+}
 
 type Note struct {
 	ID          pgtype.UUID        `json:"id"`
