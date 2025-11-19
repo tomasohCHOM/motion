@@ -38,3 +38,6 @@ go.work.sum
 # .idea/
 # .vscode/
 
+# Air
+tmp/
+air.log

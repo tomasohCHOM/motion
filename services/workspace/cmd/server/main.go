@@ -128,6 +128,7 @@ func main() {
 
 		inviteSerive := services.NewInviteService(store)
 		inviteHandler := handlers.NewInviteHandler(inviteSerive)
+
 		registerRoutes(mux, []Route{
 			{"POST", "/workspaces/{workspaceId}/invites", inviteHandler.CreateUserInvite},
 			{"GET", "/users/{user_id}/invites", inviteHandler.ListUserInvites},

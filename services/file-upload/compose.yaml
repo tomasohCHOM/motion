@@ -47,7 +47,11 @@ services:
         condition: service_healthy
 
   file-upload-service:
-    build: .
+    build:
+      context: .
+      target: dev
+    volumes:
+      - .:/app
     ports:
       - "8080:8080"
     env_file:
