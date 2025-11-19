@@ -1,0 +1,51 @@
+[build]
+cmd = "go build -o ./tmp/workspace ./cmd/server"
+bin = "./tmp/workspace"
+full_bin = ""
+args_bin = []
+log = "air.log"
+delay = 1000
+stop_on_error = true
+
+cwd = "."
+
+exclude_dir = [
+  "tmp",
+  "vendor",
+  ".git",
+  "node_modules",
+  ".idea",
+  ".vscode",
+  "migrations",
+  "tests/data"
+]
+
+include_ext = [
+  "go",
+  "mod",
+  "sum",
+  "env",
+  "yaml",
+  "yml",
+  "toml"
+]
+
+exclude_regex = [
+  "_test.go",
+  ".*\\.swp",
+  ".*~",
+  "\\.DS_Store",
+  "air.log"
+]
+
+[log]
+time = true
+
+[color]
+main = "cyan"
+watcher = "yellow"
+build = "green"
+runner = "magenta"
+
+[runner]
+kill_delay = 500
